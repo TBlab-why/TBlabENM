@@ -78,7 +78,7 @@ maxent_parameter(
 auc.val.avg值进行代替。
 }
 \examples{
-maxent_parameter(x = system.file("extdata", "species/wz0001.csv", package = "TBlabENM"),
+maxent_parameter(x = system.file("extdata", "species/Phoebe sheareri.csv", package = "TBlabENM"),
        evdir = system.file("extdata", "envar/asc", package = "TBlabENM"),
        myenv = NULL,
        evlist = 1:7,

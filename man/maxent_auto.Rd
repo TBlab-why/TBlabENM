@@ -27,6 +27,8 @@ maxent_auto(
 )
 }
 \arguments{
+\item{spdir}{要模拟的一或多个物种文件的路径，包括文件名（.csv）。}
+
 \item{evdir}{环境变量路径,格式为.asc}
 
 \item{myenv}{指定的一组环境变量，当提供此参数时，将不会再根据相关性进行变量筛选}
@@ -63,8 +65,6 @@ maxent_auto(
 \item{parallel}{是否并行计算}
 
 \item{ncpu}{如果并行，使用的cpu数}
-
-\item{sp}{要模拟的一或多个物种文件的路径，包括文件名（.csv）。}
 }
 \value{
 包含maxent相关结果的文件夹

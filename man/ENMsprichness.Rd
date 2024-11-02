@@ -50,9 +50,6 @@ ENMsprichness(
 根据布尔图进行叠加，计算物种丰富度。
 }
 \examples{
-#读取.spdata.csv
-spdata <- read.csv(paste0(system.file(package="TBlabENM"),"/extdata/spdata.csv"))
-#丰富度计算
 ENMsprichness(parameters = read.csv("F:/eblf/TBlabENM/spdata.csv"),
               x = c(3,5,7,9),
               booleandir = "F:/eblf/TBlabENM/BooleanmapT_MTSStr",

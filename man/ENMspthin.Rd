@@ -4,10 +4,10 @@
 \alias{ENMspthin}
 \title{Batch spatially thin species occurence data}
 \usage{
-ENMspthin(sp, thin.par, outdir = NULL)
+ENMspthin(spdir, thin.par, outdir = NULL)
 }
 \arguments{
-\item{sp}{要过滤的物种文件的路径的集合，包括文件名（.csv）.}
+\item{spdir}{要过滤的物种文件的路径的集合，包括文件名（.csv）.}
 
 \item{thin.par}{数值型，地理空间过滤距离（km）.}
 
@@ -25,7 +25,7 @@ ENMspthin(sp, thin.par, outdir = NULL)
 }
 \examples{
 #读取物种路径列表
-spdir <- system.file("extdata", "species", package = "TBlabENM")
+dir <- system.file("extdata", "species", package = "TBlabENM")
 splist <- list.files(spdir, pattern = ".csv$", full.names = T)
-ENMspthin(sp = splist, thin.par = 10, outdir = NULL)
+ENMspthin(spdir = splist, thin.par = 10, outdir = NULL)
 }
