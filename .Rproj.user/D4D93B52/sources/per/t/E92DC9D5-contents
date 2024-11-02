@@ -1,0 +1,139 @@
+
+#' @title Statistical Variables According to Contribution Size and Plot
+#' @description 本函数根据环境变量对模型的贡献大小进行排序，并统计对模型贡献最大的前三个变量的个数
+#' 绘制堆叠条形统计图。
+#' @param x 数值向量。表示要进行转换的物种的序号。这个序号来自ENMspdata()生成的标准文件。
+#' @param spdata 由ENMspdata()生成的标准文件。也可手动创建或修改，但是不建议。
+#' 当maxent结果文件出现变动后，强烈建议重新运行ENMspdata()。
+#' @param wordsize 用于调整标签字体大小，数值型。
+#' @param resultdir maxent结果文件路径。
+#'
+#' @return 生成"./TBlabENM/Variable_contribution"文件夹，该文件夹包括一个按贡献大小排列变量的.csv文件
+#' 和.jpeg的最重要的三个变量贡献堆叠条形统计图。
+#' @export
+#' @importFrom utils read.csv
+#' @importFrom dplyr arrange
+#' @importFrom utils write.csv
+#' @importFrom stringr str_split
+#' @importFrom tidyr pivot_longer
+#' @importFrom ggplot2 ggplot
+#' @importFrom ggsci scale_fill_npg
+#' @importFrom ggplot2 ggsave
+#' @importFrom stats aggregate
+#'
+#' @examples
+#' setwd("G:/Lauraceae")
+#' ENMev_cb(x = 1:265,
+#' spdata = read.csv("G:/Lauraceae/TBlabENM/result/.spdata.csv"),
+#' resultdir = "G:/Lauraceae/TBlabENM/result")
+ENMev_cb <- function(x, spdata, wordsize = 1, resultdir) {
+  #检查输入变量
+  if (file.exists(resultdir)==FALSE){
+    stop("Resultdir not find.")}
+  #检查x值是否正确
+  if(max(x)>nrow(spdata)){stop("x exceeds the total number of species")}
+  #选择要统计作图的物种
+  sp <- spdata[x, 1]
+  #新建空数据框保存结果
+  maxselectev <- data.frame(matrix(ncol = 5, nrow = length(sp)))
+  names(maxselectev) <- c("species", "occurrence", "Variable contribution size",
+                          "Variable contribution size1", "Variable contribution size2")
+
+  for (i in seq_along(sp)) {
+    #读取每个模拟结果的‘maxentResults.csv’文件
+    data <- utils::read.csv(paste0(resultdir, "/", sp[i], "/present/maxentResults.csv"), row.names=1)
+
+    #将第一列赋值为物种名
+    maxselectev[i, 1] <- sp[i]
+
+    #提取"occurrence"
+    occurrence <- data['species (average)','X.Training.samples']+data['species (average)','X.Test.samples']
+    #将值赋给第二列"occurrence"
+    maxselectev[i,2] <- occurrence
+
+    #提取变量贡献
+    ev_cb <- as.data.frame(t(data["species (average)",11:(10+(ncol(data)-78)/8)]))
+    names(ev_cb) <- "value"
+    #根据贡献大小排序
+    ev_cb <- dplyr::arrange(ev_cb, dplyr::desc(value))
+    #修改行名，与pearsoncor对应，即去掉".contribution"
+    site <- unlist(stringr::str_split(rownames(ev_cb), "\\."))
+    site <- site[seq(1,length(site),2)]
+    max <- site
+    #将值赋给第3列"Variable contribution size"
+    maxselectev[i,3] <- paste(paste0(max, "(", ev_cb$value, "%)", collapse=","))
+    maxselectev[i,4] <- paste(paste0(max, collapse=","))
+    maxselectev[i,5] <- paste(paste0(max, " ", ev_cb$value, collapse=","))
+    #保存本地
+    if(dir.exists("./TBlabENM/Variable_contribution")==FALSE) {
+      dir.create("./TBlabENM/Variable_contribution")
+    }
+    utils::write.csv(maxselectev[1:3], row.names = FALSE, "./TBlabENM/Variable_contribution/Variable.csv")
+  }
+  ####变量贡献条形统计图之按贡献最大的前三个变量排序
+  #取出前三重要变量
+  maxselectev1 <- data.frame(matrix(ncol = 3, nrow = nrow(maxselectev)))
+  names(maxselectev1) <- c("first", "second", "thirdly")
+  for (i in 1:nrow(maxselectev)) {
+    maxselectev1[i, ] <- stringr::str_split(maxselectev[,4], ",")[[i]][1:3]
+  }
+
+  ##
+  data1 <- tidyr::pivot_longer(maxselectev1, #需要转置的数据
+                        c(first,second,thirdly),  #需要转置的列，这里是除了X列其他都转置
+                        names_to = "Contribution",  #转置后原本的列名会变成观测生成新列，指定这列的列名(列名包含了分类信息)
+                        values_to = "Variate")  #转置后原本的各列的值会合并成一个新列，指定这列的列名
+
+#统计每个变量出现次数，按照次数指定因子水平
+  times <- table(data1$Variate)
+
+  data1$Variate <- factor(data1$Variate, levels =  rev(names(times[order(times)])))
+  p <- ggplot2::ggplot(data1) +
+    geom_bar(aes(Variate, fill = Contribution),
+             #反转条形的堆积顺序
+             position = position_stack(reverse = TRUE)) +
+    #反转图例顺序
+    guides(fill = guide_legend(reverse = TRUE, title.theme = element_text(
+      family = "serif", size = wordsize*15) )) +
+    theme_bw() + ylab("Frequency") +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5,family = "serif"),
+          axis.text = element_text(family = "serif", size = wordsize*15),
+          axis.title = element_text(family = "serif", size = wordsize*20),
+          legend.text = element_text(family = "serif", size = wordsize*12)
+          ) +
+    ggsci::scale_fill_npg()
+
+  ggplot2::ggsave(plot = p, filename = "Variable contribution statistics.jpeg",
+         path = paste0(getwd(), "/TBlabENM/Variable_contribution"),
+         device = "jpeg", scale=1, dpi = "print", width = 10,
+         height = 7)
+
+
+
+  ####变量贡献条形统计图之按变量总贡献排序
+  #
+  maxselectev2 <- sort(unlist(stringr::str_split(maxselectev[,5], ",")))
+  maxselectev3 <- unlist(stringr::str_split(maxselectev2, " "))
+  ee <- data.frame(matrix(data = maxselectev3, ncol = 2, nrow = length(maxselectev3)/2, byrow = TRUE))
+  names(ee) <- c("Variate", "Contribution value")
+  ee[2] <- as.numeric(ee[, 2])
+  ee1 <- stats::aggregate(ee[,2], list(Variate = ee$Variate), sum)
+  ee1[,3] <- ee1$x/(100*length(sp))
+  names(ee1) <- c("Variate", "Contribution value", "Percent contribution")
+  write.csv(ee1, "./TBlabENM/Variable_contribution/Variable Percent contribution.csv")
+  p <- ggplot2::ggplot(ee1) +
+    geom_col(aes(reorder(Variate, `Percent contribution`, decreasing = TRUE), `Percent contribution`, fill = Variate)) +
+    scale_y_continuous(labels = scales::percent) + xlab("Variate") +
+    theme_bw() +
+    theme(legend.position = "none",
+          axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5,family = "serif"),
+          axis.text = element_text(family = "serif", size = wordsize*15),
+          axis.title = element_text(family = "serif", size = wordsize*20))
+
+  ggplot2::ggsave(plot = p, filename = "Variable Percent contribution.jpeg",
+                  path = "./TBlabENM/Variable_contribution",
+                  device = "jpeg", scale=1, dpi = "print", width = 10,
+                  height = 7)
+
+
+  }

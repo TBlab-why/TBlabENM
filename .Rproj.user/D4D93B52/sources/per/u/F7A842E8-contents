@@ -1,0 +1,45 @@
+spdir <- "G:/eblf/test/point"
+splist <- list.files(spdir, pattern=".csv$", full.names = T)
+ENMspcheck(sp = splist[21],
+           evdir = "D:/Desktop/1/pro_var/Krasovsky_1940_Albers/ditu/var/present",
+           #用于检查的变量，一种类型的变量选择一个即可
+           evselectev = c("elev", "bio01", "su_code", "uvb1", "t_bs"),
+           #海拔范围从植物志查询
+           elevation = c(100,10000),
+           #默认误差范围为200m
+           elrange = 300)
+
+
+
+setwd("G:/eblf/test")
+ENMspdata(resultdir = "G:/eblf/test/TBlabENM2/result",
+          proname = c("Present")
+)
+
+spdata = read.csv("G:/eblf/test/TBlabENM2/spdata.csv", fileEncoding = "GB18030")
+ENMBoolean(x = c(1:20),
+           spdata = spdata,
+           proname = c("Present","2050RCP8.5", "2070RCP8.5", "Last-Glacial-Maximum", "Mid-Holocene"),
+           threshold = 0.2,
+           #下面的参数需要用到您成功执行ENMmaxent()后生成的结果文件。
+           resultdir = "G:/eblf/test/TBlabENM2/result")
+
+#面积计算
+areastats(x = c(1:20),
+          spdata = spdata,
+          proname = c("Present","2050RCP8.5", "2070RCP8.5", "Last-Glacial-Maximum", "Mid-Holocene"),
+          booleandir = "G:/eblf/test/TBlabENM/Booleanmap0.2",
+          unitlength = 1,
+          path = "G:/eblf/test/TBlabENM")
+
+#sd
+area <- read.csv("G:/eblf/test/TBlabENM/areastats.csv")
+sd1 <- sd(area[1:5,6])
+sd2 <- sd(area[6:10,6])
+sd3 <- sd(area[11:15,6])
+sd4 <- sd(area[16:20,6])
+avg1 <- mean(area[1:5,5])
+avg2 <- mean(area[6:10,5])
+avg3 <- mean(area[11:15,5])
+avg4 <- mean(area[16:20,5])
+

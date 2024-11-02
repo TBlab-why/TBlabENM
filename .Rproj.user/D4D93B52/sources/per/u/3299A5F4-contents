@@ -1,0 +1,28 @@
+library(tidyverse)
+###eblf物种数据统计图
+spdata = read.csv("G:/eblf/TBlabENM/spdata.csv",  fileEncoding = "GB18030")
+allsp = read.csv("G:/eblf/eblf物种.csv",  fileEncoding = "GB18030")
+allsp$EBLF <- factor(allsp$EBLF, levels=c("1","0"))
+spdata$EBLF <- factor(spdata$EBLF, levels=c("1","0"), labels = c("EBLF","UNEBLF"))
+
+
+pp <- ggplot(allsp, aes(x = family, group = EBLF, fill = EBLF)) +
+  geom_bar(position = "dodge") +
+  geom_text(aes(label = ..count..), stat = "count", family = "serif",
+            vjust = -0.2, size = 5, position = position_dodge(.9)) +
+  ggsci::scale_fill_npg(name = "Distribution", labels = c("EBLF","UNEBLF")) +
+  theme_bw() + xlab("Family") + ylab("Number of species")+
+  theme(text = element_text(family = "serif", size = 14)) +
+  scale_y_continuous(expand = c(0,1,0,10), limits = c(0,200))
+
+ggsave(filename = "allsp1.jpeg", pp, path = "D:/Desktop/EBLF/202310汇总", scale = 2)
+
+##直方图
+st <- ggplot(spdata, aes(x = occurrence)) +
+  geom_histogram(binwidth = 5, fill = "white", color = "black") +
+  facet_grid(EBLF ~ .) +
+  ggsci::scale_fill_npg(name = "Distribution", labels = c("EBLF","UNEBLF")) +
+  theme_bw() + xlab("Number of occurrence") + ylab("Number of species")+
+  theme(text = element_text(family = "serif", size = 14)) +
+  scale_x_continuous(expand = c(0,1,0,10), limits = c(0,600), breaks = c(seq(5,600, 25)))
+ggsave(filename = "坐标点统计.jpeg", st, path = "D:/Desktop/EBLF/202310汇总", scale = 2)

@@ -1,0 +1,21 @@
+
+
+#' Title
+#'
+#' @param x f
+#'
+#' @return
+#' @export
+#'
+#' @examples
+ff <- function(x){
+# 并行初始化
+sfInit(parallel = TRUE, cpus = 1)
+
+# 进行lapply的并行操作
+sfLapply(x, function(x) c(x, x ^ 2, x ^ 3))
+
+# 结束并行，返还内存等资源
+sfStop()
+}
+

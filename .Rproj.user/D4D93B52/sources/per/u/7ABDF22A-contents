@@ -1,0 +1,12 @@
+spdata <- read.csv("G:/Styracaceae/axx/spdata-axx.csv")
+ENMPic(x = 7,
+       spdata = spdata,
+       proname = c("Present", "2050RCP8.5", "2070RCP8.5", "Last-Glacial-Maximum", "Mid-Holocene"),
+       threshold = "T_MTSStr",
+       resultdir = "G:/eblf/TBlabENM/result",
+       wordmap = "D:/Desktop/ENMdata/worldmap/带投影坐标系/world_pro.shp",
+       regionmap = "D:/Desktop/ENMdata/Chinamap/2022年省界/sheng2022.shp",
+       #color = c("", "", "", "", ""),
+       legend = TRUE,
+       format = "jpeg",
+       path= "./sppicture-axx")

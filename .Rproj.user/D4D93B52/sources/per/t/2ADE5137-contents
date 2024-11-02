@@ -1,0 +1,154 @@
+
+#' @title Species Richness  Analysis
+#' @description 根据布尔图进行叠加
+#' @param x 数值向量。表示要进行转换的物种的序号。这个序号来自ENMspdata()生成的标准文件。
+#' @param spdata spdata 由ENMspdata()生成的标准文件。也可手动创建或修改，但是不建议。
+#' 当maxent结果文件出现变动后，强烈建议重新运行ENMspdata()。
+#' @param proname 想要计算的物种丰富度的时期名称.
+#' @param booleandir 物种单个时期的布尔图所在路径。
+#' @param path 输出结果路径。
+#'
+#' @return 物种丰富度图，.tif格式。
+#' @importFrom raster stack
+#' @importFrom raster calc
+#' @importFrom raster writeRaster
+#' @export
+#' @examples
+#' #读取.spdata.csv
+#' spdata <- read.csv(paste0(system.file(package="TBlabENM"),"/extdata/spdata.csv"))
+#' #当计算物种丰富度时，可使用如下路径
+#' raster = paste0(getwd(), "/TBlabENM/BooleanmapT_MTSSte")
+#' #丰富度计算
+#' ENMsprichness(x = c(1:nrow(spdata)),
+#' spdata = spdata,
+#' proname = "present",
+#' booleandir,
+#' bioindex,
+#' path = paste0(getwd(), "/TBlabENM/sprichness"))
+ENMsprichness <- function(x, spdata, proname = NULL, booleandir, bioindex, path) {
+  if (file.exists(booleandir)==FALSE){
+    stop("booleandir not find.")}
+  #创建保存路径
+  dir.create(path, recursive = TRUE, showWarnings = FALSE)
+  ##读取所有的二值图路径
+  rasterlist <- list.files(booleandir, pattern = "tif$|TIF$", all.files = F, full.names = T)
+  for (m in seq_along(bioindex)) {
+
+
+    if (bioindex[m]=="sr") {
+
+      ##先对时期循环
+      if(is.null(proname)==FALSE) {
+        for (i in seq_along(proname)) {
+          rasterlist1 <- rasterlist[grepl(paste0("-", proname[i]), rasterlist, ignore.case = F)]
+          #从符合的时期中挑选想要的物种
+          raster <- c()
+          for (j in x) {
+            p <- rasterlist1[grepl(paste0(spdata[j,1], "-"), rasterlist1, ignore.case = F)]
+            raster <- c(raster, p)
+          }
+          #根据路径创建stack文件
+          r_s <- raster::stack(raster)
+          #对所有栅格求和
+          sr <- sum(r_s)
+
+          raster::writeRaster(sr, paste0(path,"/", paste0("sr-", proname[i], ".tif")))
+
+        }}
+
+    }
+
+    if (bioindex[m]=="we") {
+      ##先对时期循环
+      if(is.null(proname)==FALSE) {
+        for (i in seq_along(proname)) {
+          rasterlist1 <- rasterlist[grepl(paste0("-", proname[i]), rasterlist, ignore.case = F)]
+          #从符合的时期中挑选想要的物种
+          raster <- c()
+          for (j in x) {
+            p <- rasterlist1[grepl(paste0(spdata[j,1], "-"), rasterlist1, ignore.case = F)]
+            raster <- c(raster, p)
+          }
+
+          #根据路径创建stack文件
+          print(proname[i])
+          r_s <- raster::stack(raster)
+          #新建临时文件夹
+          if(file.exists("./TBlabENM/Temp")) { unlink("./TBlabENM/Temp", recursive = TRUE) }
+          dir.create("./TBlabENM/Temp")
+          #求选择的结果的单元格出现权重
+          for (j in seq_along(raster)) {
+            #读取二值图
+            r1 <- raster::raster(raster[j])
+            #计算权重，对单元格值求和，结果即为物种出现的总单元格数，再求倒数，得到每个单元格权重
+            r2 <- raster::calc(r1, fun = function(x){x*(1/raster::cellStats(r1, stat='sum'))})
+            #将结果保存到临时文件夹
+            name <- tail(unlist(stringr::str_split(raster[j], "/")),1)
+
+            raster::writeRaster(r2, paste0("./TBlabENM/Temp/", name))
+          }
+          #读取临时文件夹中的物种
+          singlewe <- list.files("./TBlabENM/Temp", pattern = "tif$|TIF$", all.files = F, full.names = T)
+          we1 <- raster::stack(singlewe)
+          we <- sum(we1)
+          raster::writeRaster(we, paste0(path, paste0("/we-", proname[i], ".tif")))
+          #删除临时文件夹
+          unlink("./TBlabENM/Temp", recursive = TRUE)
+        }}
+
+
+    }
+
+    if (bioindex[m]=="cwe") {
+      ##先对时期循环
+      if(is.null(proname)==FALSE) {
+
+        for (i in seq_along(proname)) {
+          ###先计算物种丰富度sr
+          rasterlist1 <- rasterlist[grepl(paste0("-", proname[i]), rasterlist, ignore.case = F)]
+          #从符合的时期中挑选想要的物种
+          raster <- c()
+          for (j in x) {
+            p <- rasterlist1[grepl(paste0(spdata[j,1], "-"), rasterlist1, ignore.case = F)]
+            raster <- c(raster, p)
+          }
+
+
+          #根据路径创建stack文件
+          r_s <- raster::stack(raster)
+          #对所有栅格求和
+          sr <- sum(r_s)
+
+          raster::writeRaster(sr, paste0(path,"/", paste0("sr--", proname[i], ".tif")))
+          ###再计算加权特有性we
+          #新建临时文件夹
+          if(file.exists("./TBlabENM/Temp")) { unlink("./TBlabENM/Temp", recursive = TRUE) }
+          dir.create("./TBlabENM/Temp")
+          #求选择的结果的单元格出现权重
+          for (j in seq_along(raster)) {
+            #读取二值图
+            r1 <- raster::raster(raster[j])
+            #计算权重，对单元格值求和，结果即为物种出现的总单元格数，再求倒数，得到每个单元格权重
+            r2 <- raster::calc(r1, fun = function(x){x*(1/raster::cellStats(r1, stat='sum'))})
+            #将结果保存到临时文件夹
+            name <- tail(unlist(stringr::str_split(raster[j], "/")),1)
+
+            raster::writeRaster(r2, paste0("./TBlabENM/Temp/", name))
+          }
+          #读取临时文件夹中的物种
+          singlewe <- list.files("./TBlabENM/Temp", pattern = "tif$|TIF$", all.files = F, full.names = T)
+          we1 <- raster::stack(singlewe)
+          we <- sum(we1)
+          raster::writeRaster(we, paste0(path, paste0("/we--", proname[i], ".tif")))
+          #删除临时文件夹
+          unlink("./TBlabENM/Temp", recursive = TRUE)
+          ##计算cwe
+          cwe <- raster::overlay(we, sr, fun=function(x,y){return(x/y)} )
+
+          raster::writeRaster(cwe, paste0(path, paste0("/cwe--", proname[i], ".tif")))
+        }}
+
+    }
+  }
+
+}

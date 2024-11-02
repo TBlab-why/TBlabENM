@@ -1,0 +1,212 @@
+#设置工作路径
+setwd("D:/Desktop/others/twx/Carex")
+library(TBlabENM)
+library(rJava)
+library(tidyverse)
+setwd("G:/eblf/test")
+setwd("D:/Desktop/Rstudy/Rpkg/TBlabENM")
+#1.数据检查
+#读取物种发生数据
+spdir <- "D:/Desktop/others/twx/Carex/occ/endemic"
+splist <- list.files(spdir, pattern=".csv$", full.names = T)
+#数据检查
+ENMspcheck(sp = splist[1],
+           evdir = "I:/Magnoliaceae/bio/ct30/mlasc",
+           #用于检查的变量，一种类型的变量选择一个即可
+           evselectev = c("elev30", "bio01", "SU_CODE", "uvb1"),
+           #海拔范围从植物志查询
+           elevation = c(100,1000),
+           #默认误差范围为200m
+           elrange = 300)
+
+
+#2.坐标空间过滤
+spdir <- "I:/Styracaceae/occthin1km"
+splist <- list.files(spdir, pattern=".csv$", full.names = T)
+spthin(sp=splist, thin.par=1)
+
+#3.全变量模拟
+setwd("I:/Styracaceae")
+#读取物种文件路径
+spdir <- "I:/Styracaceae/occthin1km"
+splist <- list.files(spdir, pattern=".csv$", full.names = T)
+#挑选要建模的物种
+sp <- splist[5]
+#批量建模
+ENMmaxent1(sp = se[1:100],
+     evdir = "D:/Desktop/1/pro_var/Krasovsky_1940_Albers/ditu/var/present",
+     #如果不需要自定义背景点，则忽视这行。
+     mybgfile = "G:/eblf/pro_bg10000.csv",
+     #可以在这里自定义参数。注意：当坐标点数小于replicates时，则replicates=nrow(occ)。
+     args = maxent_args(responsecurves=FALSE),
+     #如果没有分类变量，则忽视这行。
+     factors = c('su_code',"s_usda_tex_class","t_usda_tex_class","iawc_class"))
+
+#4.选择环境变量
+spdir <- "I:/Styracaceae/occthin1km"
+splist <- list.files(spdir, pattern=".csv$", full.names = T)
+ENMselectev(sp = se[1:6],
+            evdir = "D:/Desktop/1/pro_var/Krasovsky_1940_Albers/ditu/var/present",
+            ImportanceDir = "G:/eblf/Rdata/TBlabENM/importance",
+            factors = c('su_code',"s_usda_tex_class","t_usda_tex_class","iawc_class"),
+            r = 0.8, vif = 10)
+
+#5.选择最佳参数组合
+#加载背景点
+bg <-read.csv("G:/eblf/pro_bg10000.csv")
+selectev <- read.csv("./TBlabENM/selectev.csv")
+spdir <- "occthin1km"
+splist <- list.files(spdir, pattern=".csv$", full.names = T)
+ENMspevaluate(sp = se[1:6],
+              evdir = "D:/Desktop/1/pro_var/Krasovsky_1940_Albers/ditu/var/present",
+              selectev = selectev,
+              tune.args = list(fc = c("LQ"), rm = seq(0.5, 5, 0.5)),
+              bg = bg,
+              factors = c('su_code',"s_usda_tex_class","t_usda_tex_class","iawc_class")
+            #  parallel = TRUE, numCores = 8
+)
+
+#6.根据选择的参数建模
+#读取物种文件路径
+spdir <- "I:/Styracaceae/occthin1km"
+splist <- list.files(spdir, pattern=".csv$", full.names = T)
+#挑选要建模的物种
+sp <- splist[c(1:10)]
+#批量建模
+ENMmaxent(sp = se[4:6],
+          evdir = "D:/Desktop/1/pro_var/Krasovsky_1940_Albers/ditu/var/present",
+          #如果没有分类变量，则忽视这行。
+          factors = c('su_code',"s_usda_tex_class","t_usda_tex_class","iawc_class"),
+          #如果不需要自定义背景点，则忽视这行。
+          mybgfile = "G:/eblf/pro_bg10000.csv",
+          #设置选择的变量和重要参数(fc and rm)
+          selectev=read.csv("./TBlabENM/selectev.csv"),
+          fcrm=read.csv("./TBlabENM/fcrm.csv"),
+          #可以在这里自定义其他参数。注意：当坐标点数小于replicates时，则replicates=nrow(occ)。
+          args = maxent_args(),
+          #设置投影路径，用于生成不同时空的适生区分布图
+          prodir=list(
+            present="D:/Desktop/1/pro_var/Krasovsky_1940_Albers/ditu/var/present",
+            `50ccr85`="D:/Desktop/1/pro_var/Krasovsky_1940_Albers/ditu/var/50ccr85",
+            `70ccr85`="D:/Desktop/1/pro_var/Krasovsky_1940_Albers/ditu/var/70ccr85",
+            lgmcc="D:/Desktop/1/pro_var/Krasovsky_1940_Albers/ditu/var/lgmcc",
+            midcc = "D:/Desktop/1/pro_var/Krasovsky_1940_Albers/ditu/var/midcc"))
+#7.根据最终结果提取数据用于后续分析
+setwd("G:/eblf")
+
+ENMspdata(resultdir = "G:/eblf/TBlabENM/result",
+          proname = c("Present")
+          )
+
+#8.统计环境变量贡献并绘图
+spdataall <- read.csv("./TBlabENM/spdata.csv", fileEncoding = "GB18030")
+spdataeblf <- filter(spdataall, EBLF == 1)
+ENMev_cb(x = 1:1104,
+         spdata = spdataall,
+         wordsize = 2,
+         resultdir = "./TBlabENM/importance")
+#9.根据阈值绘制适生区图
+ENMPic(x = 1:43,
+       spdata = spdata,
+       proname = c("Present","2050RCP8.5", "2070RCP8.5", "Last-Glacial-Maximum", "Mid-Holocene"),
+       threshold = "T_MTSStr",
+       resultdir = "./TBlabENM/result",
+     #  wordmap = paste0(system.file(package="TBlabENM"), "/extdata/worldmap/world-84.shp"),
+       wordmap = "D:/Desktop/ENMdata/worldmap/带投影坐标系/world_pro.shp",
+     #  regionmap = paste0(system.file(package="TBlabENM"),"/extdata/Chinamap/China-84.shp"),
+       regionmap = "D:/Desktop/ENMdata/Chinamap/2022年省界/sheng2022.shp",
+       #color = c("", "", "", "", ""),
+       legend = T,
+       format = "jpeg",
+       path= "./TBlabENM/sppicture") 
+#10.根据阈值生成二值图
+spdataall = read.csv("./TBlabENM/spdata.csv", fileEncoding = "GB18030")
+ENMBoolean(x = c(1051:1104),
+           spdata = spdataall,
+           proname = c("Present","2050RCP8.5", "2070RCP8.5", "Last-Glacial-Maximum", "Mid-Holocene"),
+           threshold = "T_MTSStr",
+           #下面的参数需要用到您成功执行ENMmaxent()后生成的结果文件。
+           resultdir = "G:/eblf/TBlabENM/result")
+
+#11.根据二值图生成物种丰富度图
+
+#丰富度计算(示例少个括号)
+ENMRorSR(x = c(351:400),
+         spdata = spdataall,
+         #注意：根据需要确定是否需要该参数。
+         proname = c("Present","2050RCP8.5", "2070RCP8.5", "Last-Glacial-Maximum", "Mid-Holocene"),
+         booleandir = "./TBlabENM/BooleanmapT_MTSStr",
+         bioindex = c("sr"),
+         path = "./TBlabENM/sr/8")
+
+#12.根据二值图生成单个物种的避难所
+ENMrefuga_sp(
+  x = c(1:43),
+  spdata = spdata,
+  proname = c("Present","2050RCP8.5", "2070RCP8.5", "Last-Glacial-Maximum", "Mid-Holocene"),
+  booleandir = "./TBlabENM/BooleanmapT_MTSStr"
+)
+
+#13.根据单个物种避难所生成类群的避难所
+spdata = read.csv("G:/Styracaceae/axx/spdata-axx.csv", fileEncoding = "GB18030")
+iucn <- c("Perkinsiodendron macgregorii","Pterostyrax psilophyllus")
+spdata$species %in% iucn
+ENMsr_refugia(x = c(spdata$species %in% iucn),
+         spdata = spdata,
+         booleandir = "./TBlabENM/sp_refugia-Present-Mid-Holocene",
+         path = "./TBlabENM/sprichnessaxx")
+
+#14.面积统计
+library(tidyverse)
+spdata <- read.csv("G:/eblf/TBlabENM/spdata.csv", fileEncoding = "GB18030")
+spdataeblf <- filter(spdata, EBLF==1)
+areastats(x = c(1:781),
+          spdata = spdataeblf,
+          proname = c("Present","2050RCP8.5", "2070RCP8.5", "Last-Glacial-Maximum", "Mid-Holocene"),
+          booleandir = "G:/eblf/TBlabENM/BooleanmapT_MTSStr",
+          unitlength = 1,
+          path = NULL)
+##14.面积堆积条形图
+
+data <- read.csv("G:/eblf/TBlabENM/areastats-all.csv")
+
+data1 <- mutate(data, 
+                y2050 = (X2050RCP8.5-Present)/Present,
+                y2070 = (X2070RCP8.5-Present)/Present,
+                lgm = -(Last.Glacial.Maximum-Present)/Present,
+                mid = -(Mid.Holocene-Present)/Present
+                
+                )
+data1 <- data1[, -2:-6]
+library(tidyr)
+pivot_longer(data1, #需要转置的数据
+             !species,  #需要转置的列，这里是除了X列其他都转置
+             names_to = "period",  #转置后原本的列名会变成观测生成新列，指定这列的列名(列名包含了分类信息)
+             values_to = "areachange") -> data.1 #转置后原本的各列的值会合并成一个新列，指定这列的列名
+data.1$"value" <- NA
+for (i in 1:nrow(data.1)) {
+  if(data.1[i,3] > 0) {data.1[i,4] <- "1"} else {data.1[i,4] <- "-1"}} 
+                               
+write.csv(data.1, "G:/eblf/TBlabENM/统计数据/allwuzhong.csv")
+iucn <- readxl::read_xlsx("G:/eblf/TBlabENM/统计数据/iucn.xlsx")
+iucn$濒危等级 <- factor(iucn$濒危等级, levels = c("极危", "濒危", "易危"))
+e <- ggplot(iucn[], aes(y= proportion, x = 濒危等级, fill = period)) +
+  geom_col(position = "dodge") + 
+  facet_grid(class ~ .) +
+  geom_text(aes(label = scales::percent(proportion, 0.01)), 
+            vjust = -0.2, size = 3, position = position_dodge(.9)) + theme_bw() +
+  guides(fill = guide_legend(title = NULL)) +
+  scale_y_continuous(name = "受威胁物种的比例", 
+                     labels = scales::percent ) +
+  scale_x_discrete(name = "受威胁等级") +
+  theme(axis.text.y = element_text( size = 12),
+        axis.text.x = element_text( size = 12),
+        axis.title = element_text( size = 15),
+        legend.position = c(0.12,0.92),
+        legend.text = element_text(size = 10)
+  )
+
+ggsave(e, filename = "2.jpeg", path = "D:/Desktop", units = "cm",
+       height = 15,width = 20, dpi ="print", device = "jpeg")
+
+

@@ -1,0 +1,68 @@
+
+#2.绘图
+data <- readxl::read_xlsx("I:/Magnoliaceae/newfold/centroid/newcut/re628/面积.xlsx", sheet = 1)
+
+library(dplyr)
+dataW <- filter(data, `W-E`=="W")
+#排序
+dataW <- dataW[order(dataW$`LGM-Present`),]
+#根据排序指定因子水平
+dataW$"fac" <- c(1:nrow(dataW))
+##
+dataE <- filter(data, `W-E`=="E")
+#排序
+dataE <- dataE[order(dataE$`LGM-Present`),]
+#根据排序指定因子水平
+dataE$"fac" <- c(1:nrow(dataE))
+
+
+library(tidyr)
+pivot_longer(dataW, #需要转置的数据
+             c(`LGM-Present`,`2070s-Present`),  #需要转置的列，这里是除了X列其他都转置
+             names_to = "TIME",  #转置后原本的列名会变成观测生成新列，指定这列的列名(列名包含了分类信息)
+             values_to = "area") -> data.1 #转置后原本的各列的值会合并成一个新列，指定这列的列名
+
+pivot_longer(dataE, #需要转置的数据
+             c(`LGM-Present`,`2070s-Present`),  #需要转置的列，这里是除了X列其他都转置
+             names_to = "TIME",  #转置后原本的列名会变成观测生成新列，指定这列的列名(列名包含了分类信息)
+             values_to = "area") -> data.2 #转置后原本的各列的值会合并成一个新列，指定这列的列名
+library(ggplot2)
+w <- ggplot() +
+  geom_col(data = data.1, aes(y= area, x = reorder(species, fac), fill = TIME),
+            ) +
+  coord_flip() +theme_bw()+
+  scale_fill_manual(values=c(`LGM-Present`="#cb3a56", `2070s-Present`="#0c8918"),
+                    #labels = c("LGM-Present", "2070s-Present")
+                    ) +
+  guides(fill = guide_legend(title = NULL)) +
+  scale_y_continuous(name = "Changes of distribution area" ) +
+  scale_x_discrete(name = "Species in western region") +
+  theme(axis.text.y = element_text(face = "italic", family = windowsFont("Times New Roman")),
+        axis.text.x = element_text( family = windowsFont("Times New Roman")),
+        axis.title = element_text( family = windowsFont("Times New Roman")),
+        legend.position = c(0.9,0.1),
+        legend.text = element_text(family = "Times New Roman")
+  )
+
+e <- ggplot() +
+  geom_col(data = data.2, aes(y= area, x = reorder(species, fac), fill = TIME),
+           ) +
+  coord_flip() +theme_bw()+
+  scale_fill_manual(values=c(`LGM-Present`="#cb3a56", `2070s-Present`="#0c8918"),
+                    # labels = c("LGM-Present", "2070s-Present")
+  ) +
+  guides(fill = guide_legend(title = NULL)) +
+  scale_y_continuous(name = "Changes of distribution area" ) +
+  scale_x_discrete(name = "Species in eastern region") +
+  theme(axis.text.y = element_text(face = "italic", family = windowsFont("Times New Roman")),
+        axis.text.x = element_text( family = windowsFont("Times New Roman")),
+        axis.title = element_text( family = windowsFont("Times New Roman")),
+        #legend.position = c(0.9,0.1),
+        legend.text = element_text(family = "Times New Roman")
+  )
+library(ggpubr)
+
+we <- ggarrange(w,e,
+                common.legend = T )
+ggsave(we, filename = "1.jpeg", path = "D:/Desktop", units = "cm",
+       height = 15,width = 20, dpi ="print", device = "jpeg")

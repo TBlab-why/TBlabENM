@@ -1,0 +1,39 @@
+
+#' @title refuges Richness  Analysis for refuges
+#' @description 根据避难所布尔图进行叠加
+#' @param x 数值向量。表示要进行转换的物种的序号。这个序号来自ENMspdata()生成的标准文件。
+#' @param spdata spdata 由ENMspdata()生成的标准文件。也可手动创建或修改，但是不建议。
+#' @param booleandir 物种单个避难所布尔图所在路径。
+#' @param path 输出结果路径。
+#'
+#' @return 避难所丰富度图，.tif格式。
+#' @importFrom raster stack
+#' @importFrom raster calc
+#' @importFrom raster writeRaster
+#' @export
+#'
+#' @examples
+#' setwd("G:/eblf")
+#' ENMrefuges(x = 1:5,
+#'            spdata = read.csv("./TBlabENM/spdata.csv", fileEncoding = "GB18030"),
+#'            booleandir = "./TBlabENM/sp_refuge-Present-Mid-Holocene",
+#'            path = "./TBlabENM/sr_refuges")
+
+ENMrefuges <- function(x, spdata, booleandir, path){
+
+  if (file.exists(booleandir)==FALSE){
+    stop("booleandir not find.")}
+  #创建保存路径
+  dir.create(path, recursive = TRUE, showWarnings = FALSE)
+  ##读取所有的二值图路径
+  rasterlist <- list.files(booleandir, pattern = "tif$|TIF$", all.files = F, full.names = T)
+  raster <- c()
+  for (i in x) {
+    p <- rasterlist[grepl(paste0(spdata[i,1], "-"), rasterlist, ignore.case = F)]
+    raster <- c(raster, p)
+  }
+  r_s <- raster::stack(raster)
+  richness <- sum(r_s)
+  filename = paste0(path, "/spp-refuges.tif")
+  raster::writeRaster(richness, filename)
+}

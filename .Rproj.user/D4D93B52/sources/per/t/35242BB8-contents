@@ -1,0 +1,43 @@
+
+#生成随机点
+sjpoint <- function(species, raster, path){
+r1 <- raster::raster(raster)
+r1_df <- methods::as(r1, "SpatialPixelsDataFrame")
+r1_ddf <- as.data.frame(r1_df)
+names(r1_ddf) <- c("value", "x", "y")
+ld <- c()
+
+for (i in 0:max(r1_ddf$value)) {
+    ff <- which(r1_ddf$value==i)
+    if (length(ff)!=0) {
+        ld1 <- sample(x=which(r1_ddf$value==i), size = 1)
+        ld <- c(ld, ld1)
+        point <- r1_ddf[ld,]
+    }
+    point[,1] <- rep(species, nrow(point))
+    names(point) <- c("species", "x", "y")
+
+    write.csv(point, path, row.names = FALSE)
+}
+
+}
+
+
+sjpoint(species = "Melliodendron xylocarpum",
+        raster = "G:/eblf/test/resampleraster1/Melliodendron xylocarpum100.tif",
+        path = "G:/eblf/test/point/Melliodendron xylocarpum5.1.csv")
+
+
+spdir <- "G:/eblf/test/point/Melliodendron xylocarpum"
+splist <- list.files(spdir, pattern=".csv$", full.names = T)
+for (i in 1:20) {
+
+ENMspcheck(sp = splist[21],
+           evdir = "D:/Desktop/1/pro_var/Krasovsky_1940_Albers/ditu/var/present",
+           #用于检查的变量，一种类型的变量选择一个即可
+           evselectev = c("elev", "bio01", "su_code", "uvb1", "t_bs"),
+           #海拔范围从植物志查询
+           elevation = c(100,10000),
+           #默认误差范围为200m
+           elrange = 300)
+}
