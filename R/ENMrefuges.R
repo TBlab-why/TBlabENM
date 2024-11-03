@@ -1,7 +1,7 @@
 
 #' @title Individual Species Refuge
 #' @description
-#'    根据不同时期的Booleanmap计算物种的避难所。Booleanmap由ENMBoolean()生成。
+#'    根据适生区/非适生区栅格计算物种的避难所。
 #'
 #' @param x 数值向量,表示物种序号,与parameters中的物种序号一致。
 #' @param booleandir 适生区和非适生区结果文件路径。
@@ -13,10 +13,8 @@
 #' @param parallel 是否并行
 #' @param ncpu 并行时cpu个数
 #' 本文件夹，请自己指定。
-#' @return 返回表示避难所区域的Boolean图，格式为.tif。自动生成"paste0(
-#' "./TBlabENM/sp_refugie", "-", proname[1],"-", periodname[length(proname)])"
-#' 文件夹保存结果。该文件夹不会保存阈值信息，当使用不同阈值得到的Booleanmap时，若还需要保存
-#' 之前的结果，请手动对本文件夹重命名。
+#' @return 返回表示避难所区域的Boolean图
+
 #' @export
 #' @importFrom stringr str_detect
 #' @examples

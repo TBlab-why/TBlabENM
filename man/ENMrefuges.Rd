@@ -35,13 +35,10 @@ ENMrefuges(
 本文件夹，请自己指定。}
 }
 \value{
-返回表示避难所区域的Boolean图，格式为.tif。自动生成"paste0(
-"./TBlabENM/sp_refugie", "-", proname\link{1},"-", periodname\link{length(proname)})"
-文件夹保存结果。该文件夹不会保存阈值信息，当使用不同阈值得到的Booleanmap时，若还需要保存
-之前的结果，请手动对本文件夹重命名。
+返回表示避难所区域的Boolean图
 }
 \description{
-根据不同时期的Booleanmap计算物种的避难所。Booleanmap由ENMBoolean()生成。
+根据适生区/非适生区栅格计算物种的避难所。
 }
 \examples{
 ENMrefuges(parameters = read.csv("F:/eblf/TBlabENM/spdata.csv"),

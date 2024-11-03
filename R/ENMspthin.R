@@ -15,7 +15,7 @@
 #' @examples
 #' #读取物种路径列表
 #' dir <- system.file("extdata", "species", package = "TBlabENM")
-#' splist <- list.files(spdir, pattern = ".csv$", full.names = T)
+#' splist <- list.files(dir, pattern = ".csv$", full.names = T)
 #' ENMspthin(spdir = splist, thin.par = 10, outdir = NULL)
 ENMspthin <- function(spdir, thin.par, outdir = NULL) {
   if(is.null(outdir)){outdir = "."}
@@ -25,8 +25,8 @@ ENMspthin <- function(spdir, thin.par, outdir = NULL) {
     occdata <- utils::read.csv(spdir[i], fileEncoding = "GB18030")
     name <- stringr::str_split_1(spdir[i], pattern = "/")[length(stringr::str_split_1(spdir[i], pattern = "/"))] %>%
       stringr::str_split_1(., pattern = ".csv$")
-    if(file.exists(paste0(outdir, "/", name[1], "_thin1.csv"))){
-      file.remove(paste0(outdir, "/", name[1], "_thin1.csv"))
+    if(file.exists(paste0(outdir, "/TBlabENM/occthin", thin.par, "km/", name[1], "_thin1.csv"))){
+      file.remove(paste0(outdir, "/TBlabENM/occthin", thin.par, "km/", name[1], "_thin1.csv"))
     }
 
       spThin::thin(

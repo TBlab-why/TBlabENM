@@ -1,4 +1,4 @@
-pmap
+
 #' Select optimum parameters for the MaxEnt models
 #' @description
 #' 本函数为MaxEnt模型选择最适合的环境变量组合、正则化乘数和特征函数组合。
@@ -71,28 +71,21 @@ maxent_parameter <- function(x, evdir, myenv = NULL, evlist = NULL, factors = NU
     importance1 <- dplyr::arrange(importance, desc(value))
     if(nrow(importance)<n){importance <- rownames(importance1)[1]} else{
       importance <- rownames(importance1)[n]}
-print("这组变量最重要的变量")
-print(importance)
-print("这组变量的相关性")
-print(correlation)
+
     ff <- correlation[,importance, drop = FALSE]
-print("最重要变量与其他变量的相关性")
-print(ff)
+
     ff <-  ff[which(ff < r), ,drop = FALSE]
-print("保留没有相关性的变量")
-print(ff)
+
     bio_name <- c(importance, rownames(ff)) #要保留的变量名称
 
-print("合并保留的变量用于下次循环")
-print(bio_name)
+
     #当执行vif分时
     if(vif==T){
-print("执行vif")
+
       bio_name <- vifse_method(envdf = mybg, env_name = bio_name,
                                          importance = importance1, vifth = vifth, n = n )
     }
-print("本次最终要保留的变量")
-print(bio_name)
+
     return <- bio_name
   }
   #vifse_method功能使用vif选择变量
@@ -100,14 +93,12 @@ print(bio_name)
     #对保留的变量进行重要性排序
     im <- dplyr::arrange(importance[env_name,, drop =FALSE],desc(value))
     env_name <- rownames(im) #排过序的变量名
-print("排过序的变量名")
-print("env_name")
+
     env_name1 <- env_name
     n = n-1
 
     while (n < length(env_name1)-1) {
-print("n")
-print(n)
+
       n = n+1
       #从env_name中取出前i个变量
       var <- env_name1[c(1:(n+1))]
@@ -115,13 +106,11 @@ print(n)
       var1 <- var[var%in%env_name]
       #对var1计算vif
       vifvalue <- usdm::vif(envdf[var1])
-print("本次要进行vif的变量")
-print(vifvalue)
+
       #当存在共线性则应该排除var1中的最后一个变量,当不存在共线性说明该变量要保留，进入下次循环
       if(sum(vifvalue$VIF > vifth)>0){env_name <- env_name[!env_name%in%var1[length(var1)]]} else{break}
     }
-print("本次保留的变量")
-print(env_name)
+
     return(env_name) }
 
 
@@ -144,8 +133,7 @@ print(env_name)
       if(length(factors)==1){
         while(sum(correlation1 > r) > nrow(correlation1)| n==0){
           n <- n+1
-print("第n次变量重要性")
-print(n)
+
           #进行模拟获得重要性列表
           compare <-suppressMessages(maxent_single(
             x = x,
@@ -164,11 +152,10 @@ print(n)
             dplyr::select(., paste0(bio_name, ".contribution")) %>%
             utils::tail(., n =1) %>% t() %>% as.data.frame()
           names(ev_cb) <- "value"
-print(ev_cb)
+
           ##排除贡献小于0.5的变量
           ev_cb <- ev_cb[ev_cb>0.5,, drop = FALSE]
-print("0.5重要值")
-print(ev_cb)
+
           #修改ev_cb的变量名
           nn <- c()
           for (i in 1:nrow(ev_cb)) {
@@ -180,10 +167,10 @@ print(ev_cb)
           if(is.null(factors)){ev_cb1 <- ev_cb} else {
             ev_cb1 <- ev_cb[!rownames(ev_cb) %in% factors, , drop = FALSE]}
 
-print(ev_cb1)
+
           #correlation1按照ev_cb提取
           correlation1 <- correlation1[rownames(ev_cb1),rownames(ev_cb1)]
-print(correlation1)
+
           #连续变量的选择n=1
           bio_name1 <- corse_method(correlation = correlation1, importance = ev_cb1, vif=vif, n=n) #下次模拟的变量
           #组合两种变量
@@ -197,16 +184,13 @@ print(correlation1)
           #计算两种变量的相关性
           correlation1 <- abs(as.data.frame(cor(mybg1[bio_name1], method = cormethod)))
         }
-print("本i中最终变量")
-print(bio_name)
+
         return(bio_name)
 
       } else { #分类变量大于1个的情况
 
         while(sum(correlation1 > r) > nrow(correlation1) | sum(correlation2 > r) > nrow(correlation2)| n==0){
-print("开始循环：进入第n重要变量的选择")
-n <- n+1
-print(n)
+
           #进行模拟获得重要性列表
           compare <-suppressMessages(maxent_single(
             x = x,
@@ -225,12 +209,10 @@ print(n)
             dplyr::select(., paste0(bio_name, ".contribution")) %>%
             utils::tail(., n =1) %>% t() %>% as.data.frame()
           names(ev_cb) <- "value"
-print("第n重要变量贡献")
-print(ev_cb)
+
           ##排除贡献小于0.5的变量
           ev_cb <- ev_cb[ev_cb>0.5,, drop = FALSE]
-print("0.5变量贡献")
-print(ev_cb)
+
           #修改ev_cb的变量名
           nn <- c()
           for (i in 1:nrow(ev_cb)) {
@@ -238,19 +220,16 @@ print(ev_cb)
             nn <- c(nn, nn1)
           }
           rownames(ev_cb) <- nn
-print("当前的factors")
-print(factors)
+
           factors <- rownames(ev_cb)[rownames(ev_cb) %in% factors] #更新factors
           if(length(factors) ==0){factors <- NULL}
-print("0.5后的factors")
-print(factors)
+
           #将ev_cb按照变量类型拆开
           if(is.null(factors)){ev_cb1 <- ev_cb} else{
             ev_cb1 <- ev_cb[!rownames(ev_cb) %in% factors, , drop = FALSE]
             ev_cb2 <- ev_cb[factors, , drop = FALSE]
           }
-print("0.5后的变量贡献")
-print(ev_cb1)
+
 if(is.null(factors)){print("ev_cb2wu")}
 
 
@@ -258,9 +237,7 @@ if(is.null(factors)){print("ev_cb2wu")}
           if(is.null(factors)){correlation1 <- correlation1[rownames(ev_cb1),rownames(ev_cb1)]}else{
             correlation1 <- correlation1[rownames(ev_cb1),rownames(ev_cb1),drop = FALSE]
             correlation2 <- correlation2[rownames(ev_cb2),rownames(ev_cb2), drop = FALSE]}
-print("0.5后的相关性")
-print(correlation1)
-print(correlation2)
+
           #连续变量的选择n=1
           if(is.null(factors)){
             bio_name1 <- corse_method(correlation = correlation1, importance = ev_cb1, vif=vif, n=n)
@@ -278,19 +255,14 @@ print(correlation2)
           factors <- bio_name2
           #组合两种变量
           bio_name <- c(bio_name2, bio_name1)
-print("根据当前模拟结果选择的变量")
-print(bio_name1)
-print(bio_name2)
-print(bio_name)
-print("更新factors")
-print(factors)
+
           #获取保留的变量存储路径的下标
           evlist <- c()
           for (i in seq_along(bio_name)) {
             evlist1 <- which( stringr::str_detect(biolistall, paste0(bio_name, ".asc")[i])==T)
             evlist <- c(evlist, evlist1)
           }
-print(evlist)
+
           #计算两种变量的相关性
           if(is.null(factors)){correlation1 <- abs(as.data.frame(cor(mybg1[bio_name1], method = cormethod)))
           correlation2 <- as.data.frame(0)
@@ -298,15 +270,11 @@ print(evlist)
             correlation1 <- abs(as.data.frame(cor(mybg1[bio_name1], method = cormethod)))
             correlation2 <- abs(as.data.frame(cor(mybg2[bio_name2], method = cormethod)))
           }
-print("选择完变量后剩下变量的相关性，若无则结束变量选择得到最终的参数")
-print(correlation1)
-print(correlation2)
+
         }
-print("最终选择的变量")
-print(bio_name)
+
         return(bio_name)}
     } else {
-print("meiy分类")
 
       while(sum(correlation1 > r) > nrow(correlation1)| n==0){ #bio_name初始值为最开始使用的全部变量
         n=n+1
@@ -330,13 +298,10 @@ print("meiy分类")
           dplyr::select(., paste0(bio_name, ".contribution")) %>%
           utils::tail(., n =1) %>% t() %>% as.data.frame()
         names(ev_cb) <- "value"
-print(paste("n" = n))
-print("第n次循环变量贡献")
-print(ev_cb)
+
         ##排除贡献小于0.5的变量
         ev_cb <- ev_cb[ev_cb > 0.5,, drop = FALSE]
-print("0.5的重要值")
-print(ev_cb)
+
         #修改ev_cb的变量名
         nn <- c()
         for (i in 1:nrow(ev_cb)) {
@@ -352,7 +317,7 @@ print(ev_cb)
           evlist1 <- which(stringr::str_detect(biolistall, paste0(bio_name, ".asc")[i])==T)
           evlist <- c(evlist, evlist1) }
         correlation1 <- abs(as.data.frame(cor(mybg[,bio_name], method = cormethod)))
-print(evlist)
+
       }
       return(bio_name)
     }
@@ -407,13 +372,13 @@ print(evlist)
   cat("***********Selecting parameters***********\n")
   #提取发生数据的环境值
   biostack <- terra::rast(biolist)
-print(x)
+
   occ <- utils::read.csv(x) #读取物种坐标数据
-print(occ)
+
   occ <- occ[c(2,3)]
 
   occdata <- terra::extract(biostack, occ, ID=FALSE)
-print(occdata)
+
   #提取背景值并计算变量相关性
   ##随机生成10000个点
   if(is.null(mybgfile)){
@@ -426,15 +391,11 @@ print(occdata)
     mybg2 <- mybg[,factors, drop = FALSE]
     correlation1 <- abs(as.data.frame(cor(mybg1, method = cormethod)))
     correlation2 <- abs(as.data.frame(cor(mybg2, method = cormethod)))
-print("初始变量相关性")
-print(correlation1)
-print(correlation2)
 
   } else { correlation1 <- abs(as.data.frame(cor(mybg, method = cormethod)))
-print("初始变量相关性")
-print(correlation1)
+
   }
-print("hgfds")
+
   #组合fc和 rm
   fc <- toupper(fc)
   combin <- expand.grid(fc, rm, stringsAsFactors = FALSE) %>%
@@ -445,7 +406,7 @@ print("hgfds")
   df <- data.frame(matrix(NA,nrow(combin),1))
   df <- cbind(combin, df)
   names(df) <- c("fc", "rm", "env")
-print(df)
+
   #根据组合设置 args参数
   args1 <- TBlabENM::maxent_args(l=FALSE , q=FALSE, p=FALSE, h=FALSE, t=FALSE,
                        responsecurves=FALSE, jackknife=FALSE, pictures=FALSE)
@@ -471,14 +432,12 @@ print(df)
    # snowfall::sfExport("maxent_single")
     k <- snowfall::sfLapply(1:nrow(combin), fun4)
     snowfall::sfStop()  # 关闭集群
-print("df")
+
     df$env <- unlist(k)
 
-print(df)
   }else{
   for(i in 1:nrow(combin)){
-print("i")
-print(i)
+
       #设置好fc和rm后进行模拟保留最重要变量i=1
       var <- fun2(fc1 = combin[i,1] ,rm1 = combin[i,2])
       df[i,3] <- paste0(var, collapse = ",")
@@ -493,11 +452,9 @@ print(i)
       bio_name0 <- stringr::str_split_1(bioname1, ".asc")[1]
       bio_name_all <- c(bio_name_all, bio_name0)
     }
-print("这里应该是所有变量")
-print(bio_name_all)
+
     #指定的变量
     bio_name <- myenv
-print(paste0("这里应该是指定的变量", bio_name))
     if(sum(bio_name %in% bio_name_all)!=length(bio_name)){
       stop("One or more specified variables do not exist! Pleaes check parameter 'evdir' and 'myenv'.")
     } else { cat(paste("Initial variable:", paste(bio_name, collapse = ","), "\n"))}
@@ -518,8 +475,7 @@ for (i in bio_name) {
   xb1 <- which( stringr::str_detect(biolistall, paste0(i, ".asc"))==T)
   xb <- c(xb, xb1) }
 biostack <- terra::rast(biolistall[xb])
-print("用于模拟的原始变量")
-print(bio_name)
+
 occ <- utils::read.csv(x) #读取物种坐标数据
 occ <- occ[c(2,3)]
 occdata <- terra::extract(biostack, occ, ID=FALSE)
@@ -542,10 +498,9 @@ if(is.null(mybgfile)){
     df <- cbind(combin, df)
     df[,3] <- rep(paste0(myenv, collapse = ","), nrow(df))
     names(df) <- c("fc", "rm", "env")
-print(paste0("这里应该是fcrm参数表", df))
+
   }
-print("df应该全选")
-print(df)
+
 if(is.null(opt)){parameter <- df} else{
 #剩余的组合进行evaluate通过AICC确定最佳组合
   df <- df %>%
@@ -556,7 +511,7 @@ if(is.null(opt)){parameter <- df} else{
       for (i in seq_along(xb2)) {
         xb1 <- which( stringr::str_detect(biolist, paste0(xb2, ".asc")[i])==T)
         xb <- c(xb, xb1) }
-print(xb2)
+
       occdata <- occdata[xb2]
     }
     )) %>%
@@ -577,8 +532,7 @@ print(xb2)
   df1 <- dplyr::filter(df, num<4)
   df <- dplyr::filter(df, num>=4)
   if(nrow(df)==0){stop("All combined environment variables have fewer than four")}
-print(paste0("这里应该是fcrm参数表列名", names(df)))
-print(df)
+
 #使用pmap函数并行评估（由于ENMevaluate函数的参数大于2个，所以使用pmap函数）
   #设置参数
   if(nrow(occdata)>=25){
@@ -616,8 +570,7 @@ print(df)
   cs <- cbind(df[1:3], gz1[c(1:16,19)])
   cs <- cs[-(4:5)]
   cs <- dplyr::arrange(cs, AICc, auc.diff.avg, or.mtp.avg)
-print("cs")
-print(cs)
+
   #依据aicc选择最佳模型
   if(opt=="aicc") {opt1 <- dplyr::filter(cs, AICc == min(AICc))
   if(nrow(opt1)==0){opt1 <- dplyr::filter(cs, auc.val.avg == max(auc.val.avg))
@@ -642,7 +595,7 @@ print(cs)
   unlink(paste0(outdir, "/TBlabENMtemp") ,recursive = T)
   #dir.create(paste0(outdir, "/TBlabENM"), showWarnings = FALSE)
 
-print(paste0(outdir, "/TBlabENM/tuneparameter_", sp_name, ".csv"))
+  print(paste0(outdir, "/TBlabENM/tuneparameter_", sp_name, ".csv"))
   utils::write.csv(cs, paste0(outdir, "/TBlabENM/tuneparameter_", sp_name, ".csv"), row.names = FALSE)
   parameter <- opt1[1,1:3]
   parameter$species <- sp_name

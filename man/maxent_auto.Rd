@@ -75,7 +75,7 @@ maxent_auto(
 适宜性地图。
 }
 \examples{
-maxent_auto(sp = system.file("extdata", "species/wz0001.csv", package = "TBlabENM"),
+maxent_auto(sp = system.file("extdata", "species/Phoebe sheareri.csv", package = "TBlabENM"),
 evdir = system.file("extdata", "envar/asc", package = "TBlabENM"),
 evlist = 1:7,
 factors = c("dr", "fao90"),
