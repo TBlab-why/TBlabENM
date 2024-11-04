@@ -8,6 +8,9 @@
 #' @param spdir 要过滤的物种文件的路径的集合，包括文件名（.csv）.
 #' @param thin.par 数值型，地理空间过滤距离（km）.
 #' @param outdir 结果保存路径，未指定时在当前工作路径自动生成保存路径.
+#' @param spec.col 物种名所在的列名.
+#' @param long.col 经度所在的列名.
+#' @param lat.col 纬度所在的列名.
 #'
 #' @return 一个文件夹,包含每个物种过滤后的csv文件和过滤前后的连接文件.
 #' @export
@@ -16,8 +19,13 @@
 #' #读取物种路径列表
 #' dir <- system.file("extdata", "species", package = "TBlabENM")
 #' splist <- list.files(dir, pattern = ".csv$", full.names = T)
-#' ENMspthin(spdir = splist, thin.par = 10, outdir = NULL)
-ENMspthin <- function(spdir, thin.par, outdir = NULL) {
+#' ENMspthin(spdir = splist,
+#'           spec.col = species,
+#'           long.col = longitude,
+#'           lat.col = latitude,
+#'           thin.par = 10,
+#'           outdir = NULL)
+ENMspthin <- function(spdir, spec.col, long.col, lat.col, thin.par, outdir = NULL) {
   if(is.null(outdir)){outdir = "."}
   dir.create(paste0(outdir, "/TBlabENM/occthin", thin.par, "km"), recursive = TRUE, showWarnings = FALSE)
 
@@ -31,9 +39,9 @@ ENMspthin <- function(spdir, thin.par, outdir = NULL) {
 
       spThin::thin(
       loc.data = occdata,
-      spec.col = names(occdata)[1],
-      long.col = names(occdata)[2],
-      lat.col = names(occdata)[3],
+      spec.col = spec.col,
+      long.col = long.col,
+      lat.col = lat.col,
       thin.par = thin.par,
       reps = 5,
       locs.thinned.list.return = FALSE,
