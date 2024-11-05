@@ -16,8 +16,7 @@ ENMrefuges(
 )
 }
 \arguments{
-\item{parameters}{数据框，第一列为物种名(要与resultdir下的名称保持一致),其他列位置不做要求，但是必须有一列或多列
-为划分适生区和非适生区的阈值。}
+\item{parameters}{数据框，第一列为物种名(要与resultdir下的名称保持一致)}
 
 \item{x}{数值向量,表示物种序号,与parameters中的物种序号一致。}
 
