@@ -13,6 +13,7 @@ ENMunityenv(
   method = "bilinear",
   res = NULL,
   outformat = "tif",
+  overwrite = F,
   outdir = NULL,
   parallel = F,
   ncpu = 2
@@ -62,5 +63,4 @@ ENMunityenv(envdir = "F:/example/TBlabENM/env1",
             outdir = "F:/example",
             parallel = F,
             ncpu = 2)
-
 }

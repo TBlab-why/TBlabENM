@@ -53,6 +53,7 @@ ENMsprichness <- function(parameters, x = NULL, booleandir, key = NULL,
   if(is.null(x)){x <- 1:nrow(parameters)}
   ##读取所有的二值图路径
   rasterlist <- list.files(booleandir, pattern = ".tif$|.TIF$", all.files = F, full.names = T)
+  if(length(rasterlist) == 0) {rasterlist <- booleandir}
   #提取想要的时期
   if(is.null(key)==FALSE){
     rasterlist <- unlist(key) %>% as.data.frame() %>%

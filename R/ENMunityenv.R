@@ -38,7 +38,6 @@
 #'             outdir = "F:/example",
 #'             parallel = F,
 #'             ncpu = 2)
-#'
 ENMunityenv <- function(envdir,
                         proname,
                         factors = NULL,
@@ -47,39 +46,37 @@ ENMunityenv <- function(envdir,
                         method = "bilinear",
                         res = NULL,
                         outformat = "tif",
+                        overwrite = F,
                         outdir = NULL,
                         parallel = F,
                         ncpu = 2){
 
   if(is.null(outdir)){outdir <- "."}
-
-  fun1 <- function(j){
-    df <- df1[j,] %>%
+#当输入为栅格
+  fun1 <- function(j){ #j为单个变量,j=2
+    #对单行进行分析
+       df <- df1[j,]
       # 读取栅格数据
-      mutate(ra = map(.x = value,.f = function(x) rast(x))) %>%
-
-      #将range的crs转为ra的
-      mutate(pr = map(.x = ra, .f = function(x){
-        project(range, crs(x, proj = TRUE))
-      }))  %>%
+        ra <- rast(df$value)
+        names(ra) <- df$envname
+      #将ra的crs转为range
+        pro <- terra::project(range, ra, method = "near", align = T, threads = T)
+        pro1 <- terra::project(ra, crs(range), method = df$method,res =1000, align = T, threads = T)
       #如果crop == T，则裁剪，否则不裁剪，保存至raster
-      mutate(raster = map2(.x = ra, .y = pr, .f = function(x,y){
-        if(crop == T){crop(x,y) %>% mask(y) } else {x} })) %>%
-      #将raster（裁剪）转投影到range
-      mutate(proraster = map2(.x = raster, .y = method, .f = function(x,y){
-        if(class(range) == "SpatVector"){
-          project(x,  crs(range, proj = TRUE), method = method, res = res, align = T, threads = T)
-        } else {
-          terra::project(x, y, method = y, align = T, threads = T)
-        }
-      })) %>%
+        if(crop == T){
+          if((ext(pro)[1] < ext(pro)[1] & ext(pro)[2] > ext(range)[2]&
+              ext(pro)[3] < ext(pro)[3]& ext(pro)[4] > ext(range)[4])==FALSE){
+            stop("The range extends beyond the grid to be processed")}
+          ra <- crop(ra, pro, mask = T) %>% mask(., pro)
+          }
+        #将投影转为range投影
+        pro <- project(ra, range, method = 'near', align = T, threads = T)
       # 保存栅格数据到同一文件夹
-      mutate(x = map2(.x = proraster, .y = path, .f = function(x, y) {
         for (i in 1:length(outformat)) {
-          writeRaster(x, paste0(y, ".",outformat[i]), overwrite=TRUE)}
-      }))}
+          writeRaster(pro, paste0(df$path, ".",outformat[i]), overwrite=overwrite)}
+}
 
-  for (i in 1:length(proname)) {
+  for (i in 1:length(proname)) {#i=1
     #创建对应时期的文件夹
     dir.create(paste0(outdir, "/TBlabENM/env/",proname[i]), recursive = TRUE, showWarnings = FALSE)
 
@@ -111,9 +108,9 @@ ENMunityenv <- function(envdir,
       snowfall::sfLibrary(tidyverse)
       snowfall::sfLapply(1:length(df), fun1)
       snowfall::sfStop()  # 关闭集群
-    } else { for(j in 1:length(df)) { fun1(j) } }
+    } else { for(j in 1:nrow(df1)) { fun1(j) } }
+
 
 }
-
-}
+  }
 

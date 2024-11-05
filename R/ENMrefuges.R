@@ -5,8 +5,7 @@
 #'
 #' @param x 数值向量,表示物种序号,与parameters中的物种序号一致。
 #' @param booleandir 适生区和非适生区结果文件路径。
-#' @param parameters 数据框，第一列为物种名(要与resultdir下的名称保持一致),其他列位置不做要求，但是必须有一列或多列
-#'     为划分适生区和非适生区的阈值。
+#' @param parameters 数据框，第一列为物种名(要与resultdir下的名称保持一致)
 #' @param key 要提取的关键词，一般对应投影时期
 #' @param overwrite logical. If TRUE, filename is overwritten
 #' @param outdir 输出文件夹
@@ -44,7 +43,9 @@ ENMrefuges <- function(parameters, x = NULL, booleandir, key = NULL,
   #读取单个物种单个时期的二值图结果文件夹,该文件夹下不要有其他的无关tif
   if (file.exists(booleandir)==FALSE){
     stop("booleandir not find.")}
+
   booleanlist <- list.files(booleandir,  full.names = T, pattern = "tif$|TIF$")
+  if(length(booleanlist) == 0) {booleanlist <- booleandir}
   #创建保存路径
   if(is.null(outdir)){outdir = "."}
   if(is.null(x)){x <- 1:nrow(parameters)}
