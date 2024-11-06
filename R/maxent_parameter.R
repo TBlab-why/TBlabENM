@@ -65,6 +65,7 @@ maxent_parameter <- function(x, evdir, myenv = NULL, evlist = NULL, factors = NU
   unlink(paste0(outdir, "/TBlabENMtemp",star_time) ,recursive = T)
   dir.create(paste0(outdir, "/TBlabENM"),recursive = TRUE, showWarnings = FALSE)
   star_time <- stringr::str_replace(Sys.time()," |:", "")
+  print(star_time)
 #corse_method功能使用相关性选择变量
   corse_method <- function(correlation, importance, vif, n){ #n最初为1
     n = n
@@ -420,6 +421,7 @@ if(is.null(factors)){print("ev_cb2wu")}
     snowfall::sfInit(parallel = TRUE, cpus = ncpu)
     # 注册每个环境变量
     snowfall::sfExport("fun2")
+    snowfall::sfExport("star_time")
     snowfall::sfLibrary(purrr)
     snowfall::sfLibrary(TBlabENM)
     snowfall::sfExport("x")
