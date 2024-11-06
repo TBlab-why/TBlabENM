@@ -62,7 +62,7 @@ maxent_parameter <- function(x, evdir, myenv = NULL, evlist = NULL, factors = NU
                              mybgfile = NULL, nbg = 10000, fc, rm, r = 0.7,
                              cormethod = "pearson", vif = T, vifth = 5, opt = "aicc",
                              outdir = NULL, parallel = F, ncpu = 2){
-  unlink(paste0(outdir, "/TBlabENMtemp",star_time) ,recursive = T)
+  unlink(paste0(outdir, "/TBlabENMtemp*",star_time) ,recursive = T)
   dir.create(paste0(outdir, "/TBlabENM"),recursive = TRUE, showWarnings = FALSE)
   star_time <- sample(1:100000,1)
 
