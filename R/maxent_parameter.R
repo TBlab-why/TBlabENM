@@ -1,4 +1,4 @@
-pmap
+
 #' Select optimum parameters for the MaxEnt models
 #' @description
 #' 本函数为MaxEnt模型选择最适合的环境变量组合、正则化乘数和特征函数组合。
@@ -233,9 +233,6 @@ n <- n+1
             ev_cb2 <- ev_cb[factors, , drop = FALSE]
           }
 
-if(is.null(factors)){print("ev_cb2wu")}
-
-
           #correlation1按照ev_cb提取
           if(is.null(factors)){correlation1 <- correlation1[rownames(ev_cb1),rownames(ev_cb1)]}else{
             correlation1 <- correlation1[rownames(ev_cb1),rownames(ev_cb1),drop = FALSE]
@@ -434,7 +431,7 @@ if(is.null(factors)){print("ev_cb2wu")}
     snowfall::sfExport("factors")
     snowfall::sfExport("correlation1")
     snowfall::sfExport("r")
-    snowfall::sfExport("correlation2")
+   # snowfall::sfExport("correlation2")
    # snowfall::sfExport("maxent_single")
     k <- snowfall::sfLapply(1:nrow(combin), fun4)
     snowfall::sfStop()  # 关闭集群
