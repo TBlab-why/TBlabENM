@@ -62,9 +62,9 @@ maxent_parameter <- function(x, evdir, myenv = NULL, evlist = NULL, factors = NU
                              mybgfile = NULL, nbg = 10000, fc, rm, r = 0.7,
                              cormethod = "pearson", vif = T, vifth = 5, opt = "aicc",
                              outdir = NULL, parallel = F, ncpu = 2){
-  unlink(paste0(outdir, "/TBlabENMtemp") ,recursive = T)
+  unlink(paste0(outdir, "/TBlabENMtemp",star_time) ,recursive = T)
   dir.create(paste0(outdir, "/TBlabENM"),recursive = TRUE, showWarnings = FALSE)
-
+  star_time <- stringr::str_replace(Sys.time()," |:", "")
 #corse_method功能使用相关性选择变量
   corse_method <- function(correlation, importance, vif, n){ #n最初为1
     n = n
@@ -144,11 +144,11 @@ maxent_parameter <- function(x, evdir, myenv = NULL, evlist = NULL, factors = NU
             mybgfile = mybgfile,
             args = args1,
             prodir = NULL,
-            outdir = paste0(outdir, "/TBlabENMtemp/",fc1,rm1),
+            outdir = paste0(outdir, "/TBlabENMtemp",star_time,"/", fc1,rm1),
             parallel = FALSE))
           #下面根据上面模拟的结果删除相关性强的变量
           #变量重要性
-          ev_cb <- read.csv(paste0(outdir, "/TBlabENMtemp/",fc1,rm1,"/TBlabENM/maxent/", sp_name, "/maxentResults.csv")) %>%
+          ev_cb <- read.csv(paste0(outdir, "/TBlabENMtemp",star_time,"/",fc1,rm1,"/TBlabENM/maxent/", sp_name, "/maxentResults.csv")) %>%
             dplyr::select(., paste0(bio_name, ".contribution")) %>%
             utils::tail(., n =1) %>% t() %>% as.data.frame()
           names(ev_cb) <- "value"
@@ -203,11 +203,11 @@ n <- n+1
             mybgfile = mybgfile,
             args = args1,
             prodir = NULL,
-            outdir = paste0(outdir, "/TBlabENMtemp/",fc1,rm1),
+            outdir = paste0(outdir, "/TBlabENMtemp", star_time, "/", fc1, rm1),
             parallel = FALSE))
           #下面根据上面模拟的结果删除相关性强的变量
           #变量重要性
-          ev_cb <- read.csv(paste0(outdir, "/TBlabENMtemp/",fc1,rm1,"/TBlabENM/maxent/", sp_name, "/maxentResults.csv")) %>%
+          ev_cb <- read.csv(paste0(outdir, "/TBlabENMtemp",star_time,"/",fc1,rm1,"/TBlabENM/maxent/", sp_name, "/maxentResults.csv")) %>%
             dplyr::select(., paste0(bio_name, ".contribution")) %>%
             utils::tail(., n =1) %>% t() %>% as.data.frame()
           names(ev_cb) <- "value"
@@ -292,12 +292,12 @@ if(is.null(factors)){print("ev_cb2wu")}
           mybgfile = mybgfile,
           args = args1,
           prodir = NULL,
-          outdir = paste0(outdir, "/TBlabENMtemp/",fc1,rm1),
+          outdir = paste0(outdir, "/TBlabENMtemp",star_time,"/",fc1,rm1),
           parallel = FALSE))
 
         #下面根据上面模拟的结果删除相关性强的变量
         #变量重要性
-        ev_cb <- read.csv(paste0(outdir,"/TBlabENMtemp/",fc1,rm1,"/TBlabENM/maxent/", sp_name, "/maxentResults.csv")) %>%
+        ev_cb <- read.csv(paste0(outdir,"/TBlabENMtemp",star_time,"/",fc1,rm1,"/TBlabENM/maxent/", sp_name, "/maxentResults.csv")) %>%
           dplyr::select(., paste0(bio_name, ".contribution")) %>%
           utils::tail(., n =1) %>% t() %>% as.data.frame()
         names(ev_cb) <- "value"
@@ -598,7 +598,7 @@ if(is.null(opt)){parameter <- df} else{
   }
   #保存结果
   #删除缓存文件
-  unlink(paste0(outdir, "/TBlabENMtemp") ,recursive = T)
+  unlink(paste0(outdir, "/TBlabENMtemp",star_time) ,recursive = T)
   #dir.create(paste0(outdir, "/TBlabENM"), showWarnings = FALSE)
 
 print(paste0(outdir, "/TBlabENM/tuneparameter_", sp_name, ".csv"))
