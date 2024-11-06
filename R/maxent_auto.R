@@ -105,8 +105,8 @@ maxent_auto <- function(spdir, evdir, myenv = NULL, evlist = NULL, factors = NUL
       args = args,
       prodir = prodir,
       outdir = outdir,
-      parallel = F,
-      ncpu =2
+      parallel = parallel,
+      ncpu = ncpu
     )
 
     }
