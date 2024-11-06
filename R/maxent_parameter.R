@@ -64,8 +64,8 @@ maxent_parameter <- function(x, evdir, myenv = NULL, evlist = NULL, factors = NU
                              outdir = NULL, parallel = F, ncpu = 2){
   unlink(paste0(outdir, "/TBlabENMtemp",star_time) ,recursive = T)
   dir.create(paste0(outdir, "/TBlabENM"),recursive = TRUE, showWarnings = FALSE)
-  star_time <- stringr::str_replace(Sys.time()," |:", "")
-  print(star_time)
+  star_time <- sample(1:100000,1)
+
 #corse_method功能使用相关性选择变量
   corse_method <- function(correlation, importance, vif, n){ #n最初为1
     n = n
