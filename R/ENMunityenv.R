@@ -24,7 +24,10 @@
 #' ENMunityenv(radir = "F:/example/env",
 #'             ref = rast("F:/var2/eblf_proj/present/tif/bio1.tif"),
 #'             proname = c("present", "acc2030ssp126","acc2030ssp245"),
-#'             outdir = "F:/example/env")
+#'             outdir = "F:/example/env",
+#'             overwrite = T,
+#'             parallel = T,
+#'             ncpu = 2)
 #'
 ENMunityenv <- function(radir, ref, proname = NULL, factors = NULL, method = "bilinear", res,
                  format = "tif", outdir = NULL, overwrite = F, parallel = F, ncpu = 2){

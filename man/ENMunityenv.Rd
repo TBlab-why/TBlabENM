@@ -52,6 +52,9 @@ SpatRaster一致,如果是SpatVector,裁剪后的变量范围与SpatVector一致
 ENMunityenv(radir = "F:/example/env",
             ref = rast("F:/var2/eblf_proj/present/tif/bio1.tif"),
             proname = c("present", "acc2030ssp126","acc2030ssp245"),
-            outdir = "F:/example/env")
+            outdir = "F:/example/env",
+            overwrite = T,
+            parallel = T,
+            ncpu = 2)
 
 }
