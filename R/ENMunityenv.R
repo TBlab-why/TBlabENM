@@ -16,6 +16,7 @@
 #' @param ncpu 并行的cpu数
 #' @param res numeric. Can be used to set the resolution of the output raster if ref is a SpatVector
 #'
+#' @importFrom purrr map_chr map_int map
 #' @return 栅格文件
 #' @export
 #'
@@ -34,7 +35,7 @@ ENMunityenv <- function(radir, ref, proname = NULL, factors = NULL, method = "bi
     ralist <- list.files(radir, full.names = TRUE, pattern = ".asc$|.tif$")} else {
       ralist <- c()
       for (i in seq_along(proname)) {
-          ralist1 <- list.files(paste0(outdir, "/", proname[i]),
+          ralist1 <- list.files(paste0(radir, "/", proname[i]),
                                full.names = T,  pattern = ".asc$|.tif$")
           ralist <- c(ralist, ralist1)
     }}
@@ -91,8 +92,10 @@ ENMunityenv <- function(radir, ref, proname = NULL, factors = NULL, method = "bi
     snowfall::sfStop()  # 关闭集群
 
   }else{
+
     for (i in 1:nrow(radf)) {
       fun1(radf[i,1])
+
     }
   }
 
