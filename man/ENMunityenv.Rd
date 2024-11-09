@@ -5,62 +5,53 @@
 \title{Environment variable processing}
 \usage{
 ENMunityenv(
-  envdir,
-  proname,
+  radir,
+  ref,
+  proname = NULL,
   factors = NULL,
-  range,
-  crop = T,
   method = "bilinear",
-  res = NULL,
-  outformat = "tif",
-  overwrite = F,
+  res,
+  format = "tif",
   outdir = NULL,
+  overwrite = F,
   parallel = F,
   ncpu = 2
 )
 }
 \arguments{
-\item{envdir}{要处理的原始环境变量集所在路径，该路径下包括代表不同时期或地理空间的子文件夹，
-每个子文件夹内存放对应的环境变量。}
+\item{radir}{要处理的环境变量所在的路径}
 
-\item{proname}{不同时期或地理空间的名称，与envdir下的子文件夹名称对应}
+\item{ref}{SpatRaster或SpatVector,作为参考研究区，如果是SpatRaster裁剪后的变量范围和分辨率与
+SpatRaster一致,如果是SpatVector,裁剪后的变量范围与SpatVector一致，分辨率由res参数指定。}
 
-\item{factors}{分类变量名称}
+\item{proname}{投影时期的名字，必须是radir下的子文件夹的名字}
 
-\item{range}{SpatRaster, SpatVector}
+\item{factors}{分类变量名，要与radir下的变量名称一致}
 
-\item{crop}{是否将原始变量裁剪至研究区范围}
+\item{method}{连续变量的重采样方法，对于分类变量内部设置为near，可选bilinear,cubic,near等}
 
-\item{method}{连续变量重采样的方法}
+\item{res}{numeric. Can be used to set the resolution of the output raster if ref is a SpatVector}
 
-\item{res}{数值型，当range为SpatVector时输出栅格的分辨率}
+\item{format}{输出变量格式}
 
-\item{outformat}{输出文件格式,可选asc,tif或二者组合}
+\item{outdir}{输出文件路径}
 
-\item{outdir}{输出文件夹}
+\item{overwrite}{logical. If TRUE, filename is overwritten}
 
 \item{parallel}{是否并行}
 
-\item{ncpu}{并行使用的cpu数}
+\item{ncpu}{并行的cpu数}
 }
 \value{
-返回tif或asc文件
+栅格文件
 }
 \description{
-将不同来源的环境变量转换为格式、分辨率、范围统一的变量，用于生态位建模。目前仅
-支持tif和asc格式变量的处理。
+将不同来源的环境变量进行格式转换、重新投影到指定的研究区.
 }
 \examples{
-ENMunityenv(envdir = "F:/example/TBlabENM/env1",
-            proname <- c("present", "lgm"),
-            factors = NULL,
-          # range <- rast("C:/Users/why/TBlabENM/inst/extdata/envar/tif/bio1.tif"),
-            range <- vect("D:/Desktop/ENMdata/Chinamap/2022年省界/sheng2022.shp") ,
-            crop = T,
-            method  = "bilinear",
-            res = 10000,
-            outformat = "tif",
-            outdir = "F:/example",
-            parallel = F,
-            ncpu = 2)
+ENMunityenv(radir = "F:/example/env",
+            ref = rast("F:/var2/eblf_proj/present/tif/bio1.tif"),
+            proname = c("present", "acc2030ssp126","acc2030ssp245"),
+            outdir = "F:/example/env")
+
 }

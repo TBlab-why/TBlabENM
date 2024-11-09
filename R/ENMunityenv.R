@@ -1,116 +1,101 @@
 
 #' Environment variable processing
 #' @description
-#' 将不同来源的环境变量转换为格式、分辨率、范围统一的变量，用于生态位建模。目前仅
-#' 支持tif和asc格式变量的处理。
-#' @param envdir 要处理的原始环境变量集所在路径，该路径下包括代表不同时期或地理空间的子文件夹，
-#' 每个子文件夹内存放对应的环境变量。
-#' @param range SpatRaster, SpatVector
-#' @param proname 不同时期或地理空间的名称，与envdir下的子文件夹名称对应
-#' @param factors 分类变量名称
-#' @param method 连续变量重采样的方法
-#' @param crop 是否将原始变量裁剪至研究区范围
-#' @param res 数值型，当range为SpatVector时输出栅格的分辨率
-#' @param outformat 输出文件格式,可选asc,tif或二者组合
-#' @param outdir 输出文件夹
+#' 将不同来源的环境变量进行格式转换、重新投影到指定的研究区.
+#'
+#' @param radir 要处理的环境变量所在的路径
+#' @param ref SpatRaster或SpatVector,作为参考研究区，如果是SpatRaster裁剪后的变量范围和分辨率与
+#'     SpatRaster一致,如果是SpatVector,裁剪后的变量范围与SpatVector一致，分辨率由res参数指定。
+#' @param proname 投影时期的名字，必须是radir下的子文件夹的名字
+#' @param factors 分类变量名，要与radir下的变量名称一致
+#' @param method 连续变量的重采样方法，对于分类变量内部设置为near，可选bilinear,cubic,near等
+#' @param format 输出变量格式
+#' @param outdir 输出文件路径
+#' @param overwrite logical. If TRUE, filename is overwritten
 #' @param parallel 是否并行
-#' @param ncpu 并行使用的cpu数
+#' @param ncpu 并行的cpu数
+#' @param res numeric. Can be used to set the resolution of the output raster if ref is a SpatVector
 #'
-#' @importFrom dplyr mutate
-#' @importFrom purrr map map2 map_chr
-#' @importFrom terra crs project rast crop mask writeRaster
-#' @importFrom stringr str_split_1
-#' @importFrom tibble as_tibble
-#'
-#' @return 返回tif或asc文件
+#' @return 栅格文件
 #' @export
 #'
 #' @examples
-#' ENMunityenv(envdir = "F:/example/TBlabENM/env1",
-#'             proname <- c("present", "lgm"),
-#'             factors = NULL,
-#'           # range <- rast("C:/Users/why/TBlabENM/inst/extdata/envar/tif/bio1.tif"),
-#'             range <- vect("D:/Desktop/ENMdata/Chinamap/2022年省界/sheng2022.shp") ,
-#'             crop = T,
-#'             method  = "bilinear",
-#'             res = 10000,
-#'             outformat = "tif",
-#'             outdir = "F:/example",
-#'             parallel = F,
-#'             ncpu = 2)
-ENMunityenv <- function(envdir,
-                        proname,
-                        factors = NULL,
-                        range,
-                        crop = T,
-                        method = "bilinear",
-                        res = NULL,
-                        outformat = "tif",
-                        overwrite = F,
-                        outdir = NULL,
-                        parallel = F,
-                        ncpu = 2){
-
+#' ENMunityenv(radir = "F:/example/env",
+#'             ref = rast("F:/var2/eblf_proj/present/tif/bio1.tif"),
+#'             proname = c("present", "acc2030ssp126","acc2030ssp245"),
+#'             outdir = "F:/example/env")
+#'
+ENMunityenv <- function(radir, ref, proname = NULL, factors = NULL, method = "bilinear", res,
+                 format = "tif", outdir = NULL, overwrite = F, parallel = F, ncpu = 2){
+  dir.create(paste0(outdir, "/TBlabENM/env"), showWarnings = FALSE)
   if(is.null(outdir)){outdir <- "."}
-#当输入为栅格
-  fun1 <- function(j){ #j为单个变量,j=2
-    #对单行进行分析
-       df <- df1[j,]
-      # 读取栅格数据
-        ra <- rast(df$value)
-        names(ra) <- df$envname
-      #将ra的crs转为range
-        pro <- terra::project(range, ra, method = "near", align = T, threads = T)
-        pro1 <- terra::project(ra, crs(range), method = df$method,res =1000, align = T, threads = T)
-      #如果crop == T，则裁剪，否则不裁剪，保存至raster
-        if(crop == T){
-          if((ext(pro)[1] < ext(pro)[1] & ext(pro)[2] > ext(range)[2]&
-              ext(pro)[3] < ext(pro)[3]& ext(pro)[4] > ext(range)[4])==FALSE){
-            stop("The range extends beyond the grid to be processed")}
-          ra <- crop(ra, pro, mask = T) %>% mask(., pro)
-          }
-        #将投影转为range投影
-        pro <- project(ra, range, method = 'near', align = T, threads = T)
-      # 保存栅格数据到同一文件夹
-        for (i in 1:length(outformat)) {
-          writeRaster(pro, paste0(df$path, ".",outformat[i]), overwrite=overwrite)}
-}
-
-  for (i in 1:length(proname)) {#i=1
-    #创建对应时期的文件夹
-    dir.create(paste0(outdir, "/TBlabENM/env/",proname[i]), recursive = TRUE, showWarnings = FALSE)
-
-    #提取每个时期的原始变量
-    df1 <- list.files(paste0(envdir, "/", proname[i]), recursive = T, full.names = T, pattern = "asc$|tif$") %>%
-      as_tibble() %>%
-      #变量名
-      mutate(envname = map_chr(.x = value, .f = function(x){
-        name <- str_split_1(x, "/")[length(str_split_1(x, "/"))]
-        name1 <-  str_split_1(name, "\\.")[length(str_split_1(name, "\\."))-1]
+  #创建栅格列表
+  if(is.null(proname)){
+    ralist <- list.files(radir, full.names = TRUE, pattern = ".asc$|.tif$")} else {
+      ralist <- c()
+      for (i in seq_along(proname)) {
+          ralist1 <- list.files(paste0(outdir, "/", proname[i]),
+                               full.names = T,  pattern = ".asc$|.tif$")
+          ralist <- c(ralist, ralist1)
+    }}
+   #构建栅格列表数据框
+    radf <- as.data.frame(ralist) %>%
+      mutate(name = map_chr(.x = ralist, .f = function(x){
+        a <- stringr::str_split_1(x, "/")[length(stringr::str_split_1(x, "/"))]
+        a <- stringr::str_split_1(a, ".tif|.asc")[1]
       })) %>%
-      #保存路径
-      mutate(path = map_chr(.x = envname, .f = function(x){
-        paste0(outdir, "/TBlabENM/env/",proname[i],"/", x)
-        })) %>%
-      #method
-      mutate(method = map_chr(.x = envname, .f = function(x){
-           if(x %in% factors){"near"} else {method}
-        }))
+      mutate(method = map_chr(.x = name, .f = function(x){
+        if(x %in% factors){method <- "near"} else {method <- method}
+      })) %>%
+      mutate(factor = map_int(.x = name, .f = function(x){
+        if(x %in% factors){factor <- 1} else {method <- 0}
+      })) %>%
+      mutate(proname = map_chr(.x = ralist, .f = function(x){
+        if(is.null(proname)){
+          a <- NA
+        }else{a <- stringr::str_split_1(x, "/")[length(stringr::str_split_1(x, "/"))-1]}
 
-    if(parallel == TRUE){
-      ncpu = ncpu
-      # 开启集成
-      snowfall::sfInit(parallel = TRUE, cpus = ncpu)
-      # 注册每个环境变量
-      #snowfall::sfExportAll()
-      #加载需要用到的变量或函数 因为下面函数fff中要用到prodir参数
-      snowfall::sfExport("radf")
-      snowfall::sfLibrary(tidyverse)
-      snowfall::sfLapply(1:length(df), fun1)
-      snowfall::sfStop()  # 关闭集群
-    } else { for(j in 1:nrow(df1)) { fun1(j) } }
+      })) %>%
+      mutate(proref = map(.x = ralist, .f = function(x){
+        if(class(ref) == "SpatRaster"){NA}else{
+          a <- terra::project(ref, terra::crs(rast(x))) }
+      }))
 
+    #检查要处理的变量是否含有factors
+    if(is.null(factors)==FALSE){
+      if(sum(radf$factor)==0){
+        stop("The specified categorical variable was not found.Please check parameter factors!")}}
 
-}
+    fun1 <- function(x){ #
+      ra <- terra::rast(x)
+      #terra::crs(ra, proj = TRUE, describe = TRUE)
+      if(class(ref) == "SpatRaster"){ra_r <- terra::project(ra, ref, method = radf$method[which(x==radf[1])]) %>%
+        terra::crop(., ref) %>%
+        terra::mask(., ref)} else {
+          ra <- terra::crop(ra, radf$proref[which(x==radf[1])]) %>% terra::mask(., radf$proref[which(x==radf[1])])
+      ra_r <- terra::project(ra, ref, method = radf$method[which(x==radf[1])], res = res) %>%
+        terra::crop(., ref) %>%
+        terra::mask(., ref)}
+      if(is.null(proname)){
+        terra::writeRaster(ra_r, paste0(outdir, "/TBlabENM/env/",radf$name[which(x==radf[1])], ".", format),
+                           NAflag = -9999, overwrite = overwrite)}else{
+                             dir.create(paste0(outdir, "/TBlabENM/env/", radf$proname[which(x==radf[1])]), recursive = TRUE, showWarnings = FALSE)
+                             writeRaster(ra_r, paste0(outdir, "/TBlabENM/env/",radf$proname[which(x==radf[1])], "/", radf$name[which(x==radf[1])], ".", format),
+                                         NAflag = -9999, overwrite = overwrite) }
+    }
+  if(parallel == TRUE){
+    snowfall::sfInit(parallel = TRUE, cpus = ncpu)
+   # snowfall::sfExport("star_time")
+    snowfall::sfLibrary(purrr)
+    k <- snowfall::sfLapply(radf$ralist, fun1)
+    snowfall::sfStop()  # 关闭集群
+
+  }else{
+    for (i in 1:nrow(radf)) {
+      fun1(radf[i,1])
+    }
   }
+
+  }
+
 
