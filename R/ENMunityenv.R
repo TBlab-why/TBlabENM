@@ -17,6 +17,7 @@
 #' @param res numeric. Can be used to set the resolution of the output raster if ref is a SpatVector
 #'
 #' @importFrom purrr map_chr map_int map
+#' @importFrom dplyr mutate
 #' @return 栅格文件
 #' @export
 #'
@@ -33,6 +34,7 @@ ENMunityenv <- function(radir, ref, proname = NULL, factors = NULL, method = "bi
                  format = "tif", outdir = NULL, overwrite = F, parallel = F, ncpu = 2){
   dir.create(paste0(outdir, "/TBlabENM/env"), showWarnings = FALSE)
   if(is.null(outdir)){outdir <- "."}
+
   #创建栅格列表
   if(is.null(proname)){
     ralist <- list.files(radir, full.names = TRUE, pattern = ".asc$|.tif$")} else {
@@ -70,16 +72,15 @@ ENMunityenv <- function(radir, ref, proname = NULL, factors = NULL, method = "bi
       if(sum(radf$factor)==0){
         stop("The specified categorical variable was not found.Please check parameter factors!")}}
 
+
     fun1 <- function(x){ #
       ra <- terra::rast(x)
-      #terra::crs(ra, proj = TRUE, describe = TRUE)
       if(class(ref) == "SpatRaster"){ra_r <- terra::project(ra, ref, method = radf$method[which(x==radf[1])]) %>%
-        terra::crop(., ref) %>%
-        terra::mask(., ref)} else {
-          ra <- terra::crop(ra, radf$proref[which(x==radf[1])]) %>% terra::mask(., radf$proref[which(x==radf[1])])
-      ra_r <- terra::project(ra, ref, method = radf$method[which(x==radf[1])], res = res) %>%
-        terra::crop(., ref) %>%
-        terra::mask(., ref)}
+        terra::crop(., ref) %>% terra::mask(., ref)} else {
+
+          ra <- terra::crop(ra, radf$proref[which(x==radf[1])]) %>% terra::mask(., radf$proref[[which(x==radf[1])]])
+      ra_r <- terra::project(ra, terra::crs(ref), method = radf$method[which(x==radf[1])], res = res) }
+
       if(is.null(proname)){
         terra::writeRaster(ra_r, paste0(outdir, "/TBlabENM/env/",radf$name[which(x==radf[1])], ".", format),
                            NAflag = -9999, overwrite = overwrite)}else{
