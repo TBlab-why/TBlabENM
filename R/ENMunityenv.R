@@ -32,7 +32,7 @@
 #'
 ENMunityenv <- function(radir, ref, proname = NULL, factors = NULL, method = "bilinear", res,
                  format = "tif", outdir = NULL, overwrite = F, parallel = F, ncpu = 2){
-  dir.create(paste0(outdir, "/TBlabENM/env"), showWarnings = FALSE)
+  dir.create(paste0(outdir, "/TBlabENM/env/"), recursive = TRUE, showWarnings = FALSE)
   if(is.null(outdir)){outdir <- "."}
 
   #创建栅格列表
@@ -61,10 +61,6 @@ ENMunityenv <- function(radir, ref, proname = NULL, factors = NULL, method = "bi
           a <- NA
         }else{a <- stringr::str_split_1(x, "/")[length(stringr::str_split_1(x, "/"))-1]}
 
-      })) %>%
-      mutate(proref = map(.x = ralist, .f = function(x){
-        if(class(ref) == "SpatRaster"){NA}else{
-          a <- terra::project(ref, terra::crs(rast(x))) }
       }))
 
     #检查要处理的变量是否含有factors
@@ -73,13 +69,15 @@ ENMunityenv <- function(radir, ref, proname = NULL, factors = NULL, method = "bi
         stop("The specified categorical variable was not found.Please check parameter factors!")}}
 
 
-    fun1 <- function(x){ #
+    fun1 <- function(x){
       ra <- terra::rast(x)
-      if(class(ref) == "SpatRaster"){ra_r <- terra::project(ra, ref, method = radf$method[which(x==radf[1])]) %>%
-        terra::crop(., ref) %>% terra::mask(., ref)} else {
+      if(terra::crs(ref, proj = TRUE)== terra::crs(ra, proj = TRUE)){
+        ra_r <- terra::crop(ra, ref, mask = T) %>% terra::mask(., ref)} else{
+          if(class(ref) == "SpatRaster"){ra_r <- terra::project(ra, ref, method = radf$method[which(x==radf[1])])
+          } else { ra <- terra::project(ra, terra::crs(ref), method = radf$method[[which(x==radf[1])]], res = res) }
+          ra_r <- terra::crop(ra, ref, mask = T) %>% terra::mask(., ref)
+        }
 
-          ra <- terra::crop(ra, radf$proref[which(x==radf[1])]) %>% terra::mask(., radf$proref[[which(x==radf[1])]])
-      ra_r <- terra::project(ra, terra::crs(ref), method = radf$method[which(x==radf[1])], res = res) }
 
       if(is.null(proname)){
         terra::writeRaster(ra_r, paste0(outdir, "/TBlabENM/env/",radf$name[which(x==radf[1])], ".", format),
