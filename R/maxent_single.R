@@ -169,7 +169,7 @@ maxent_single <- function(x, evdir, evlist = NULL, factors = NULL, mybgfile = NU
         mutate(purrr::map2(.x = file, .y = path, .f = function(x, y){
           terra::writeRaster(terra::rast(x), y, overwrite=TRUE)}))
 
-      # #删除asc格式
+       #删除asc格式
       # gg <- file.remove(list.files(paste0(outdir, sp_name), full.names = TRUE) %>%
       #                     list.files(., pattern = "asc$", full.names = TRUE))
 

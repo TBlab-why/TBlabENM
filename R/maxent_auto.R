@@ -54,8 +54,10 @@ maxent_auto <- function(spdir, evdir, myenv = NULL, evlist = NULL, factors = NUL
     cat("*****************************************************\n")
     pa <- TBlabENM::maxent_parameter(x = x,
                     evdir = evdir,
+                    myenv = myenv,
                     evlist = evlist,
                     factors = factors,
+                    mybgfile = mybgfile,
                     nbg = nbg,
                     fc = fc,
                     rm = rm,
@@ -194,6 +196,7 @@ maxent_auto <- function(spdir, evdir, myenv = NULL, evlist = NULL, factors = NUL
     sp_name <- stringr::str_split_1(spname1, ".csv$")[1]
     nm <- c(nm, sp_name)
   }
+  if(is.null(outdir)) {outdir <- "."}
   for (i in nm) {
       df1 <- utils::read.csv(paste0(outdir,"/TBlabENM/maxent/", i, "/parameters.csv"))
     df <- rbind(df,df1)
