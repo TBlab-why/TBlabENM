@@ -57,45 +57,45 @@ maxent_auto <- function(spdir, evdir, myenv = NULL, evlist = NULL, factors = NUL
                         mybgfile = NULL, nbg = 10000, args = maxent_args(),
                         fc, rm, r = 0.7, cormethod = "pearson", vif = T, vifth = 5,
                         opt = NULL, prodir = NULL, outdir = NULL, p_ncpu = FALSE){
+  if(length(p_ncpu) == 1){
+    if(p_ncpu == FALSE){
+      parallel1 = FALSE
+      parallel2 = FALSE
+      parallel3 = FALSE
+      ncpu1 = p_ncpu
+      ncpu2 = p_ncpu
+      ncpu3 = p_ncpu
+    } else {
+      parallel1 = TRUE
+      parallel2 = TRUE
+      parallel3 = TRUE
+      ncpu1 = p_ncpu
+      ncpu2 = p_ncpu
+      ncpu3 = p_ncpu
+    }
+  } else {
+    if(p_ncpu[1]>0){
+      parallel1 = TRUE
+      ncpu1 = p_ncpu[1]} else {
+        parallel1 = FALSE
+        ncpu1 = p_ncpu[1]}
+
+    if(p_ncpu[2]>0){
+      parallel2 = TRUE
+      ncpu2 = p_ncpu[2]} else {
+        parallel2 = FALSE
+        ncpu2 = p_ncpu[2]}
+
+    if(p_ncpu[3]>0){
+      parallel3 = TRUE
+      ncpu3 = p_ncpu[3]} else {
+        parallel3 = FALSE
+        ncpu3 = p_ncpu[3]}
+
+  }
 
   fun3 <- function(x){
     cat("*****************************************************\n")
-    if(length(p_ncpu) == 1){
-      if(p_ncpu == FALSE){
-        parallel1 = FALSE
-        parallel2 = FALSE
-        parallel3 = FALSE
-        ncpu1 = p_ncpu
-        ncpu2 = p_ncpu
-        ncpu3 = p_ncpu
-        } else {
-          parallel1 = TRUE
-          parallel2 = TRUE
-          parallel3 = TRUE
-          ncpu1 = p_ncpu
-          ncpu2 = p_ncpu
-          ncpu3 = p_ncpu
-      }
-    } else {
-      if(p_ncpu[1]>0){
-        parallel1 = TRUE
-        ncpu1 = p_ncpu[1]} else {
-          parallel1 = FALSE
-          ncpu1 = p_ncpu[1]}
-
-      if(p_ncpu[2]>0){
-        parallel2 = TRUE
-        ncpu2 = p_ncpu[2]} else {
-          parallel2 = FALSE
-          ncpu2 = p_ncpu[2]}
-
-      if(p_ncpu[3]>0){
-        parallel3 = TRUE
-        ncpu3 = p_ncpu[3]} else {
-          parallel3 = FALSE
-          ncpu3 = p_ncpu[3]}
-
-    }
 
     pa <- TBlabENM::maxent_parameter(x = x,
                     evdir = evdir,
