@@ -22,8 +22,7 @@ maxent_auto(
   opt = NULL,
   prodir = NULL,
   outdir = NULL,
-  parallel = F,
-  ncpu = 2
+  p_ncpu = FALSE
 )
 }
 \arguments{
@@ -62,9 +61,9 @@ maxent_auto(
 
 \item{outdir}{结果保存路径}
 
-\item{parallel}{是否并行计算}
-
-\item{ncpu}{如果并行，使用的cpu数}
+\item{p_ncpu}{是否并行计算及各部分并行计算的cpu数.共有3处可能用到并行，分别是多物种并行，
+每个物种参数调优并行和每个物种不同时期投影并行.如果不使用并行，则p_ncpu = FALSE.
+当使用并行时，可分别对这3处设置不同的cpu数来最大化效率.详见details.}
 }
 \value{
 包含maxent相关结果的文件夹
@@ -73,6 +72,15 @@ maxent_auto(
 本函数自动执行MaxEnt模型，当设置好参数后，首先进行相关参数的选择，包括环境变量、
 正则化乘数和特征函数。接着使用选择好的最佳参数进行建模然后投影至指定的时空生成
 适宜性地图。
+}
+\details{
+p_ncpu参数
+当电脑或服务器的cpu数较多时，可以选择并行来加快速度.例如可以设置p_ncpu = c(2,5,10)
+即同时模拟2个物种，在为每个物种选择参数过程中使用5个cpu，在为每个物种执行投影时
+使用10个cpu,在这个过程中最多可能使用到2*10共20个cpu,因此每处cpu设置的个数应该结合
+电脑cpu数和实际模拟需要的cpu数进行合理设置.如果某个过程不想执行并行，可以设置为FALSE，
+例如p_ncpu = c(FALSE,5,10),即只对选择参数过程和地理投影过程执行并行.如果p_ncpu = 5，
+则所有部分都使用5个cpu.
 }
 \examples{
 maxent_auto(sp = system.file("extdata", "species/Phoebe sheareri.csv", package = "TBlabENM"),

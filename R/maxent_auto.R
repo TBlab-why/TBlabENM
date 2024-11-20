@@ -4,6 +4,15 @@
 #' 本函数自动执行MaxEnt模型，当设置好参数后，首先进行相关参数的选择，包括环境变量、
 #'     正则化乘数和特征函数。接着使用选择好的最佳参数进行建模然后投影至指定的时空生成
 #'     适宜性地图。
+#' @details
+#' p_ncpu参数
+#' 当电脑或服务器的cpu数较多时，可以选择并行来加快速度.例如可以设置p_ncpu = c(2,5,10)
+#' 即同时模拟2个物种，在为每个物种选择参数过程中使用5个cpu，在为每个物种执行投影时
+#' 使用10个cpu,在这个过程中最多可能使用到2*10共20个cpu,因此每处cpu设置的个数应该结合
+#' 电脑cpu数和实际模拟需要的cpu数进行合理设置.如果某个过程不想执行并行，可以设置为FALSE，
+#' 例如p_ncpu = c(FALSE,5,10),即只对选择参数过程和地理投影过程执行并行.如果p_ncpu = 5，
+#' 则所有部分都使用5个cpu.
+#'
 #'
 #' @param spdir 要模拟的一或多个物种文件的路径，包括文件名（.csv）。
 #' @param evdir 环境变量路径,格式为.asc
@@ -23,8 +32,10 @@
 #' @param opt 选择最佳模型的指标，可选择"aicc","seq","cbi".
 #' @param prodir 用列表储存的投影文件路径，包含了投影时期的名称和与之对应的环境变量路径
 #' @param outdir 结果保存路径
-#' @param parallel 是否并行计算
-#' @param ncpu 如果并行，使用的cpu数
+#' @param p_ncpu 是否并行计算及各部分并行计算的cpu数.共有3处可能用到并行，分别是多物种并行，
+#' 每个物种参数调优并行和每个物种不同时期投影并行.如果不使用并行，则p_ncpu = FALSE.
+#' 当使用并行时，可分别对这3处设置不同的cpu数来最大化效率.详见details.
+
 #'
 #' @return 包含maxent相关结果的文件夹
 #' @export
@@ -48,10 +59,47 @@
 maxent_auto <- function(spdir, evdir, myenv = NULL, evlist = NULL, factors = NULL,
                         mybgfile = NULL, nbg = 10000, args = maxent_args(),
                         fc, rm, r = 0.7, cormethod = "pearson", vif = T, vifth = 5,
-                        opt = NULL, prodir = NULL, outdir = NULL, parallel = F, ncpu = 2){
+                        opt = NULL, prodir = NULL, outdir = NULL, p_ncpu = FALSE){
 
   fun3 <- function(x){
     cat("*****************************************************\n")
+    if(length(p_ncpu) == 1){
+      if(p_ncpu == FALSE){
+        parallel1 = FALSE
+        parallel2 = FALSE
+        parallel3 = FALSE
+        ncpu1 = p_ncpu
+        ncpu2 = p_ncpu
+        ncpu3 = p_ncpu
+        } else {
+          parallel1 = TRUE
+          parallel2 = TRUE
+          parallel3 = TRUE
+          ncpu1 = p_ncpu
+          ncpu2 = p_ncpu
+          ncpu3 = p_ncpu
+      }
+    } else {
+      if(p_ncpu[1]>0){
+        parallel1 = TRUE
+        ncpu1 = p_ncpu[1]} else {
+          parallel1 = FALSE
+          ncpu1 = p_ncpu[1]}
+
+      if(p_ncpu[2]>0){
+        parallel2 = TRUE
+        ncpu2 = p_ncpu[2]} else {
+          parallel2 = FALSE
+          ncpu2 = p_ncpu[2]}
+
+      if(p_ncpu[3]>0){
+        parallel3 = TRUE
+        ncpu3 = p_ncpu[3]} else {
+          parallel3 = FALSE
+          ncpu3 = p_ncpu[3]}
+
+    }
+
     pa <- TBlabENM::maxent_parameter(x = x,
                     evdir = evdir,
                     myenv = myenv,
@@ -66,8 +114,8 @@ maxent_auto <- function(spdir, evdir, myenv = NULL, evlist = NULL, factors = NUL
                     vifth = vifth,
                     opt = opt,
                     outdir = outdir,
-                    parallel = parallel,
-                    ncpu = ncpu)
+                    parallel = parallel2,
+                    ncpu = ncpu2)
   print("将使用以下参数构建最终模型")
   print(pa)
     #模拟
@@ -107,8 +155,8 @@ maxent_auto <- function(spdir, evdir, myenv = NULL, evlist = NULL, factors = NUL
       args = args,
       prodir = prodir,
       outdir = outdir,
-      parallel = parallel,
-      ncpu = ncpu
+      parallel = parallel3,
+      ncpu = ncpu3
     )
 
     }
@@ -148,10 +196,10 @@ maxent_auto <- function(spdir, evdir, myenv = NULL, evlist = NULL, factors = NUL
     dir.create(paste0(outdir, "/TBlabENM"), showWarnings = FALSE)}
 
   star_time <- Sys.time() ## 记录程序开始时间
-  if(parallel == T){
+  if(parallel1 == T){
     # library(snowfall)
     # 开启集成
-    snowfall::sfInit(parallel = TRUE, cpus = ncpu)
+    snowfall::sfInit(parallel = TRUE, cpus = ncpu1)
     # 注册每个环境变量
     snowfall::sfExport("fun3")
     snowfall::sfExport("maxent_args")
