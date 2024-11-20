@@ -61,8 +61,8 @@ ENMclassify <- function(parameters, x = NULL, resultdir,
                         prefix = NULL, suffix, rcl,
                         overwrite = FALSE, outdir = NULL, parallel = F, ncpu = 2) {
   star_time <- Sys.time() ## 记录程序开始时间
-  unlink(paste0(outdir, "/TBlabENM/TBlabENMtemp2"), recursive = TRUE)
-#根据threshold的类型分析
+
+  #根据threshold的类型分析
   threshold <- rcl
   if(is.list(threshold)){
     a <- c()
@@ -70,13 +70,13 @@ ENMclassify <- function(parameters, x = NULL, resultdir,
       a1 <- c(rcl[[i]], i-1)
       a <- c(a,a1)}
     parameters$reclass =  list(matrix(a, ncol=3, byrow=TRUE))
-    }
- # threshold = 0.2
-if(is.numeric(threshold)){
-  a <- c(0, threshold, 0, threshold, 1000, 1)
-  parameters$reclass =  list(matrix(a, ncol=3, byrow=TRUE))
-}
- # threshold = "T_MTSSte"
+  }
+  # threshold = 0.2
+  if(is.numeric(threshold)){
+    a <- c(0, threshold, 0, threshold, 1000, 1)
+    parameters$reclass =  list(matrix(a, ncol=3, byrow=TRUE))
+  }
+  # threshold = "T_MTSSte"
   if(is.character(threshold)){
     parameters$reclass <- NA
     for (i in 1:nrow(parameters)) {
@@ -95,9 +95,10 @@ if(is.numeric(threshold)){
   if(is.null(x)){x <- 1:nrow(parameters)}
   spdata <- parameters
   #临时文件夹
-  dir.create(paste0(outdir, "/TBlabENM/TBlabENMtemp2"), showWarnings = FALSE)
+  star_time <- sample(1:100000,1)
+  dir.create(paste0(outdir, "/TBlabENM/TBlabENM", star_time), recursive = T, showWarnings = FALSE)
   #创建文件夹用于保存二值图
-  dir.create(paste0(outdir, "/TBlabENM/reclass"), showWarnings = FALSE)
+  dir.create(paste0(outdir, "/TBlabENM/reclass"), recursive = T, showWarnings = FALSE)
 
   #################################################函数
   fun1 <- function(x){
@@ -118,134 +119,52 @@ if(is.numeric(threshold)){
         str_split_1(x, ".tif")[1]
       }))
 
-###############################
-    #当数据太大时分批计算i=1
-    radf1 <- terra::rast(ra_df[1,1])
-    cell <- terra::nrow(radf1)*terra::ncol(radf1)
-    #取余数
-    ys <- nrow(ra_df)%%3
-    if(cell>10000000 & nrow(ra_df)>3){
-###############################
-      for (i in 1:(nrow(ra_df)%/%3)){
-        #每次取3个进行计算i=1
-        radf1 <- ra_df[(3*i-2):3*i, ]
-        radf1 <- radf1 %>%
-           #重分类
-          mutate(reclass = map2(.x = ., .y = reclass, .f = function(x,y){
-            terra::classify(terra::rast(x), y)
-          })) %>%
-        #单个像元面积
-         mutate(unit = map(.x = reclass, .f = function(x){
-           prod(terra::res(x))
-         })) %>%
-          #统计各个分类值的像元个数*单个像元面积
-          mutate(area = map2(.x = reclass, .y = unit, .f = function(x,y){
-            count <- terra::freq(x)
-            count$count <- count$count*y
-            tidyr::spread(count, key = "value",
-                          value = "count")
-          })) %>%
-          mutate(area1 = map2(.x = area, .y = pro, .f = function(x,y){
-            x$pro = y
-            x$species = spname
-            x
-          })) %>%
-          #保存重分类结果
-          mutate(ss = map2(.x = reclass, .y = path, .f = function(x,y){
-            terra::writeRaster(x,
-                               paste0(outdir, "/TBlabENM/reclass/", spname, "_", y ),overwrite = overwrite)
-          }))
+    ###############################
 
-        #新建数据框保存单个物种的结果
-        data <- data.frame(matrix(NA, nrow = 0, ncol = ncol(radf1[,7][[1]])))
-        names(data) <- names(radf1[,7][[1]])
-
-        for (i in 1:length(radf1[,7])) {
-          b1 <- radf1[,7][[i]]
-          data <- rbind(data,b1)
-        }
-
-       ################################
-      if(nrow(ra_df)%%3>0){
-      radf1 <- ra_df[(nrow(ra_df)-ys+1):nrow(ra_df), ]
-      radf1 <-  radf1 %>%
-        mutate(reclass = map2(.x = ., .y = reclass, .f = function(x,y){
-          terra::classify(terra::rast(x), y)
-        })) %>%
-        #单个像元面积
-        mutate(unit = map(.x = reclass, .f = function(x){
-          prod(terra::res(x))
-        })) %>%
-        #统计各个分类值的像元个数*单个像元面积
-        mutate(area = map2(.x = reclass, .y = unit, .f = function(x,y){
-          count <- terra::freq(x)
-          count$count <- count$count*y
-          tidyr::spread(count, key = "value",
-                        value = "count")
-        })) %>%
-         mutate(area1 = map2(.x = area, .y = pro, .f = function(x,y){
-           x$pro = y
-           x$species = spname
-           x
-         })) %>%
-        mutate(ss = map2(.x = reclass, .y = path, .f = function(x,y){
-          terra::writeRaster(x,
-                             paste0(outdir, "/TBlabENM/reclass/", spname, "_", y ),overwrite = overwrite)
-        }))
-
-      #组合结果
-      for (i in 1:length(radf1[,7])) {
-        b1 <- radf1[,7][[i]]
-        data <- rbind(data,b1) }
-      }
-
-      }
-
-    } else {
-      radf <- ra_df%>%
+    radf <- ra_df %>%
       mutate(reclass = map2(.x = ., .y = reclass, .f = function(x,y){
         terra::classify(terra::rast(x), y)
       })) %>%
-        #单个像元面积
-        mutate(unit = map(.x = reclass, .f = function(x){
-          prod(terra::res(x))
-        })) %>%
-        #统计各个分类值的像元个数*单个像元面积
-        mutate(area = map2(.x = reclass, .y = unit, .f = function(x,y){
-          count <- terra::freq(x)
-          count$count <- count$count*y
-          tidyr::spread(count, key = "value",
-                        value = "count")
-        })) %>%
-        mutate(area1 = map2(.x = area, .y = pro, .f = function(x,y){
-          x$pro = y
-          x$species = spname
-          x
-        })) %>%
+      #单个像元面积
+      mutate(unit = map(.x = reclass, .f = function(x){
+        prod(terra::res(x))
+      })) %>%
+      #统计各个分类值的像元个数*单个像元面积
+      mutate(area = map2(.x = reclass, .y = unit, .f = function(x,y){
+        count <- terra::freq(x)
+        count$count <- count$count*y
+        tidyr::spread(count, key = "value",
+                      value = "count")
+      })) %>%
+      mutate(area1 = map2(.x = area, .y = pro, .f = function(x,y){
+        x$pro = y
+        x$species = spname
+        x
+      })) %>%
       mutate(ss = map2(.x = reclass, .y = path, .f = function(x,y){
         terra::writeRaster(x,
-          paste0(outdir, "/TBlabENM/reclass/", spname, "_", y ),overwrite = overwrite)
+                           paste0(outdir, "/TBlabENM/reclass/", spname, "_", y ),overwrite = overwrite)
       }))
 
-      #新建数据框保存单个物种的结果
-      data <- data.frame(matrix(NA, nrow = 0, ncol = ncol(radf[,7][[1]])))
-      names(data) <- names(radf[,7][[1]])
+    #新建数据框保存单个物种的结果
+    data <- data.frame(matrix(NA, nrow = 0, ncol = ncol(radf[,7][[1]])))
+    names(data) <- names(radf[,7][[1]])
 
-      for (i in 1:length(radf[,7])) {
-        b1 <- radf[,7][[i]]
-        data <- rbind(data,b1)
-      }
-
+    for (i in 1:length(radf[,7])) {
+      b1 <- radf[,7][[i]]
+      data <- rbind(data,b1)
     }
+
+
 
     data <- data[-1]%>%
       relocate(pro)%>%
       relocate(species)
-    write.csv(data, paste0(outdir, "/TBlabENM/TBlabENMtemp2/", spname,".csv"), row.names = FALSE)
+    write.csv(data, paste0(outdir, "/TBlabENM/TBlabENM", star_time, "/", spname,".csv"), row.names = FALSE)
 
-}
+  }
 
-#并行
+  #并行
 
 
   if(parallel == TRUE){
@@ -264,26 +183,25 @@ if(is.numeric(threshold)){
     snowfall::sfExport("overwrite")
     snowfall::sfExport("outdir")
     snowfall::sfExport("fun1")
-    snowfall::sfExport("radf")
 
     snowfall::sfLibrary(tidyverse)
 
     snowfall::sfLapply(x, fun1)
     snowfall::sfStop()  # 关闭集群
   } else {
-  ## 第一个位置：新建一个起始进度条
-  pb <- utils::txtProgressBar(style=3)
-  ##
-  for (i in x) {
-    fun1(i)
+    ## 第一个位置：新建一个起始进度条
+    pb <- utils::txtProgressBar(style=3)
+    ##
+    for (i in x) {
+      fun1(i)
       ##第二个位置：实时显示进度
       utils::setTxtProgressBar(pb, which(i == x)/length(x))
       print(paste0(outdir, "/TBlabENM/reclass/", spdata[i,1]))
-  }
+    }
   }
 
   #组合每个物种的面积
-  splist <- list.files(paste0(outdir, "/TBlabENM/TBlabENMtemp2/"), full.names = TRUE)
+  splist <- list.files(paste0(outdir, "/TBlabENM/TBlabENM" , star_time), full.names = TRUE)
   v <- read.csv(splist[1])
   v <- v[0,]
   for (i in 1:length(splist)) {
@@ -294,7 +212,7 @@ if(is.numeric(threshold)){
     names(v) <- c("species", "pro", "USA", "SA")
   }
   write.csv(v, paste0(outdir, "/TBlabENM/suitable_area.csv"), row.names = FALSE, fileEncoding = "GB18030")
-  unlink(paste0(outdir, "/TBlabENM/TBlabENMtemp2"), recursive = TRUE)
+  unlink(paste0(outdir, "/TBlabENM/TBlabENM", star_time), recursive = TRUE)
   end_time <- Sys.time()  ## 记录程序结束时间
   ## 第三个位置关闭进度条
   if(exists("pb")){close(pb)}
