@@ -415,7 +415,7 @@ n <- n+1
 ##并行计算
   if(parallel == T){
     # 开启集成
-    snowfall::sfInit(parallel = TRUE, cpus = ncpu, slaveOutfile = "maxent_parameter_log.txt")
+    snowfall::sfInit(parallel = TRUE, cpus = ncpu, slaveOutfile = paste0(star_time,"maxent_parameter_log.txt"))
     # 注册每个环境变量
     snowfall::sfExport("fun2")
     snowfall::sfExport("star_time")
