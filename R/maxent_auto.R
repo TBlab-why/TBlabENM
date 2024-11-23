@@ -196,13 +196,13 @@ maxent_auto <- function(spdir, evdir, myenv = NULL, evlist = NULL, factors = NUL
   if(parallel1 == T){
     # library(snowfall)
     # 开启集成
-    snowfall::sfInit(parallel = TRUE, cpus = ncpu1)
+    snowfall::sfInit(parallel = TRUE, cpus = ncpu1, slaveOutfile = "test.txt")
     # 注册每个环境变量
     snowfall::sfExport("fun3")
     snowfall::sfExport("maxent_args")
    # snowfall::sfLibrary(TBlabENM)
     snowfall::sfExport("spdir")
-    snowfall::sfLapply(spdir, fun3)
+    snowfall::sfLapply(spdir, snowfall::sfCat(fun3))
     snowfall::sfStop()  # 关闭集群
 
   } else{
