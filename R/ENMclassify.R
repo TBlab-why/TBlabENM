@@ -170,7 +170,7 @@ ENMclassify <- function(parameters, x = NULL, resultdir,
   if(parallel == TRUE){
     ncpu = ncpu
     # 开启集成
-    snowfall::sfInit(parallel = TRUE, cpus = ncpu)
+    snowfall::sfInit(parallel = TRUE, cpus = ncpu, slaveOutfile = "test.txt")
     # 注册每个环境变量
     #snowfall::sfExportAll()
     #加载需要用到的变量或函数 因为下面函数fff中要用到prodir参数
@@ -186,7 +186,7 @@ ENMclassify <- function(parameters, x = NULL, resultdir,
 
     snowfall::sfLibrary(tidyverse)
 
-    snowfall::sfLapply(x, fun1)
+    snowfall::sfLapply(x, sfCat(fun1))
     snowfall::sfStop()  # 关闭集群
   } else {
     ## 第一个位置：新建一个起始进度条

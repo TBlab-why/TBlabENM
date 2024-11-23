@@ -415,7 +415,7 @@ n <- n+1
 ##并行计算
   if(parallel == T){
     # 开启集成
-    snowfall::sfInit(parallel = TRUE, cpus = ncpu)
+    snowfall::sfInit(parallel = TRUE, cpus = ncpu, slaveOutfile = "test1.txt")
     # 注册每个环境变量
     snowfall::sfExport("fun2")
     snowfall::sfExport("star_time")
@@ -433,7 +433,7 @@ n <- n+1
     snowfall::sfExport("r")
    # snowfall::sfExport("correlation2")
    # snowfall::sfExport("maxent_single")
-    k <- snowfall::sfLapply(1:nrow(combin), fun4)
+    k <- snowfall::sfLapply(1:nrow(combin), sfCat(fun4))
     snowfall::sfStop()  # 关闭集群
 
     df$env <- unlist(k)
