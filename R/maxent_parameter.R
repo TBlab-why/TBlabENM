@@ -433,7 +433,7 @@ n <- n+1
     snowfall::sfExport("r")
    # snowfall::sfExport("correlation2")
    # snowfall::sfExport("maxent_single")
-    k <- snowfall::sfLapply(1:nrow(combin), snowfall::sfCat(fun4))
+    k <- snowfall::sfLapply(1:nrow(combin), fun4)
     snowfall::sfStop()  # 关闭集群
 
     df$env <- unlist(k)
