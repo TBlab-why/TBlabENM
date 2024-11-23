@@ -202,7 +202,7 @@ maxent_auto <- function(spdir, evdir, myenv = NULL, evlist = NULL, factors = NUL
     snowfall::sfExport("maxent_args")
    # snowfall::sfLibrary(TBlabENM)
     snowfall::sfExport("spdir")
-    snowfall::sfLapply(spdir, snowfall::sfCat(fun3))
+    snowfall::sfLapply(spdir, fun3)
     snowfall::sfStop()  # 关闭集群
 
   } else{
