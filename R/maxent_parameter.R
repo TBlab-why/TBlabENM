@@ -204,7 +204,7 @@ n <- n+1
             mybgfile = mybgfile,
             args = args1,
             prodir = NULL,
-            outdir = paste0(outdir, "/TBlabENMtemp", star_time, "/", fc1, rm1),
+            outdir = paste0(outdir, "/TBlabENMtemp", star_time, "/", fc1, rm1, n),
             parallel = FALSE))
           #下面根据上面模拟的结果删除相关性强的变量
           #变量重要性
