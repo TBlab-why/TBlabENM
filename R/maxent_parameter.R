@@ -208,7 +208,7 @@ n <- n+1
             parallel = FALSE))
           #下面根据上面模拟的结果删除相关性强的变量
           #变量重要性
-          ev_cb <- read.csv(paste0(outdir, "/TBlabENMtemp",star_time,"/",fc1,rm1,"/TBlabENM/maxent/", sp_name, "/maxentResults.csv")) %>%
+          ev_cb <- read.csv(paste0(outdir, "/TBlabENMtemp",star_time,"/",fc1,rm1,n, "/TBlabENM/maxent/", sp_name, "/maxentResults.csv")) %>%
             dplyr::select(., paste0(bio_name, ".contribution")) %>%
             utils::tail(., n =1) %>% t() %>% as.data.frame()
           names(ev_cb) <- "value"
