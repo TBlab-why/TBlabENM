@@ -145,11 +145,11 @@ maxent_parameter <- function(x, evdir, myenv = NULL, evlist = NULL, factors = NU
             mybgfile = mybgfile,
             args = args1,
             prodir = NULL,
-            outdir = paste0(outdir, "/TBlabENMtemp",star_time,"/", fc1,rm1),
+            outdir = paste0(outdir, "/TBlabENMtemp",star_time,"/", fc1,rm1,n),
             parallel = FALSE))
           #下面根据上面模拟的结果删除相关性强的变量
           #变量重要性
-          ev_cb <- read.csv(paste0(outdir, "/TBlabENMtemp",star_time,"/",fc1,rm1,"/TBlabENM/maxent/", sp_name, "/maxentResults.csv")) %>%
+          ev_cb <- read.csv(paste0(outdir, "/TBlabENMtemp",star_time,"/",fc1,rm1,n,"/TBlabENM/maxent/", sp_name, "/maxentResults.csv")) %>%
             dplyr::select(., paste0(bio_name, ".contribution")) %>%
             utils::tail(., n =1) %>% t() %>% as.data.frame()
           names(ev_cb) <- "value"
@@ -290,12 +290,12 @@ n <- n+1
           mybgfile = mybgfile,
           args = args1,
           prodir = NULL,
-          outdir = paste0(outdir, "/TBlabENMtemp",star_time,"/",fc1,rm1),
+          outdir = paste0(outdir, "/TBlabENMtemp",star_time,"/",fc1,rm1,n),
           parallel = FALSE))
 
         #下面根据上面模拟的结果删除相关性强的变量
         #变量重要性
-        ev_cb <- read.csv(paste0(outdir,"/TBlabENMtemp",star_time,"/",fc1,rm1,"/TBlabENM/maxent/", sp_name, "/maxentResults.csv")) %>%
+        ev_cb <- read.csv(paste0(outdir,"/TBlabENMtemp",star_time,"/",fc1,rm1,n,"/TBlabENM/maxent/", sp_name, "/maxentResults.csv")) %>%
           dplyr::select(., paste0(bio_name, ".contribution")) %>%
           utils::tail(., n =1) %>% t() %>% as.data.frame()
         names(ev_cb) <- "value"
@@ -385,7 +385,7 @@ n <- n+1
   ##随机生成10000个点
   if(is.null(mybgfile)){
     mybg0 <- terra::spatSample(biostack, nbg, na.rm = T, xy = T)
-    write.csv(mybg0, paste0(outdir, "/TBlabENM/", sp_name, "_bg.csv"))
+    write.csv(mybg0[-(1:2)], paste0(outdir, "/TBlabENM/", sp_name, "_bg.csv"), row.names = FALSE)
     mybg <- mybg0[-(1:2)]} else{
     mybg <- terra::extract(biostack, mybgfile, ID=FALSE)
   }
@@ -582,7 +582,7 @@ if(is.null(opt)){parameter <- df} else{
   #依据aicc选择最佳模型
   if(opt=="aicc") {opt1 <- dplyr::filter(cs, AICc == min(AICc))
   if(nrow(opt1)==0){opt1 <- dplyr::filter(cs, auc.val.avg == max(auc.val.avg))
-  waring("AICC is NA, use 'auc.val.avg' instead.")}
+  warning("AICC is NA, use 'auc.val.avg' instead.")}
 
     }
   #使用顺序法选择最佳模型
@@ -595,7 +595,7 @@ if(is.null(opt)){parameter <- df} else{
   #使用cbi选择最佳模型
   if(opt=="cbi") {opt1 <- dplyr::filter(cs, cbi.val.avg == max(cbi.val.avg))
   if(nrow(opt1)==0){opt1 <- dplyr::filter(cs, auc.val.avg == max(auc.val.avg))
-  waring("cbi.val.avg is NA, use 'auc.val.avg' instead.")
+  warning("cbi.val.avg is NA, use 'auc.val.avg' instead.")
   }
   }
   #保存结果

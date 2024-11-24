@@ -143,13 +143,17 @@ maxent_auto <- function(spdir, evdir, myenv = NULL, evlist = NULL, factors = NUL
 
     #模拟
     cat("*****************modelling*****************\n")
+    if(is.null(outdir)){outdir1 <- "."} else {outdir1 <- outdir}
+    if(is.null(mybgfile)){mybgfile1 <- mybgfile} else {
+      mybgfile1 <- utils::read.csv(paste0(outdir1, "/TBlabENM/", sp_name, "_bg.csv"))}
+
     ms <- TBlabENM::maxent_single(
       x = x,
       evdir = evdir,
       evlist = evlist,
       factors = factors,
       nbg = nbg,
-      mybgfile = mybgfile,
+      mybgfile = mybgfile1,
       args = args,
       prodir = prodir,
       outdir = outdir,
