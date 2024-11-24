@@ -35,7 +35,7 @@
 #'
 #' @importFrom dplyr mutate arrange select
 #' @importFrom stringr str_split_1
-#' @importFrom utils read.csv tail
+#' @importFrom utils read.csv tail write.csv
 #' @importFrom magrittr %>%
 #' @importFrom purrr map_chr map map_dbl
 #'
@@ -63,7 +63,7 @@ maxent_parameter <- function(x, evdir, myenv = NULL, evlist = NULL, factors = NU
                              cormethod = "pearson", vif = T, vifth = 5, opt = "aicc",
                              outdir = NULL, parallel = F, ncpu = 2){
   # unlink(paste0(outdir, "/TBlabENMtemp*") ,recursive = T)
-  dir.create(paste0(outdir, "/TBlabENM"),recursive = TRUE, showWarnings = FALSE)
+
   star_time <- sample(1:100000,1)
 
 #corse_method功能使用相关性选择变量
@@ -339,6 +339,7 @@ n <- n+1
 
   tzhs <- c("L", "Q", "H", "P", "T")
   if(is.null(outdir)){outdir <- "."}
+  dir.create(paste0(outdir, "/TBlabENM"),recursive = TRUE, showWarnings = FALSE)
   factors123 <- factors
   biolistall <- list.files(evdir, pattern = ".asc$", full.names = TRUE)
 
@@ -383,7 +384,9 @@ n <- n+1
   #提取背景值并计算变量相关性
   ##随机生成10000个点
   if(is.null(mybgfile)){
-  mybg <- terra::spatSample(biostack, nbg, na.rm = T, xy = T)[-(1:2)]} else{
+    mybg0 <- terra::spatSample(biostack, nbg, na.rm = T, xy = T)
+    write.csv(mybg0, paste0(outdir, "/TBlabENM/", sp_name, "_bg.csv"))
+    mybg <- mybg0[-(1:2)]} else{
     mybg <- terra::extract(biostack, mybgfile, ID=FALSE)
   }
   ##判断是否存在分类变量，若存在则分开计算
