@@ -282,8 +282,8 @@ n <- n+1
             correlation1 <- abs(as.data.frame(cor(mybg1[bio_name1], method = cormethod)))
             correlation2 <- abs(as.data.frame(cor(mybg2[bio_name2], method = cormethod)))
           }
-          utils::write.csv(correlation1, paste0(outdir, "/TBlabENMtemp", star_time, "/", fc1, rm1, n, "/correlation1.csv"))
-          utils::write.csv(correlation2, paste0(outdir, "/TBlabENMtemp", star_time, "/", fc1, rm1, n, "/correlation2.csv"))
+         # utils::write.csv(correlation1, paste0(outdir, "/TBlabENMtemp", star_time, "/", fc1, rm1, n, "/correlation1.csv"))
+         # utils::write.csv(correlation2, paste0(outdir, "/TBlabENMtemp", star_time, "/", fc1, rm1, n, "/correlation2.csv"))
         }
 
         return(bio_name)}
