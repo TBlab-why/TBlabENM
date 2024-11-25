@@ -1,0 +1,320 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+%
+\documentclass[
+]{article}
+\usepackage{amsmath,amssymb}
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math} % this also loads fontspec
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+\usepackage{lmodern}
+\ifPDFTeX\else
+  % xetex/luatex font selection
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{xcolor}
+\usepackage[margin=1in]{geometry}
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\usepackage{framed}
+\definecolor{shadecolor}{RGB}{248,248,248}
+\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.94,0.16,0.16}{#1}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\BuiltInTok}[1]{#1}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.64,0.00,0.00}{\textbf{#1}}}
+\newcommand{\ExtensionTok}[1]{#1}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\ImportTok}[1]{#1}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\NormalTok}[1]{#1}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\RegionMarkerTok}[1]{#1}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\usepackage{graphicx}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+% Set default figure placement to htbp
+\makeatletter
+\def\fps@figure{htbp}
+\makeatother
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+\ifLuaTeX
+  \usepackage{selnolig}  % disable illegal ligatures
+\fi
+\usepackage{bookmark}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\urlstyle{same}
+\hypersetup{
+  pdftitle={maxent\_single.R},
+  pdfauthor={why},
+  hidelinks,
+  pdfcreator={LaTeX via pandoc}}
+
+\title{maxent\_single.R}
+\author{why}
+\date{2024-11-25}
+
+\begin{document}
+\maketitle
+
+@title Perform the MaxEnt model for a single species @description
+本函数为单个物种构建MaxEnt模型. @details
+如果已经对MaxEet模型参数进行了优化(例如使用\code{\link[ENMeval]{ENMevaluate}})，
+用户可以使用参数args在一定程度上修改模型参数，来获得质量更高的模型。可以使用evlist
+参数来选择需要的环境变量集。当提供参数prodir时，则将模型投影至指定的地理空间，否则仅拟合模型。
+
+@param x 要模拟的物种文件的路径，包括文件名（.csv）。 @param evdir
+环境变量路径,格式为.asc @param evlist
+用于建模的环境变量，是环境变量路径下所有变量的子集。用下标表示，
+数字代表要选用的变量，默认使用所有变量。 @param factors
+字符型向量。指定哪些变量是分类变量。未指定时，则默认全为连续变量。
+@param nbg 随机背景点数量，当指定参数mybgfile时忽略。 @param mybgfile
+自定义的背景点。包含两列（经度、纬度） 未指定时，随机从环境层生成。
+@param args
+自定义的MaxEnt模型参数，详见\code{\link[TBlabENM]{maxent_args}}。 @param
+prodir
+用列表储存的投影文件路径，包含了投影时期的名称和与之对应的环境变量路径
+@param outdir
+输出文件路径，若未指定则在当前目录下生成./TBlabENM/maxent文件夹保存输出结果
+@param parallel 是否并行计算 @param ncpu 如果并行，使用的cpu数 @return
+包含maxent模型结果的一系列文件 @export @importFrom utils read.csv
+@importFrom stringr str\_split @importFrom dplyr bind\_rows @importFrom
+dismo maxent @importFrom magrittr \%\textgreater\% @examples
+
+maxent\_single( x = system.file(``extdata'', ``species/Phoebe
+sheareri.csv'', package = ``TBlabENM''), evdir =
+system.file(``extdata'', ``envar/asc'', package = ``TBlabENM''), evlist
+= 1:7, factors = c(``dr'', ``fao90''), nbg = 1000, args =
+maxent\_args(), prodir = list(present = system.file(``extdata'',
+``envar/asc'', package = ``TBlabENM''), present1 =
+system.file(``extdata'', ``envar/asc'', package = ``TBlabENM'') ),
+parallel = T, ncpu =2)
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{maxent\_single }\OtherTok{\textless{}{-}} \ControlFlowTok{function}\NormalTok{(x, evdir, }\AttributeTok{evlist =} \ConstantTok{NULL}\NormalTok{, }\AttributeTok{factors =} \ConstantTok{NULL}\NormalTok{, }\AttributeTok{mybgfile =} \ConstantTok{NULL}\NormalTok{,}
+                          \AttributeTok{nbg =} \DecValTok{10000}\NormalTok{, }\AttributeTok{args =} \FunctionTok{maxent\_args}\NormalTok{(), }\AttributeTok{prodir =} \ConstantTok{NULL}\NormalTok{,}
+                          \AttributeTok{outdir =} \ConstantTok{NULL}\NormalTok{, }\AttributeTok{parallel =}\NormalTok{ F, }\AttributeTok{ncpu =} \DecValTok{2}\NormalTok{)\{}
+\NormalTok{  star\_time }\OtherTok{\textless{}{-}} \FunctionTok{Sys.time}\NormalTok{() }\DocumentationTok{\#\# 记录程序开始时间}
+\CommentTok{\#检查prodir参数是否包含名字，否则报错}
+  \ControlFlowTok{if}\NormalTok{(}\FunctionTok{is.null}\NormalTok{(prodir)}\SpecialCharTok{==}\ConstantTok{FALSE}\NormalTok{)\{}\ControlFlowTok{if}\NormalTok{(}\FunctionTok{is.null}\NormalTok{(}\FunctionTok{names}\NormalTok{(prodir)))\{}
+    \FunctionTok{stop}\NormalTok{(}\StringTok{"The projection path does not have a valid name, please check parameter prodir"}\NormalTok{)\}\}}
+  \CommentTok{\#获取物种名 对路径拆分并取倒数第一个字符串}
+\NormalTok{  spname1 }\OtherTok{\textless{}{-}}\NormalTok{ stringr}\SpecialCharTok{::}\FunctionTok{str\_split\_1}\NormalTok{(x, }\StringTok{"/"}\NormalTok{)[}\FunctionTok{length}\NormalTok{(stringr}\SpecialCharTok{::}\FunctionTok{str\_split\_1}\NormalTok{(x, }\StringTok{"/"}\NormalTok{))]}
+\NormalTok{  sp\_name }\OtherTok{\textless{}{-}}\NormalTok{ stringr}\SpecialCharTok{::}\FunctionTok{str\_split\_1}\NormalTok{(spname1, }\StringTok{".csv$"}\NormalTok{)[}\DecValTok{1}\NormalTok{]}
+  \FunctionTok{cat}\NormalTok{(}\FunctionTok{paste}\NormalTok{(}\StringTok{"Buildding MaxEnt models for"}\NormalTok{, sp\_name, }\StringTok{"}\SpecialCharTok{\textbackslash{}n}\StringTok{"}\NormalTok{))}
+
+   \CommentTok{\#读取环境变量}
+\NormalTok{  biolist }\OtherTok{\textless{}{-}} \FunctionTok{list.files}\NormalTok{(evdir, }\AttributeTok{pattern =} \StringTok{".asc$"}\NormalTok{, }\AttributeTok{full.names =} \ConstantTok{TRUE}\NormalTok{)}
+  \ControlFlowTok{if}\NormalTok{(}\FunctionTok{is.null}\NormalTok{(evlist)}\SpecialCharTok{==}\ConstantTok{FALSE}\NormalTok{)\{biolist }\OtherTok{\textless{}{-}}\NormalTok{ biolist[evlist]\}}
+\NormalTok{  biostack }\OtherTok{\textless{}{-}}\NormalTok{ terra}\SpecialCharTok{::}\FunctionTok{rast}\NormalTok{(biolist)}
+
+  \CommentTok{\#读取、提取背景点的环境值并转化为数据框，生成环境背景数据}
+  \FunctionTok{ifelse}\NormalTok{(}\FunctionTok{is.null}\NormalTok{(mybgfile), mybg }\OtherTok{\textless{}{-}}\NormalTok{ terra}\SpecialCharTok{::}\FunctionTok{spatSample}\NormalTok{(biostack, nbg, }\AttributeTok{na.rm =}\NormalTok{ T, }\AttributeTok{xy =}\NormalTok{ T)[}\DecValTok{1}\SpecialCharTok{:}\DecValTok{2}\NormalTok{],}
+\NormalTok{       mybg }\OtherTok{\textless{}{-}}\NormalTok{ mybgfile)}
+  \FunctionTok{names}\NormalTok{(mybg) }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(}\StringTok{"longitude"}\NormalTok{, }\StringTok{"latitude"}\NormalTok{)}
+\NormalTok{  mybgdata }\OtherTok{\textless{}{-}}\NormalTok{ terra}\SpecialCharTok{::}\FunctionTok{extract}\NormalTok{(biostack, mybg, }\AttributeTok{ID=}\ConstantTok{FALSE}\NormalTok{)}
+
+  \CommentTok{\#将背景点赋值为0}
+\NormalTok{  mybg}\SpecialCharTok{$}\StringTok{\textquotesingle{}p/b\textquotesingle{}} \OtherTok{\textless{}{-}} \FunctionTok{rep}\NormalTok{(}\DecValTok{0}\NormalTok{, }\AttributeTok{times =} \FunctionTok{nrow}\NormalTok{(mybg))}
+
+  \CommentTok{\#读取、提取存在点的环境值并转化为数据框，生成存在环境数据}
+\NormalTok{  occ }\OtherTok{\textless{}{-}}\NormalTok{ utils}\SpecialCharTok{::}\FunctionTok{read.csv}\NormalTok{(x) }\CommentTok{\#读取物种坐标数据}
+\NormalTok{  occ }\OtherTok{\textless{}{-}}\NormalTok{ occ[}\FunctionTok{c}\NormalTok{(}\DecValTok{2}\NormalTok{,}\DecValTok{3}\NormalTok{)]}
+  \FunctionTok{names}\NormalTok{(occ) }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(}\StringTok{"longitude"}\NormalTok{, }\StringTok{"latitude"}\NormalTok{)}
+\NormalTok{  occdata }\OtherTok{\textless{}{-}}\NormalTok{ terra}\SpecialCharTok{::}\FunctionTok{extract}\NormalTok{(biostack, occ, }\AttributeTok{ID=}\ConstantTok{FALSE}\NormalTok{)}
+  \CommentTok{\#将存在点赋值为1}
+\NormalTok{  occ}\SpecialCharTok{$}\StringTok{\textquotesingle{}p/b\textquotesingle{}} \OtherTok{\textless{}{-}} \FunctionTok{rep}\NormalTok{(}\DecValTok{1}\NormalTok{, }\AttributeTok{times =} \FunctionTok{nrow}\NormalTok{(occ))}
+
+\DocumentationTok{\#\#\#\#全变量模拟\#\#\#\#}
+\CommentTok{\#组合存在环境数据与环境背景数据构成环境变量数据框}
+\NormalTok{  evdata }\OtherTok{\textless{}{-}}\NormalTok{ dplyr}\SpecialCharTok{::}\FunctionTok{bind\_rows}\NormalTok{(occdata, mybgdata)}
+\CommentTok{\#指定分类变量}
+  \CommentTok{\#获取变量名}
+\NormalTok{  bio\_name }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{()}
+  \ControlFlowTok{for}\NormalTok{(i }\ControlFlowTok{in} \FunctionTok{seq\_along}\NormalTok{(biolist))\{}
+\NormalTok{  bioname1 }\OtherTok{\textless{}{-}}\NormalTok{ stringr}\SpecialCharTok{::}\FunctionTok{str\_split\_1}\NormalTok{(biolist[i], }\StringTok{"/"}\NormalTok{)[}\FunctionTok{length}\NormalTok{(stringr}\SpecialCharTok{::}\FunctionTok{str\_split\_1}\NormalTok{(biolist[i], }\StringTok{"/"}\NormalTok{))]}
+\NormalTok{  bio\_name0 }\OtherTok{\textless{}{-}}\NormalTok{ stringr}\SpecialCharTok{::}\FunctionTok{str\_split\_1}\NormalTok{(bioname1, }\StringTok{".asc"}\NormalTok{)[}\DecValTok{1}\NormalTok{]}
+\NormalTok{  bio\_name }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(bio\_name, bio\_name0)}
+\NormalTok{  \}}
+\CommentTok{\#}
+  \ControlFlowTok{if}\NormalTok{(}\FunctionTok{is.null}\NormalTok{(factors)}\SpecialCharTok{==}\ConstantTok{FALSE}\NormalTok{)\{}
+\NormalTok{    site }\OtherTok{\textless{}{-}}\NormalTok{ bio\_name[bio\_name }\SpecialCharTok{\%in\%}\NormalTok{ factors]}
+\NormalTok{    evdata }\OtherTok{\textless{}{-}}\NormalTok{ evdata }\SpecialCharTok{\%\textgreater{}\%}\NormalTok{ dplyr}\SpecialCharTok{::}\FunctionTok{mutate\_at}\NormalTok{(site, as.factor)}
+\NormalTok{    \}}
+
+\CommentTok{\#组合存在点和背景点构成坐标点数据框（包含0或1的）（要与上面的顺序一致）}
+\NormalTok{  xydata }\OtherTok{\textless{}{-}}\NormalTok{ dplyr}\SpecialCharTok{::}\FunctionTok{bind\_rows}\NormalTok{(occ, mybg)}
+\NormalTok{  args2 }\OtherTok{\textless{}{-}}\NormalTok{ args}
+  \CommentTok{\#当坐标点少于25个时，将replicates=设置为坐标点数。}
+  \ControlFlowTok{if}\NormalTok{(}\FunctionTok{nrow}\NormalTok{(occ) }\SpecialCharTok{\textless{}}  \DecValTok{25}\NormalTok{) \{ args2[}\DecValTok{1}\NormalTok{] }\OtherTok{\textless{}{-}} \FunctionTok{paste0}\NormalTok{(}\StringTok{"replicates="}\NormalTok{, }\FunctionTok{nrow}\NormalTok{(occ))\}}
+\CommentTok{\#模型模拟, xydata$\textasciigrave{}p/b\textasciigrave{}}
+  \ControlFlowTok{if}\NormalTok{(}\FunctionTok{is.null}\NormalTok{(outdir))\{outdir }\OtherTok{\textless{}{-}} \StringTok{"./TBlabENM/maxent/"}\NormalTok{\} }\ControlFlowTok{else}\NormalTok{\{}
+\NormalTok{    outdir }\OtherTok{\textless{}{-}} \FunctionTok{paste0}\NormalTok{(outdir, }\StringTok{"/TBlabENM/maxent/"}\NormalTok{)}
+\NormalTok{  \}}
+
+  \ControlFlowTok{if}\NormalTok{(}\FunctionTok{is.null}\NormalTok{(prodir) }\SpecialCharTok{==} \ConstantTok{TRUE}\NormalTok{)\{}
+\NormalTok{    me1 }\OtherTok{\textless{}{-}}\NormalTok{ dismo}\SpecialCharTok{::}\FunctionTok{maxent}\NormalTok{(evdata, xydata}\SpecialCharTok{$}\StringTok{\textasciigrave{}}\AttributeTok{p/b}\StringTok{\textasciigrave{}}\NormalTok{ , }\CommentTok{\#环境变量、坐标数据和背景点}
+\NormalTok{                args2, }\FunctionTok{paste0}\NormalTok{(outdir, sp\_name)) \}}\CommentTok{\#输出路径}
+
+  \DocumentationTok{\#\#当提供prodir时，对不同时期循环}
+  \ControlFlowTok{if}\NormalTok{(}\FunctionTok{is.null}\NormalTok{(prodir) }\SpecialCharTok{==} \ConstantTok{FALSE}\NormalTok{)\{}
+    \FunctionTok{cat}\NormalTok{(}\FunctionTok{paste}\NormalTok{(}\StringTok{"Perform the projection for"}\NormalTok{, sp\_name, }\StringTok{"}\SpecialCharTok{\textbackslash{}n}\StringTok{"}\NormalTok{))}
+
+    \ControlFlowTok{if}\NormalTok{(parallel }\SpecialCharTok{==}\NormalTok{T)\{}
+      \CommentTok{\# library(snowfall)}
+
+      \CommentTok{\# 开启集成}
+\NormalTok{      snowfall}\SpecialCharTok{::}\FunctionTok{sfInit}\NormalTok{(}\AttributeTok{parallel =} \ConstantTok{TRUE}\NormalTok{, }\AttributeTok{cpus =}\NormalTok{ ncpu)}
+
+      \CommentTok{\#加载需要用到的变量或函数 因为下面函数fff中要用到prodir参数}
+\NormalTok{      snowfall}\SpecialCharTok{::}\FunctionTok{sfExport}\NormalTok{(}\StringTok{"prodir"}\NormalTok{)}
+      \CommentTok{\#构建函数fff}
+\NormalTok{     fff }\OtherTok{\textless{}{-}} \ControlFlowTok{function}\NormalTok{(y)\{dismo}\SpecialCharTok{::}\FunctionTok{maxent}\NormalTok{(evdata, xydata}\SpecialCharTok{$}\StringTok{\textasciigrave{}}\AttributeTok{p/b}\StringTok{\textasciigrave{}}\NormalTok{ , }\CommentTok{\#环境变量、坐标数据和背景点}
+                               \FunctionTok{append}\NormalTok{(args2, }\FunctionTok{paste0}\NormalTok{(}\StringTok{"projectionlayers="}\NormalTok{, prodir[[y]])),}
+                               \CommentTok{\#新建文件夹保存模拟结果}
+                               \AttributeTok{path =} \FunctionTok{paste0}\NormalTok{(outdir, sp\_name, }\StringTok{"/"}\NormalTok{, }\FunctionTok{names}\NormalTok{(prodir)[y]))}
+\NormalTok{     \}}
+\NormalTok{     snowfall}\SpecialCharTok{::}\FunctionTok{sfLapply}\NormalTok{(}\FunctionTok{seq\_along}\NormalTok{(prodir), fff)}
+\NormalTok{     snowfall}\SpecialCharTok{::}\FunctionTok{sfStop}\NormalTok{()  }\CommentTok{\# 关闭集群}
+     \CommentTok{\#将结果文件的asc格式转为tif格式以节约内存}
+\NormalTok{     df }\OtherTok{\textless{}{-}} \FunctionTok{list.files}\NormalTok{(}\FunctionTok{paste0}\NormalTok{(outdir, sp\_name), }\AttributeTok{full.names =} \ConstantTok{TRUE}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}
+       \FunctionTok{list.files}\NormalTok{(., }\AttributeTok{pattern =} \StringTok{"asc$"}\NormalTok{, }\AttributeTok{full.names =} \ConstantTok{TRUE}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}
+         \FunctionTok{as.data.frame}\NormalTok{()}
+     \FunctionTok{names}\NormalTok{(df) }\OtherTok{\textless{}{-}} \StringTok{"file"}
+\NormalTok{     df1 }\OtherTok{\textless{}{-}}\NormalTok{ df }\SpecialCharTok{\%\textgreater{}\%}
+        \FunctionTok{mutate}\NormalTok{(}\AttributeTok{path =} \FunctionTok{map\_chr}\NormalTok{(}\AttributeTok{.x =}\NormalTok{ file, }\AttributeTok{.f =} \ControlFlowTok{function}\NormalTok{(x)\{}
+\NormalTok{          stringr}\SpecialCharTok{::}\FunctionTok{str\_replace}\NormalTok{(x, }\AttributeTok{pattern =} \StringTok{".asc$"}\NormalTok{, }\StringTok{".tif"}\NormalTok{)}
+\NormalTok{        \})) }\SpecialCharTok{\%\textgreater{}\%}
+\NormalTok{        dplyr}\SpecialCharTok{::}\FunctionTok{mutate}\NormalTok{(}\AttributeTok{ra =}\NormalTok{ purrr}\SpecialCharTok{::}\FunctionTok{map}\NormalTok{(}\AttributeTok{.x =}\NormalTok{ file, }\AttributeTok{.f =} \ControlFlowTok{function}\NormalTok{(x)\{terra}\SpecialCharTok{::}\FunctionTok{rast}\NormalTok{(x)\})) }\SpecialCharTok{\%\textgreater{}\%}
+        \FunctionTok{mutate}\NormalTok{(purrr}\SpecialCharTok{::}\FunctionTok{map2}\NormalTok{(}\AttributeTok{.x =}\NormalTok{ ra, }\AttributeTok{.y =}\NormalTok{ path, }\AttributeTok{.f =} \ControlFlowTok{function}\NormalTok{(x, y)\{}
+\NormalTok{          terra}\SpecialCharTok{::}\FunctionTok{writeRaster}\NormalTok{(x, y, }\AttributeTok{overwrite=}\ConstantTok{TRUE}\NormalTok{)\}))}
+       \CommentTok{\#删除asc格式}
+\NormalTok{       gg }\OtherTok{\textless{}{-}} \FunctionTok{file.remove}\NormalTok{(}\FunctionTok{list.files}\NormalTok{(}\FunctionTok{paste0}\NormalTok{(outdir, sp\_name), }\AttributeTok{full.names =} \ConstantTok{TRUE}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}
+                     \FunctionTok{list.files}\NormalTok{(., }\AttributeTok{pattern =} \StringTok{"asc$"}\NormalTok{, }\AttributeTok{full.names =} \ConstantTok{TRUE}\NormalTok{))}
+
+\NormalTok{     end\_time }\OtherTok{\textless{}{-}} \FunctionTok{Sys.time}\NormalTok{()}
+     \FunctionTok{print}\NormalTok{(end\_time }\SpecialCharTok{{-}}\NormalTok{ star\_time)}
+
+\NormalTok{    \} }\ControlFlowTok{else}\NormalTok{ \{}
+
+      \ControlFlowTok{for}\NormalTok{ (b }\ControlFlowTok{in} \FunctionTok{seq\_along}\NormalTok{(prodir)) \{}
+\NormalTok{      args3 }\OtherTok{\textless{}{-}}\FunctionTok{append}\NormalTok{(args2, }\FunctionTok{paste0}\NormalTok{(}\StringTok{"projectionlayers="}\NormalTok{, prodir[[b]]))}
+    \CommentTok{\#模型模拟, xydata$\textasciigrave{}p/b\textasciigrave{}}
+\NormalTok{      me1 }\OtherTok{\textless{}{-}}\NormalTok{ dismo}\SpecialCharTok{::}\FunctionTok{maxent}\NormalTok{(evdata, xydata}\SpecialCharTok{$}\StringTok{\textasciigrave{}}\AttributeTok{p/b}\StringTok{\textasciigrave{}}\NormalTok{ , }\CommentTok{\#环境变量、坐标数据和背景点}
+\NormalTok{                         args3,}
+                         \CommentTok{\#新建文件夹保存模拟结果}
+                         \AttributeTok{path =} \FunctionTok{paste0}\NormalTok{(outdir, sp\_name, }\StringTok{"/"}\NormalTok{, }\FunctionTok{names}\NormalTok{(prodir)[b]))}
+
+\NormalTok{      \}}
+      \CommentTok{\#将结果文件的asc格式转为tif格式以节约内存}
+\NormalTok{      df }\OtherTok{\textless{}{-}} \FunctionTok{list.files}\NormalTok{(}\FunctionTok{paste0}\NormalTok{(outdir, sp\_name), }\AttributeTok{full.names =} \ConstantTok{TRUE}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}
+        \FunctionTok{list.files}\NormalTok{(., }\AttributeTok{pattern =} \StringTok{"asc$"}\NormalTok{, }\AttributeTok{full.names =} \ConstantTok{TRUE}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}
+        \FunctionTok{as.data.frame}\NormalTok{()}
+      \FunctionTok{names}\NormalTok{(df) }\OtherTok{\textless{}{-}} \StringTok{"file"}
+\NormalTok{      df1 }\OtherTok{\textless{}{-}}\NormalTok{ df }\SpecialCharTok{\%\textgreater{}\%}
+        \FunctionTok{mutate}\NormalTok{(}\AttributeTok{path =} \FunctionTok{map\_chr}\NormalTok{(}\AttributeTok{.x =}\NormalTok{ file, }\AttributeTok{.f =} \ControlFlowTok{function}\NormalTok{(x)\{}
+\NormalTok{          stringr}\SpecialCharTok{::}\FunctionTok{str\_replace}\NormalTok{(x, }\AttributeTok{pattern =} \StringTok{".asc$"}\NormalTok{, }\StringTok{".tif"}\NormalTok{)}
+\NormalTok{        \})) }\SpecialCharTok{\%\textgreater{}\%}
+        \FunctionTok{mutate}\NormalTok{(purrr}\SpecialCharTok{::}\FunctionTok{map2}\NormalTok{(}\AttributeTok{.x =}\NormalTok{ file, }\AttributeTok{.y =}\NormalTok{ path, }\AttributeTok{.f =} \ControlFlowTok{function}\NormalTok{(x, y)\{}
+\NormalTok{          terra}\SpecialCharTok{::}\FunctionTok{writeRaster}\NormalTok{(terra}\SpecialCharTok{::}\FunctionTok{rast}\NormalTok{(x), y, }\AttributeTok{overwrite=}\ConstantTok{TRUE}\NormalTok{)\}))}
+
+       \CommentTok{\#删除asc格式}
+      \CommentTok{\# gg \textless{}{-} file.remove(list.files(paste0(outdir, sp\_name), full.names = TRUE) \%\textgreater{}\%}
+      \CommentTok{\#                     list.files(., pattern = "asc$", full.names = TRUE))}
+
+\NormalTok{      end\_time }\OtherTok{\textless{}{-}} \FunctionTok{Sys.time}\NormalTok{()}
+      \FunctionTok{print}\NormalTok{(end\_time }\SpecialCharTok{{-}}\NormalTok{ star\_time)}
+\NormalTok{\}}
+
+\NormalTok{  \}}
+  \CommentTok{\#提取参数}
+\NormalTok{  df }\OtherTok{\textless{}{-}} \FunctionTok{data.frame}\NormalTok{(}\FunctionTok{matrix}\NormalTok{(}\ConstantTok{NA}\NormalTok{,}\DecValTok{1}\NormalTok{,}\DecValTok{10}\NormalTok{))}
+  \FunctionTok{names}\NormalTok{(df) }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(}\StringTok{"species"}\NormalTok{, }\StringTok{"number"}\NormalTok{, }\StringTok{"env"}\NormalTok{, }\StringTok{"fc"}\NormalTok{, }\StringTok{"rm"}\NormalTok{, }\StringTok{"replicates"}\NormalTok{, }\StringTok{"AUCtrain"}\NormalTok{, }\StringTok{"AUCtest"}\NormalTok{, }\StringTok{"MTSStrain"}\NormalTok{, }\StringTok{"MTSStest"}\NormalTok{)}
+\NormalTok{  df}\SpecialCharTok{$}\NormalTok{species }\OtherTok{\textless{}{-}}\NormalTok{ sp\_name}
+
+\NormalTok{  df}\SpecialCharTok{$}\NormalTok{env }\OtherTok{\textless{}{-}} \FunctionTok{paste0}\NormalTok{(}\FunctionTok{sort}\NormalTok{(}\FunctionTok{names}\NormalTok{(occdata)), }\AttributeTok{collapse =} \StringTok{","}\NormalTok{)}
+\NormalTok{  fc }\OtherTok{\textless{}{-}}\NormalTok{ args2[}\DecValTok{3}\SpecialCharTok{:}\DecValTok{7}\NormalTok{][stringr}\SpecialCharTok{::}\FunctionTok{str\_detect}\NormalTok{(args2[}\DecValTok{3}\SpecialCharTok{:}\DecValTok{7}\NormalTok{], }\StringTok{"TRUE"}\NormalTok{)]}
+\NormalTok{  fc1 }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{()}
+  \ControlFlowTok{for}\NormalTok{ (i }\ControlFlowTok{in}\NormalTok{ fc) \{}
+\NormalTok{    fc2 }\OtherTok{\textless{}{-}}\NormalTok{ stringr}\SpecialCharTok{::}\FunctionTok{str\_split\_1}\NormalTok{(i,}\StringTok{""}\NormalTok{)[}\DecValTok{1}\NormalTok{]}
+\NormalTok{    fc1 }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(fc1, fc2)}
+\NormalTok{  \}}
+\NormalTok{  df}\SpecialCharTok{$}\NormalTok{fc }\OtherTok{\textless{}{-}} \FunctionTok{toupper}\NormalTok{(}\FunctionTok{paste0}\NormalTok{(fc1, }\AttributeTok{collapse =} \StringTok{""}\NormalTok{))}
+\NormalTok{  df}\SpecialCharTok{$}\NormalTok{rm }\OtherTok{\textless{}{-}}\NormalTok{ stringr}\SpecialCharTok{::}\FunctionTok{str\_split\_1}\NormalTok{(args2[}\DecValTok{2}\NormalTok{], }\StringTok{"="}\NormalTok{)[}\DecValTok{2}\NormalTok{]}
+\NormalTok{  df}\SpecialCharTok{$}\NormalTok{replicates }\OtherTok{\textless{}{-}}\NormalTok{ stringr}\SpecialCharTok{::}\FunctionTok{str\_split\_1}\NormalTok{(args2[}\DecValTok{1}\NormalTok{], }\StringTok{"="}\NormalTok{)[}\DecValTok{2}\NormalTok{]}
+  \ControlFlowTok{if}\NormalTok{(}\FunctionTok{is.null}\NormalTok{(prodir))\{}
+\NormalTok{    data }\OtherTok{\textless{}{-}} \FunctionTok{read.csv}\NormalTok{(}\FunctionTok{paste0}\NormalTok{(outdir, sp\_name, }\StringTok{"/maxentResults.csv"}\NormalTok{))}
+\NormalTok{  \} }\ControlFlowTok{else}\NormalTok{ \{data }\OtherTok{\textless{}{-}} \FunctionTok{read.csv}\NormalTok{(}\FunctionTok{paste0}\NormalTok{(outdir, sp\_name, }\StringTok{"/"}\NormalTok{, }\FunctionTok{names}\NormalTok{(prodir)[}\DecValTok{1}\NormalTok{], }\StringTok{"/maxentResults.csv"}\NormalTok{))\}}
+
+\NormalTok{  df}\SpecialCharTok{$}\NormalTok{AUCtest }\OtherTok{\textless{}{-}}\NormalTok{ data}\SpecialCharTok{$}\NormalTok{Test.AUC[}\FunctionTok{length}\NormalTok{(data}\SpecialCharTok{$}\NormalTok{Test.AUC)]}
+\NormalTok{  df}\SpecialCharTok{$}\NormalTok{AUCtrain }\OtherTok{\textless{}{-}}\NormalTok{ data}\SpecialCharTok{$}\NormalTok{Training.AUC[}\FunctionTok{length}\NormalTok{(data}\SpecialCharTok{$}\NormalTok{Training.AUC)]}
+\NormalTok{  df}\SpecialCharTok{$}\NormalTok{MTSStrain }\OtherTok{\textless{}{-}}\NormalTok{ data}\SpecialCharTok{$}\NormalTok{Maximum.training.sensitivity.plus.specificity.Logistic.threshold[}\FunctionTok{length}\NormalTok{(data}\SpecialCharTok{$}\NormalTok{Maximum.training.sensitivity.plus.specificity.Logistic.threshold)]}
+\NormalTok{  df}\SpecialCharTok{$}\NormalTok{MTSStest }\OtherTok{\textless{}{-}}\NormalTok{ data}\SpecialCharTok{$}\NormalTok{Maximum.test.sensitivity.plus.specificity.Logistic.threshold[}\FunctionTok{length}\NormalTok{(data}\SpecialCharTok{$}\NormalTok{Maximum.test.sensitivity.plus.specificity.Logistic.threshold)]}
+\NormalTok{  df}\SpecialCharTok{$}\NormalTok{number }\OtherTok{\textless{}{-}}\NormalTok{ data}\SpecialCharTok{$}\NormalTok{X.Training.samples[}\DecValTok{1}\NormalTok{]}\SpecialCharTok{+}\NormalTok{data}\SpecialCharTok{$}\NormalTok{X.Test.samples[}\DecValTok{1}\NormalTok{]}
+  \FunctionTok{cat}\NormalTok{(}\FunctionTok{paste0}\NormalTok{(}\StringTok{"The results are saved "}\NormalTok{, outdir, sp\_name, }\StringTok{"}\SpecialCharTok{\textbackslash{}n}\StringTok{"}\NormalTok{))}
+  \FunctionTok{write.csv}\NormalTok{(df, }\FunctionTok{paste0}\NormalTok{(outdir, sp\_name, }\StringTok{"/parameters.csv"}\NormalTok{), }\AttributeTok{row.names =} \ConstantTok{FALSE}\NormalTok{)}
+
+  \FunctionTok{return}\NormalTok{(df)}
+\NormalTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+
+\end{document}

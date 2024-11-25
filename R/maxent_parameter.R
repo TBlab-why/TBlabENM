@@ -68,14 +68,15 @@ maxent_parameter <- function(x, evdir, myenv = NULL, evlist = NULL, factors = NU
 
 #corse_method功能使用相关性选择变量
   corse_method <- function(correlation, importance, vif, n){ #n最初为1
+
     n = n
     importance1 <- dplyr::arrange(importance, desc(value))
-    if(nrow(importance)<n){importance <- rownames(importance1)[1]} else{
-      importance <- rownames(importance1)[n]}
+    if (nrow(importance) < n) {importance <- rownames(importance1)[1]} else{
+      importance <- rownames(importance1)[1:n]}
 
     ff <- correlation[,importance, drop = FALSE]
-
-    ff <-  ff[which(ff < r), ,drop = FALSE]
+    ff <- dplyr::filter(ff, rowSums(ff < r) == ncol(ff))
+    #ff <-  ff[which(ff < r), ,drop = FALSE]
 
     bio_name <- c(importance, rownames(ff)) #要保留的变量名称
 
@@ -121,22 +122,33 @@ maxent_parameter <- function(x, evdir, myenv = NULL, evlist = NULL, factors = NU
     args1[2] <- paste0("betamultiplier=", rm1)
     ff1 <- stringr::str_split_1(fc1, "")
     for (j in ff1) {
-      if(j == "L"){args1[3] <- "linear=TRUE"}
-      if(j == "Q"){args1[4] <- "quadratic=TRUE"}
-      if(j == "P"){args1[5] <- "product=TRUE"}
-      if(j == "T"){args1[6] <- "threshold=TRUE"}
-      if(j == "H"){args1[7] <- "hinge=TRUE"}
+      if (j == "L") {
+        args1[3] <- "linear=TRUE"
+      }
+      if (j == "Q") {
+        args1[4] <- "quadratic=TRUE"
+      }
+      if (j == "P") {
+        args1[5] <- "product=TRUE"
+      }
+      if (j == "T") {
+        args1[6] <- "threshold=TRUE"
+      }
+      if (j == "H") {
+        args1[7] <- "hinge=TRUE"
+      }
     }
 
-    n=0 #用于fun1(),指示第几次循环来确定次重要变量
-    if(is.null(factors) == FALSE){ #当存在分类变量，分开计算
+    n = 0 #用于fun1(),指示第几次循环来确定次重要变量
+    if(is.null(factors) == FALSE) {
+      #当存在分类变量，分开计算
       #当factors只有1个变量
       if(length(factors)==1){
-        while(sum(correlation1 > r) > nrow(correlation1)| n==0){
-          n <- n+1
+        while(sum(correlation1 > r) > nrow(correlation1) | n == 0){
+          n <- n + 1
 
           #进行模拟获得重要性列表
-          compare <-suppressMessages(maxent_single(
+          compare <- suppressMessages(maxent_single(
             x = x,
             evdir = evdir,
             evlist = evlist, #evlist应该是相对于evdir也就是全部变量biolstall的下标
