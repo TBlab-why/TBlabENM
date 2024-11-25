@@ -201,7 +201,7 @@ maxent_auto <- function(spdir, evdir, myenv = NULL, evlist = NULL, factors = NUL
   if(parallel1 == T){
     # library(snowfall)
     # 开启集成
-    snowfall::sfInit(parallel = TRUE, cpus = ncpu1, slaveOutfile = "maxent_parameter_log.txt")
+    snowfall::sfInit(parallel = TRUE, cpus = ncpu1)
 
     # 注册每个环境变量
     snowfall::sfExport("fun3")

@@ -270,7 +270,8 @@ n <- n+1
             correlation1 <- abs(as.data.frame(cor(mybg1[bio_name1], method = cormethod)))
             correlation2 <- abs(as.data.frame(cor(mybg2[bio_name2], method = cormethod)))
           }
-
+          utils::write.csv(correlation1, paste0(outdir, "/TBlabENMtemp", star_time, "/", fc1, rm1, n, "/correlation1.csv"))
+          utils::write.csv(correlation2, paste0(outdir, "/TBlabENMtemp", star_time, "/", fc1, rm1, n, "/correlation2.csv"))
         }
 
         return(bio_name)}
@@ -385,6 +386,7 @@ n <- n+1
   ##随机生成10000个点
   if(is.null(mybgfile)){
     mybg0 <- terra::spatSample(biostack, nbg, na.rm = T, xy = T)
+    mybgfile <- mybg0[1:2]
     write.csv(mybg0[1:2], paste0(outdir, "/TBlabENM/", sp_name, "_bg.csv"), row.names = FALSE)
     mybg <- mybg0[-(1:2)]} else{
     mybg <- terra::extract(biostack, mybgfile, ID=FALSE)
@@ -418,7 +420,7 @@ n <- n+1
 ##并行计算
   if(parallel == T){
     # 开启集成
-    snowfall::sfInit(parallel = TRUE, cpus = ncpu, slaveOutfile = paste0(star_time,"maxent_parameter_log.txt"))
+    snowfall::sfInit(parallel = TRUE, cpus = ncpu)
     # 注册每个环境变量
     snowfall::sfExport("fun2")
     snowfall::sfExport("star_time")
