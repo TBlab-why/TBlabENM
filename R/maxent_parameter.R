@@ -385,7 +385,7 @@ n <- n+1
   ##随机生成10000个点
   if(is.null(mybgfile)){
     mybg0 <- terra::spatSample(biostack, nbg, na.rm = T, xy = T)
-    write.csv(mybg0[-(1:2)], paste0(outdir, "/TBlabENM/", sp_name, "_bg.csv"), row.names = FALSE)
+    write.csv(mybg0[1:2], paste0(outdir, "/TBlabENM/", sp_name, "_bg.csv"), row.names = FALSE)
     mybg <- mybg0[-(1:2)]} else{
     mybg <- terra::extract(biostack, mybgfile, ID=FALSE)
   }
