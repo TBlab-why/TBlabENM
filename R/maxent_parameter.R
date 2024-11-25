@@ -340,7 +340,8 @@ n <- n+1
 
   tzhs <- c("L", "Q", "H", "P", "T")
   if(is.null(outdir)){outdir <- "."}
-  dir.create(paste0(outdir, "/TBlabENM"),recursive = TRUE, showWarnings = FALSE)
+  #dir.create(paste0(outdir, "/TBlabENM"),recursive = TRUE, showWarnings = FALSE)
+  dir.create(paste0(outdir, "/TBlabENM/data"), showWarnings = FALSE, recursive = TRUE)
   factors123 <- factors
   biolistall <- list.files(evdir, pattern = ".asc$", full.names = TRUE)
 
@@ -387,7 +388,7 @@ n <- n+1
   if(is.null(mybgfile)){
     mybg0 <- terra::spatSample(biostack, nbg, na.rm = T, xy = T)
     mybgfile <- mybg0[1:2]
-    write.csv(mybg0, paste0(outdir, "/TBlabENM/", sp_name, "_bg.csv"), row.names = FALSE)
+    write.csv(mybgfile, paste0(outdir, "/TBlabENM/data/", sp_name, "_bg.csv"), row.names = FALSE)
     mybg <- mybg0[-(1:2)]} else{
     mybg <- terra::extract(biostack, mybgfile, ID=FALSE)
   }
@@ -606,7 +607,8 @@ if(is.null(opt)){parameter <- df} else{
   #dir.create(paste0(outdir, "/TBlabENM"), showWarnings = FALSE)
 
 print(paste0(outdir, "/TBlabENM/tuneparameter_", sp_name, ".csv"))
-  utils::write.csv(cs, paste0(outdir, "/TBlabENM/tuneparameter_", sp_name, ".csv"), row.names = FALSE)
+
+  utils::write.csv(cs, paste0(outdir, "/TBlabENM/data/tuneparameter_", sp_name, ".csv"), row.names = FALSE)
   parameter <- opt1[1,1:3]
   parameter$species <- sp_name
   parameter$number <- nrow(occ)

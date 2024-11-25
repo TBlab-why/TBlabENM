@@ -148,7 +148,7 @@ maxent_auto <- function(spdir, evdir, myenv = NULL, evlist = NULL, factors = NUL
     spname1 <- stringr::str_split_1(x, "/")[length(stringr::str_split_1(x, "/"))]
     sp_name <- stringr::str_split_1(spname1, ".csv$")[1]
     if(is.null(mybgfile)==FALSE){mybgfile1 <- mybgfile} else {
-      mybgfile1 <- utils::read.csv(paste0(outdir1, "/TBlabENM/", sp_name, "_bg.csv"))}
+      mybgfile1 <- utils::read.csv(paste0(outdir1, "/TBlabENM/data/", sp_name, "_bg.csv"))}
 
     ms <- TBlabENM::maxent_single(
       x = x,
