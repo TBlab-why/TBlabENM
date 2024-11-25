@@ -387,7 +387,7 @@ n <- n+1
   if(is.null(mybgfile)){
     mybg0 <- terra::spatSample(biostack, nbg, na.rm = T, xy = T)
     mybgfile <- mybg0[1:2]
-    write.csv(mybg0[1:2], paste0(outdir, "/TBlabENM/", sp_name, "_bg.csv"), row.names = FALSE)
+    write.csv(mybg0, paste0(outdir, "/TBlabENM/", sp_name, "_bg.csv"), row.names = FALSE)
     mybg <- mybg0[-(1:2)]} else{
     mybg <- terra::extract(biostack, mybgfile, ID=FALSE)
   }
