@@ -70,13 +70,18 @@ maxent_parameter <- function(x, evdir, myenv = NULL, evlist = NULL, factors = NU
   corse_method <- function(correlation, importance, vif, n){ #n最初为1
 
     n = n
-    importance1 <- dplyr::arrange(importance, desc(value))
+    #这里可能会出现变量重要性不一致问题，之前选出来的变量直接保留占位，其他变量排序
+    if(n==1){importance1 <- dplyr::arrange(importance, desc(value))} else {
+    importance_a <- importance[1:(n-1), , drop = FALSE]
+    importance_b <- dplyr::arrange(importance[-(1:(n-1)), , drop = FALSE], desc(value))
+    importance1 <- rbind(importance_a, importance_b)}
+    #importance1 <- dplyr::arrange(importance, desc(value))
     if (nrow(importance) < n) {importance <- rownames(importance1)[1]} else{
-      importance <- rownames(importance1)[1:n]}
+      importance <- rownames(importance1)[n]}
 
     ff <- correlation[,importance, drop = FALSE]
-    ff <- dplyr::filter(ff, rowSums(ff < r) == ncol(ff))
-    #ff <-  ff[which(ff < r), ,drop = FALSE]
+    #ff <- dplyr::filter(ff, rowSums(ff < r) == ncol(ff))
+    ff <-  ff[which(ff < r), ,drop = FALSE]
 
     bio_name <- c(importance, rownames(ff)) #要保留的变量名称
 
