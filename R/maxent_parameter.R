@@ -91,23 +91,26 @@ maxent_parameter <- function(x, evdir, myenv = NULL, evlist = NULL, factors = NU
 
       bio_name <- vifse_method(envdf = mybg, env_name = bio_name,
                                          importance = importance1, vifth = vifth, n = n )
+      #importance继承自importance1，importance1是排过序的，因此importance不用再排序
     }
 
-    return <- bio_name
+    return(bio_name)
   }
   #vifse_method功能使用vif选择变量
   vifse_method <- function(envdf, env_name, importance, vifth, n){
     #对保留的变量进行重要性排序
-    im <- dplyr::arrange(importance[env_name,, drop =FALSE],desc(value))
-    env_name <- rownames(im) #排过序的变量名
-
+    #im <- dplyr::arrange(importance[env_name,, drop =FALSE],desc(value))
+    #env_name <- rownames(im) #排过序的变量名
+    #importance中取出保留的变量
+    im <- importance[rownames(importance) %in% env_name, , drop = FALSE]
+    env_name <- rownames(im) #这里的env_name是排过序的变量名
     env_name1 <- env_name
     n = n-1
 
     while (n < length(env_name1)-1) {
 
       n = n+1
-      #从env_name中取出前i个变量
+      #从env_name中取出前n+1个变量，判断最重要的变量和次重要的变量之间的共线性，如果存在，次重要的变量删除
       var <- env_name1[c(1:(n+1))]
       #只保留在env_name1中的变量
       var1 <- var[var%in%env_name]
