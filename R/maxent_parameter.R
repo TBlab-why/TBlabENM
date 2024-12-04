@@ -169,7 +169,7 @@ maxent_parameter <- function(x, evdir, myenv = NULL, evlist = NULL, factors = NU
             parallel = FALSE))
           #下面根据上面模拟的结果删除相关性强的变量
           #变量重要性
-          ev_cb <- read.csv(paste0(outdir, "/TBlabENMtemp",star_time,"/",fc1,rm1,n,"/TBlabENM/maxent/", sp_name, "/maxentResults.csv")) %>%
+          ev_cb <- read.csv(paste0(outdir, "/TBlabENMtemp", star_time, "/", fc1, rm1, n, "/TBlabENM/maxent/", sp_name,"/maxentResults.csv")) %>%
             dplyr::select(., paste0(bio_name, ".contribution")) %>%
             utils::tail(., n =1) %>% t() %>% as.data.frame()
           names(ev_cb) <- "value"
@@ -185,6 +185,9 @@ maxent_parameter <- function(x, evdir, myenv = NULL, evlist = NULL, factors = NU
           }
           rownames(ev_cb) <- nn
           #将ev_cb按照变量类型拆开
+          factors <- rownames(ev_cb)[rownames(ev_cb) %in% factors] #更新factors
+          if (length(factors) == 0) {factors <- NULL}
+
           if(is.null(factors)){ev_cb1 <- ev_cb} else {
             ev_cb1 <- ev_cb[!rownames(ev_cb) %in% factors, , drop = FALSE]}
 
@@ -212,7 +215,7 @@ maxent_parameter <- function(x, evdir, myenv = NULL, evlist = NULL, factors = NU
 
         while(sum(correlation1 > r) > nrow(correlation1) | sum(correlation2 > r) > nrow(correlation2)| n==0){
 
-n <- n+1
+        n <- n+1
 
           #进行模拟获得重要性列表
           compare <-suppressMessages(maxent_single(
@@ -245,29 +248,34 @@ n <- n+1
           rownames(ev_cb) <- nn
 
           factors <- rownames(ev_cb)[rownames(ev_cb) %in% factors] #更新factors
-          if(length(factors) ==0){factors <- NULL}
+          if (length(factors) == 0) {factors <- NULL}
 
           #将ev_cb按照变量类型拆开
-          if(is.null(factors)){ev_cb1 <- ev_cb} else{
+          if (is.null(factors)) {ev_cb1 <- ev_cb} else {
             ev_cb1 <- ev_cb[!rownames(ev_cb) %in% factors, , drop = FALSE]
             ev_cb2 <- ev_cb[factors, , drop = FALSE]
           }
 
           #correlation1按照ev_cb提取
-          if(is.null(factors)){correlation1 <- correlation1[rownames(ev_cb1),rownames(ev_cb1)]}else{
-            correlation1 <- correlation1[rownames(ev_cb1),rownames(ev_cb1),drop = FALSE]
-            correlation2 <- correlation2[rownames(ev_cb2),rownames(ev_cb2), drop = FALSE]}
+          if (is.null(factors)) {correlation1 <- correlation1[rownames(ev_cb1), rownames(ev_cb1)]} else {
+            correlation1 <- correlation1[rownames(ev_cb1), rownames(ev_cb1), drop = FALSE]
+            correlation2 <- correlation2[rownames(ev_cb2), rownames(ev_cb2), drop = FALSE]}
 
           #连续变量的选择n=1
-          if(is.null(factors)){
-            bio_name1 <- corse_method(correlation = correlation1, importance = ev_cb1, vif=vif, n=n)
+          if (is.null(factors)) {
+            if (length(ev_cb1) == 0) {bio_name1 <- NULL} else {
+              bio_name1 <- corse_method(correlation = correlation1, importance = ev_cb1, vif = vif, n = n)
+            }
             bio_name2 <- NULL
           } else{
-            if(length(factors) ==1){
-              bio_name1 <- bio_name1 <- corse_method(correlation = correlation1, importance = ev_cb1, vif=vif, n=n)
-              bio_name2 <- factors}else{
-
-                bio_name1 <- corse_method(correlation = correlation1, importance = ev_cb1, vif=vif, n=n)  #下次模拟的变量
+            if (length(factors) == 1) {
+              if (length(ev_cb1) == 0) {bio_name1 <- NULL} else {
+                bio_name1 <- corse_method(correlation = correlation1, importance = ev_cb1, vif = vif, n = n)
+              }
+              bio_name2 <- factors} else {
+                if (length(ev_cb1) == 0) {bio_name1 <- NULL} else {
+                  bio_name1 <- corse_method(correlation = correlation1, importance = ev_cb1, vif = vif, n = n)
+                }  #下次模拟的变量
                 #分类变量的选择
                 bio_name2 <- corse_method(correlation = correlation2, importance = ev_cb2, vif=vif, n=n) }} #下次模拟的变量
 
@@ -279,15 +287,17 @@ n <- n+1
           #获取保留的变量存储路径的下标
           evlist <- c()
           for (i in seq_along(bio_name)) {
-            evlist1 <- which( stringr::str_detect(biolistall, paste0(bio_name, ".asc")[i])==T)
+            evlist1 <- which(stringr::str_detect(biolistall, paste0(bio_name, ".asc")[i]) == TRUE)
             evlist <- c(evlist, evlist1)
           }
 
           #计算两种变量的相关性
-          if(is.null(factors)){correlation1 <- abs(as.data.frame(cor(mybg1[bio_name1], method = cormethod)))
+          if (is.null(factors)) {correlation1 <- abs(as.data.frame(cor(mybg1[bio_name1], method = cormethod)))
           correlation2 <- as.data.frame(0)
-          }else{
-            correlation1 <- abs(as.data.frame(cor(mybg1[bio_name1], method = cormethod)))
+          } else {
+            if (is.null(bio_name1)) {correlation1 <- as.data.frame(0)} else {
+              correlation1 <- abs(as.data.frame(cor(mybg1[bio_name1], method = cormethod)))
+            }
             correlation2 <- abs(as.data.frame(cor(mybg2[bio_name2], method = cormethod)))
           }
          # utils::write.csv(correlation1, paste0(outdir, "/TBlabENMtemp", star_time, "/", fc1, rm1, n, "/correlation1.csv"))
@@ -637,3 +647,6 @@ print(paste0(outdir, "/TBlabENM/tuneparameter_", sp_name, ".csv"))
     print(df1[1:3])}}
   return(parameter)
     }
+
+
+
