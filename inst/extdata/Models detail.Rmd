@@ -1,0 +1,115 @@
+---
+title: "Models detail"
+author: 
+date: "2024-12-04"
+output: html_document
+params:
+  spdir: NULL
+  evdir: "F:/var2/eblf_proj/present/asc"
+  myenv: NULL
+  evlist: NULL
+  factors: NULL
+  mybgfile: NULL
+  nbg: NULL
+  args: NULL
+  fc: NULL
+  rm: NULL
+  r: NULL
+  cormethod: NULL
+  vif: NULL
+  vifth: NULL
+  opt: NULL
+  prodir: NULL
+  outdir: NULL
+---
+
+
+```{r setup, echo = FALSE, comment = '', include = FALSE}
+#全局设置，不显示代码块、结果不用#保护、结果直接作为文本、不输出警告信息、遇到错误继续执行
+knitr::opts_chunk$set(echo=FALSE, comment='', results='asis', warning = FALSE, error=TRUE)
+f <- officer::fp_text(color = "black", font.family = "Times New Roman", font.size = 12, eastasia.family = "宋体")
+flextable::set_flextable_defaults(
+    font.family = "Times New Roman", #英文设置Times New Roman
+    font.size = 10.5, #字体10.5磅等于5号字体
+    text.align = "center", #文本居中对齐
+    border.color = "black", #边框黑色
+    border.width = 0.75, #边框宽度1.5磅
+    line_spacing = 1, #单倍行距
+    eastasia.family = "宋体", #中文设置宋体
+    pct_digits = 2, #保留2位小数
+    split = F, #不允许一行内容分两页
+    padding.bottom = 4,#段后4磅约0.25行
+    padding.top = 4, #段前4磅约0.25行
+    padding.right = 0, #右侧缩进
+    padding.left = 0, #左侧缩进
+    background.color = "transparent", #单元格背景色透明
+    theme_fun = "theme_booktabs", #使用主题
+    font.color = "black" #文本字体黑色
+)
+```
+## 模型参数预设
+``` {r 环境变量设置情况, echo = FALSE}
+biolist <- list.files(params$evdir, pattern = ".asc$", full.names = TRUE)
+  if(is.null(params$evlist) == FALSE){biolist <- biolist[params$evlist]}
+  bio_name <- c()
+  for(i in seq_along(biolist)){
+    bioname1 <- stringr::str_split_1(biolist[i], "/")[length(stringr::str_split_1(biolist[i], "/"))]
+    bio_name0 <- stringr::str_split_1(bioname1, ".asc")[1]
+    bio_name <- c(bio_name, bio_name0)
+  }
+```
+本次使用MaxEnt为`r length(params$spdir)` 个物种构建了生态位模型。全部使用的环境变量共有`r length(bio_name)` 个，分别为`r bio_name`.
+特征函数(FC)设置为`r params$fc`，正则化乘数设置为`r params$rm`,共有`r length(params$fc)*length(params$rm)`个组合.见表
+```{r echo=FALSE, comment=''}
+df <- expand.grid(fc, rm, stringsAsFactors = FALSE)
+
+names(df)[1:2] <- c("fc", "rm")
+diversity_tb <- flextable::flextable(
+    data = df, # data
+    col_keys = names(df)) %>% #要出现在表格中的列
+        flextable::set_caption(   #添加标题
+            .,
+            caption = "表1 参数组合",
+            autonum = NULL,
+            style = "Table Caption",
+            html_escape = TRUE ) %>%
+              flextable::align(., align = "center", part = "all") %>% # 居中对齐
+              flextable::bold(., i = 1, part = "header")  #表头（第一行）文字加粗
+
+diversity_tb
+```
+
+## 最佳参数选择
+
+我们在研究区域内随机选取`r nbg` 个点作为背景点，并计算了每个环境变量的皮尔逊相关性。当相关性r>0.7时
+表明两个变量具有强相关性。
+使用预设参数进行模拟，获得每个环境变量的重要性。首先排除与贡献最高的变量具有强相关性的变量，然后排除贡献小于0.5的变量，
+用于剩余的变量再次构建模型获得这组环境变量的重要性，再排除与贡献第二高的变量具有强相关性的变量，
+最终为每个组合都选择了一组环境变量。
+
+## 最优模型选择
+
+使用`r length(params$opt)`选择最佳模型，见表2
+
+
+。对于分布点大于r的`r length(params$myenv)`,
+
+`r length(params$mybgfile)`,
+`r length(params$factors)`,
+`r length(params$nbg)`,
+`r length(params$args)`,
+
+
+`r length(params$r)`,
+`r length(params$cormethod)`,
+`r length(params$vif)`,
+`r length(params$vifth)`,
+`r length(params$opt)`,
+`r length(params$prodir)`,
+`r length(params$outdir)`,
+
+
+
+
+
+

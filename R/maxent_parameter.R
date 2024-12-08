@@ -251,29 +251,34 @@ maxent_parameter <- function(x, evdir, myenv = NULL, evlist = NULL, factors = NU
           if (length(factors) == 0) {factors <- NULL}
 
           #将ev_cb按照变量类型拆开
-          if (is.null(factors)) {ev_cb1 <- ev_cb} else {
+          if (is.null(factors) ) {ev_cb1 <- ev_cb} else {
             ev_cb1 <- ev_cb[!rownames(ev_cb) %in% factors, , drop = FALSE]
             ev_cb2 <- ev_cb[factors, , drop = FALSE]
           }
 
           #correlation1按照ev_cb提取
           if (is.null(factors)) {correlation1 <- correlation1[rownames(ev_cb1), rownames(ev_cb1)]} else {
-            correlation1 <- correlation1[rownames(ev_cb1), rownames(ev_cb1), drop = FALSE]
-            correlation2 <- correlation2[rownames(ev_cb2), rownames(ev_cb2), drop = FALSE]}
+            if (nrow(ev_cb1) == 0) {
+              correlation2 <- correlation2[rownames(ev_cb2), rownames(ev_cb2), drop = FALSE]
+            } else {
+              correlation1 <- correlation1[rownames(ev_cb1), rownames(ev_cb1), drop = FALSE]
+              correlation2 <- correlation2[rownames(ev_cb2), rownames(ev_cb2), drop = FALSE]
+            }
+            }
 
           #连续变量的选择n=1
           if (is.null(factors)) {
-            if (length(ev_cb1) == 0) {bio_name1 <- NULL} else {
+            if (nrow(ev_cb1) == 0) {bio_name1 <- NULL} else {
               bio_name1 <- corse_method(correlation = correlation1, importance = ev_cb1, vif = vif, n = n)
             }
             bio_name2 <- NULL
           } else{
             if (length(factors) == 1) {
-              if (length(ev_cb1) == 0) {bio_name1 <- NULL} else {
+              if (nrow(ev_cb1) == 0) {bio_name1 <- NULL} else {
                 bio_name1 <- corse_method(correlation = correlation1, importance = ev_cb1, vif = vif, n = n)
               }
               bio_name2 <- factors} else {
-                if (length(ev_cb1) == 0) {bio_name1 <- NULL} else {
+                if (nrow(ev_cb1) == 0) {bio_name1 <- NULL} else {
                   bio_name1 <- corse_method(correlation = correlation1, importance = ev_cb1, vif = vif, n = n)
                 }  #下次模拟的变量
                 #分类变量的选择
@@ -363,10 +368,12 @@ maxent_parameter <- function(x, evdir, myenv = NULL, evlist = NULL, factors = NU
 
 
   #####################################################################
-  if(is.null(myenv)==FALSE){evlist <- NULL}
-  if(is.null(opt)==FALSE){
-    if(is.null(myenv)==FALSE & length(myenv)<4){stop("The number of environment variables must be at least three")}
-    if(is.null(evlist)==FALSE & length(evlist)<4){stop("The number of environment variables must be at least three")}}
+  if (is.null(myenv) == FALSE) {
+    cat("The environment variable has been specified and is no longer selected !")
+    evlist <- NULL}
+  if (is.null(opt) == FALSE) {
+    if (is.null(myenv) == FALSE & length(myenv) < 4) {stop("The number of environment variables must be at least three")}
+    if (is.null(evlist) == FALSE & length(evlist) < 4) {stop("The number of environment variables must be at least three")}}
 
   tzhs <- c("L", "Q", "H", "P", "T")
   if(is.null(outdir)){outdir <- "."}
@@ -415,12 +422,13 @@ maxent_parameter <- function(x, evdir, myenv = NULL, evlist = NULL, factors = NU
 
   #提取背景值并计算变量相关性
   ##随机生成10000个点
-  if(is.null(mybgfile)){
+  if(is.null(mybgfile)) {
     mybg0 <- terra::spatSample(biostack, nbg, na.rm = T, xy = T)
     mybgfile <- mybg0[1:2]
     write.csv(mybgfile, paste0(outdir, "/TBlabENM/data/", sp_name, "_bg.csv"), row.names = FALSE)
     mybg <- mybg0[-(1:2)]} else{
-    mybg <- terra::extract(biostack, mybgfile, ID=FALSE)
+    cat("The background points has been specified !")
+    mybg <- terra::extract(biostack, mybgfile, ID = FALSE)
   }
   ##判断是否存在分类变量，若存在则分开计算
   if(is.null(factors) == FALSE){#mybg分为两组，mybg1为连续变量，mybg2为分类变量
