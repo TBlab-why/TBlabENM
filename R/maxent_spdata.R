@@ -4,7 +4,7 @@
 #' 物种丰富度、避难所等分析的输入文件。注意：重新运行该命令会覆盖上一次的结果。
 #' @param resultdir maxent结果文件路径。
 #' @param proname 字符型向量。要提取的时期名称。根据自己的时期确定。
-#' @return 一个格式规范的.CSV文件。
+#' @return 一个格式规范的.csv文件。
 #' @export
 #' @importFrom utils read.csv
 #' @importFrom utils write.csv

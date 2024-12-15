@@ -12,7 +12,7 @@ maxent_spdata(resultdir = "./TBlabENM/result", proname = "present")
 \item{proname}{字符型向量。要提取的时期名称。根据自己的时期确定。}
 }
 \value{
-一个格式规范的.CSV文件。
+一个格式规范的.csv文件。
 }
 \description{
 本函数从maxent的结果文件中提取物种名、T_MTSSte, T_MTSStr和AUC，作为进行

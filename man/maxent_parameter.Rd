@@ -19,6 +19,7 @@ maxent_parameter(
   vif = T,
   vifth = 5,
   opt = "aicc",
+  null_model = TRUE,
   outdir = NULL,
   parallel = F,
   ncpu = 2
@@ -53,6 +54,8 @@ maxent_parameter(
 \item{vifth}{方差膨胀因子阈值}
 
 \item{opt}{选择最佳模型的指标，可选择"aicc","seq","cbi"或NULL.当选择NULL时，则仅选择变量。}
+
+\item{null_model}{逻辑值,是否进行NULL模型检验。}
 
 \item{outdir}{结果保存路径}
 

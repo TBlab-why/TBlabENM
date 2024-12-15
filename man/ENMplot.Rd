@@ -42,6 +42,9 @@ ENMplot(
 
 \item{path}{结果保存路径}
 }
+\value{
+picture
+}
 \description{
 对相关结果进行分类的单张图片绘制，比如适生区图、避难所图、丰富度图等。
 }

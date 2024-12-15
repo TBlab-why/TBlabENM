@@ -96,9 +96,9 @@ ENMclassify <- function(parameters, x = NULL, resultdir,
   spdata <- parameters
   #临时文件夹
   star_time <- sample(1:100000,1)
-  dir.create(paste0(outdir, "/TBlabENM/TBlabENM", star_time), recursive = T, showWarnings = FALSE)
+  dir.create(paste0(outdir, "/TBlabENM", star_time), recursive = T, showWarnings = FALSE)
   #创建文件夹用于保存二值图
-  dir.create(paste0(outdir, "/TBlabENM/reclass"), recursive = T, showWarnings = FALSE)
+  dir.create(paste0(outdir, "/reclass"), recursive = T, showWarnings = FALSE)
 
   #################################################函数
   fun1 <- function(x){
@@ -143,7 +143,7 @@ ENMclassify <- function(parameters, x = NULL, resultdir,
       })) %>%
       mutate(ss = map2(.x = reclass, .y = path, .f = function(x,y){
         terra::writeRaster(x,
-                           paste0(outdir, "/TBlabENM/reclass/", spname, "_", y ),overwrite = overwrite)
+                           paste0(outdir, "/reclass/", spname, "_", y ),overwrite = overwrite)
       }))
 
     #新建数据框保存单个物种的结果
@@ -160,7 +160,7 @@ ENMclassify <- function(parameters, x = NULL, resultdir,
     data <- data[-1]%>%
       relocate(pro)%>%
       relocate(species)
-    write.csv(data, paste0(outdir, "/TBlabENM/TBlabENM", star_time, "/", spname,".csv"), row.names = FALSE)
+    write.csv(data, paste0(outdir, "/TBlabENM", star_time, "/", spname,".csv"), row.names = FALSE)
 
   }
 
@@ -196,12 +196,12 @@ ENMclassify <- function(parameters, x = NULL, resultdir,
       fun1(i)
       ##第二个位置：实时显示进度
       utils::setTxtProgressBar(pb, which(i == x)/length(x))
-      print(paste0(outdir, "/TBlabENM/reclass/", spdata[i,1]))
+      print(paste0(outdir, "/reclass/", spdata[i,1]))
     }
   }
 
   #组合每个物种的面积
-  splist <- list.files(paste0(outdir, "/TBlabENM/TBlabENM" , star_time), full.names = TRUE)
+  splist <- list.files(paste0(outdir, "/TBlabENM" , star_time), full.names = TRUE)
   v <- read.csv(splist[1])
   v <- v[0,]
   for (i in 1:length(splist)) {
@@ -211,8 +211,8 @@ ENMclassify <- function(parameters, x = NULL, resultdir,
   if(is.list(threshold)){names(v) <- c("species", "pro", names(rcl))} else{
     names(v) <- c("species", "pro", "USA", "SA")
   }
-  write.csv(v, paste0(outdir, "/TBlabENM/suitable_area.csv"), row.names = FALSE, fileEncoding = "GB18030")
-  unlink(paste0(outdir, "/TBlabENM/TBlabENM", star_time), recursive = TRUE)
+  write.csv(v, paste0(outdir, "/suitable_area.csv"), row.names = FALSE, fileEncoding = "GB18030")
+  unlink(paste0(outdir, "/TBlabENM", star_time), recursive = TRUE)
   end_time <- Sys.time()  ## 记录程序结束时间
   ## 第三个位置关闭进度条
   if(exists("pb")){close(pb)}

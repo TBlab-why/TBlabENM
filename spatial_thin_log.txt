@@ -1,0 +1,126 @@
+********************************************** 
+ Beginning Spatial Thinning.
+ Script Started at: Wed Dec 11 20:15:48 2024
+********************************************** 
+ Beginning Spatial Thinning.
+ Script Started at: Wed Dec 11 20:16:52 2024
+********************************************** 
+ Beginning Spatial Thinning.
+ Script Started at: Wed Dec 11 20:17:22 2024
+
+Thinning Parameter Used (in km): 1
+Number of replicates of thinning script: 5
+
+Elapsed time for thinning completion
+0 0 0.04 NA NA
+
+Number of data.frames per locations retained
+loc.cnt df.freq
+10
+5
+Maximum number of records after thinning: 10
+Number of data.frames with max records: 5
+
+**New *.csv file creation:**
+Writing new *.csv files to output directory: ./occthin1km
+Writing file: ./occthin1km/Castanopsis purpurella_thin1.csv
+********************************************** 
+ Beginning Spatial Thinning.
+ Script Started at: Wed Dec 11 20:17:22 2024
+
+Thinning Parameter Used (in km): 1
+Number of replicates of thinning script: 5
+
+Elapsed time for thinning completion
+0 0 0.05 NA NA
+
+Number of data.frames per locations retained
+loc.cnt df.freq
+78
+5
+Maximum number of records after thinning: 78
+Number of data.frames with max records: 5
+
+**New *.csv file creation:**
+Writing new *.csv files to output directory: ./occthin1km
+Writing file: ./occthin1km/Liriodendron chinense_thin1.csv
+********************************************** 
+ Beginning Spatial Thinning.
+ Script Started at: Wed Dec 11 20:17:23 2024
+
+Thinning Parameter Used (in km): 1
+Number of replicates of thinning script: 5
+
+Elapsed time for thinning completion
+0.03 0.05 0.66 NA NA
+
+Number of data.frames per locations retained
+loc.cnt df.freq
+276
+5
+Maximum number of records after thinning: 276
+Number of data.frames with max records: 5
+
+**New *.csv file creation:**
+Writing new *.csv files to output directory: ./occthin1km
+Writing file: ./occthin1km/Phoebe formosana_thin1.csv
+********************************************** 
+ Beginning Spatial Thinning.
+ Script Started at: Wed Dec 11 20:17:45 2024
+
+Thinning Parameter Used (in km): 1
+Number of replicates of thinning script: 5
+
+Elapsed time for thinning completion
+0 0 0.05 NA NA
+
+Number of data.frames per locations retained
+loc.cnt df.freq
+10
+5
+Maximum number of records after thinning: 10
+Number of data.frames with max records: 5
+
+**New *.csv file creation:**
+Writing new *.csv files to output directory: F:/example/occthin1km
+Writing file: F:/example/occthin1km/Castanopsis purpurella_thin1.csv
+********************************************** 
+ Beginning Spatial Thinning.
+ Script Started at: Wed Dec 11 20:17:45 2024
+
+Thinning Parameter Used (in km): 1
+Number of replicates of thinning script: 5
+
+Elapsed time for thinning completion
+0.02 0 0.1 NA NA
+
+Number of data.frames per locations retained
+loc.cnt df.freq
+78
+5
+Maximum number of records after thinning: 78
+Number of data.frames with max records: 5
+
+**New *.csv file creation:**
+Writing new *.csv files to output directory: F:/example/occthin1km
+Writing file: F:/example/occthin1km/Liriodendron chinense_thin1.csv
+********************************************** 
+ Beginning Spatial Thinning.
+ Script Started at: Wed Dec 11 20:17:45 2024
+
+Thinning Parameter Used (in km): 1
+Number of replicates of thinning script: 5
+
+Elapsed time for thinning completion
+0.05 0 0.1 NA NA
+
+Number of data.frames per locations retained
+loc.cnt df.freq
+276
+5
+Maximum number of records after thinning: 276
+Number of data.frames with max records: 5
+
+**New *.csv file creation:**
+Writing new *.csv files to output directory: F:/example/occthin1km
+Writing file: F:/example/occthin1km/Phoebe formosana_thin1.csv

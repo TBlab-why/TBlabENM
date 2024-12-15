@@ -27,7 +27,7 @@ maxent_envcb(
 \item{outdir}{输出文件路径}
 }
 \value{
-生成"./TBlabENM/Variable_contribution"文件夹，该文件夹包括一个按贡献大小排列变量的.csv文件
+生成"./Variable_contribution"文件夹，该文件夹包括一个按贡献大小排列变量的.csv文件
 和.jpeg的最重要的三个变量贡献堆叠条形统计图。
 }
 \description{

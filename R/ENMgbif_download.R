@@ -74,8 +74,8 @@
 
 ENMgbif_download <- function(spnames, range = NULL, uncertainty = 10000, rWCVP = TRUE, dist = 1,
                           outdir = NULL, filename, user, pwd, email){
-  if (is.null(outdir)) {outdir <- "./TBlabENM/gbif_data"} else {
-    outdir <- paste0(outdir, "/TBlabENM/gbif_data")
+  if (is.null(outdir)) {outdir <- "./gbif_data"} else {
+    outdir <- paste0(outdir, "/gbif_data")
   }
   dir.create(outdir, recursive = TRUE, showWarnings = FALSE)
   if (is.null(range) == FALSE) {
@@ -249,7 +249,7 @@ ENMgbif_download <- function(spnames, range = NULL, uncertainty = 10000, rWCVP =
 suppressWarnings(suppressMessages(buffered_dist <- native_range %>%
       st_union() %>%
       st_buffer(dist)))   #构建一个缓冲区
-    suppressMessages(occs$native_buffer <- st_intersects(occs, buffered_dist, sparse = FALSE)[,1])
+    suppressMessages(occs$native_buffer <- sf::st_intersects(occs, buffered_dist, sparse = FALSE)[,1])
 
     #现在，我们可以丢弃在原生范围之外 >100 公里（大约）的记录。
     occs_filtered <- occs %>% filter(native_buffer)
@@ -258,7 +258,7 @@ suppressWarnings(suppressMessages(buffered_dist <- native_range %>%
   occs_i <- arrange(occs_i, species) %>%
     as.data.frame()
 
-  occs_i <- cbind(occs_i[1], st_coordinates(occs_i$geometry), occs_i[2:10], occs_i[12:13])
+  occs_i <- cbind(occs_i[1], sf::st_coordinates(occs_i$geometry), occs_i[2:10], occs_i[12:13])
   names(occs_i)[2:3] <- c("longitude", "latitude")
   }
 

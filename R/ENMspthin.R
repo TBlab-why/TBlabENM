@@ -25,19 +25,30 @@
 #'           lat.col = latitude,
 #'           thin.par = 10,
 #'           outdir = NULL)
-ENMspthin <- function(spdir, spec.col, long.col, lat.col, thin.par, outdir = NULL) {
-  if(is.null(outdir)){outdir = "."}
-  dir.create(paste0(outdir, "/TBlabENM/occthin", thin.par, "km"), recursive = TRUE, showWarnings = FALSE)
+ENMspthin <- function(spdir,
+                      spec.col,
+                      long.col,
+                      lat.col,
+                      thin.par,
+                      outdir = NULL) {
+  if (is.null(outdir)) {
+    outdir = "."
+  }
+  dir.create(
+    paste0(outdir, "/occthin", thin.par, "km"),
+    recursive = TRUE,
+    showWarnings = FALSE
+  )
 
   for (i in seq_along(spdir)) {
     occdata <- utils::read.csv(spdir[i], fileEncoding = "GB18030")
     name <- stringr::str_split_1(spdir[i], pattern = "/")[length(stringr::str_split_1(spdir[i], pattern = "/"))] %>%
       stringr::str_split_1(., pattern = ".csv$")
-    if(file.exists(paste0(outdir, "/TBlabENM/occthin", thin.par, "km/", name[1], "_thin1.csv"))){
-      file.remove(paste0(outdir, "/TBlabENM/occthin", thin.par, "km/", name[1], "_thin1.csv"))
+    if (file.exists(paste0(outdir, "/occthin", thin.par, "km/", name[1], "_thin1.csv"))) {
+      file.remove(paste0(outdir, "/occthin", thin.par, "km/", name[1], "_thin1.csv"))
     }
 
-      spThin::thin(
+    spThin::thin(
       loc.data = occdata,
       spec.col = spec.col,
       long.col = long.col,
@@ -47,17 +58,36 @@ ENMspthin <- function(spdir, spec.col, long.col, lat.col, thin.par, outdir = NUL
       locs.thinned.list.return = FALSE,
       write.files = TRUE,
       max.files = 1,
-      out.dir= paste0(outdir, "/TBlabENM/occthin", thin.par, "km"),
+      out.dir = paste0(outdir, "/occthin", thin.par, "km"),
       out.base =  name[1],
       write.log.file = TRUE,
       log.file = "spatial_thin_log.txt",
-      verbose = FALSE )
-  thinfile <- utils::read.csv(paste0(outdir, "/TBlabENM/occthin", thin.par, "km/", name[1], "_thin1.csv") )
-  thinfile$retain <- rep("T", nrow(thinfile))
-  compare <-suppressMessages(dplyr::left_join(occdata, thinfile))
+      verbose = FALSE
+    )
+    thinfile <- utils::read.csv(paste0(
+      outdir,
+      "/occthin",
+      thin.par,
+      "km/",
+      name[1],
+      "_thin1.csv"
+    ))
+    thinfile$retain <- rep("T", nrow(thinfile))
+    compare <- suppressMessages(dplyr::left_join(occdata, thinfile))
 
-  utils::write.csv(compare, paste0(outdir, "/TBlabENM/occthin", thin.par, "km/compare_", name[1], ".csv"),
-            fileEncoding = "GB18030",na = "")
-    }
-
+    utils::write.csv(
+      compare,
+      paste0(
+        outdir,
+        "/occthin",
+        thin.par,
+        "km/compare_",
+        name[1],
+        ".csv"
+      ),
+      fileEncoding = "GB18030",
+      na = ""
+    )
   }
+
+}

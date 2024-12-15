@@ -45,7 +45,7 @@ ENMsprichness <- function(parameters, x = NULL, booleandir, key = NULL,
                           bioindex = "sr", overwrite = FALSE, outdir = NULL,
                           parallel = F, ncpu = 2) {
   start_time <- Sys.time()
-  unlink(paste0(outdir, "/TBlabENM/TBlabENMtemp3"), recursive = TRUE)
+  #unlink(paste0(outdir, "/TBlabENM/TBlabENMtemp3"), recursive = TRUE)
   if (file.exists(booleandir)==FALSE){
     stop("booleandir not find.")}
   #创建保存路径
@@ -81,13 +81,13 @@ ENMsprichness <- function(parameters, x = NULL, booleandir, key = NULL,
     }
 
     ra <- sum(terra::rast(raster))
-    terra::writeRaster(ra, paste0(outdir, "/TBlabENM/biodiversity/sr/",bb[b%in%y], ".tif"), overwrite = overwrite)
+    terra::writeRaster(ra, paste0(outdir, "/biodiversity/sr/",bb[b%in%y], ".tif"), overwrite = overwrite)
   }
 #计算we
 
   we <- function(z){
 
-    dir.create(paste0(outdir, "/TBlabENM/TBlabENMtemp3/", bb[b%in%z], "/"), showWarnings = FALSE, recursive = TRUE)
+    dir.create(paste0(outdir, "/TBlabENMtemp3/", bb[b%in%z], "/"), showWarnings = FALSE, recursive = TRUE)
     if(is.null(key)==FALSE){
     rasterlist = rasterlist[[z,2]]
     names(rasterlist) <- "path"
@@ -107,20 +107,20 @@ ENMsprichness <- function(parameters, x = NULL, booleandir, key = NULL,
        x*(1/(terra::freq(x)[2,3]))
      })) %>%
       mutate(map2(.x = we, .y = path, .f = function(x,y){
-        terra::writeRaster(x, paste0(outdir, "/TBlabENM/TBlabENMtemp3/",  bb[b%in%z], "/", y, ".tif"), overwrite = overwrite)
+        terra::writeRaster(x, paste0(outdir, "/TBlabENMtemp3/",  bb[b%in%z], "/", y, ".tif"), overwrite = overwrite)
       }))
 
-    raster <- list.files(paste0(outdir, "/TBlabENM/TBlabENMtemp3/",  bb[b%in%z], "/"), full.names = TRUE)
+    raster <- list.files(paste0(outdir, "/TBlabENMtemp3/",  bb[b%in%z], "/"), full.names = TRUE)
     ra <- sum(terra::rast(raster))
-    terra::writeRaster(ra, paste0(outdir, "/TBlabENM/biodiversity/we/",  bb[b%in%z],".tif"), overwrite = overwrite)
-    unlink(paste0(outdir, "/TBlabENM/TBlabENMtemp3"), recursive = TRUE)
+    terra::writeRaster(ra, paste0(outdir, "/biodiversity/we/",  bb[b%in%z],".tif"), overwrite = overwrite)
+    unlink(paste0(outdir, "/TBlabENMtemp3"), recursive = TRUE)
   }
 
 
 cwe <- function(y){
 
-  cwe <- terra::rast(paste0(outdir, "/TBlabENM/biodiversity/we/", bb[b%in%y],".tif"))/terra::rast(paste0(outdir, "/TBlabENM/biodiversity/sr/",bb[b%in%y], ".tif"))
-  terra::writeRaster(cwe, paste0(outdir, "/TBlabENM/biodiversity/cwe/", bb[b%in%y],".tif"), overwrite = overwrite)
+  cwe <- terra::rast(paste0(outdir, "/biodiversity/we/", bb[b%in%y],".tif"))/terra::rast(paste0(outdir, "/biodiversity/sr/",bb[b%in%y], ".tif"))
+  terra::writeRaster(cwe, paste0(outdir, "/biodiversity/cwe/", bb[b%in%y],".tif"), overwrite = overwrite)
 }
 
 
@@ -143,31 +143,31 @@ cwe <- function(y){
     snowfall::sfLibrary(tidyverse)
 
     if(bioindex == "sr"){
-      dir.create(paste0(outdir, "/TBlabENM/biodiversity/sr"), showWarnings = FALSE, recursive = TRUE)
+      dir.create(paste0(outdir, "/biodiversity/sr"), showWarnings = FALSE, recursive = TRUE)
     snowfall::sfLapply(b, sr) }
     if(bioindex == "we"){
-      dir.create(paste0(outdir, "/TBlabENM/biodiversity/we"), showWarnings = FALSE, recursive = TRUE)
+      dir.create(paste0(outdir, "/biodiversity/we"), showWarnings = FALSE, recursive = TRUE)
       snowfall::sfLapply(b, we) }
     if(bioindex == "cwe"){
-  dir.create(paste0(outdir, "/TBlabENM/biodiversity/cwe"), showWarnings = FALSE, recursive = TRUE)
-  dir.create(paste0(outdir, "/TBlabENM/biodiversity/we"), showWarnings = FALSE, recursive = TRUE)
-  dir.create(paste0(outdir, "/TBlabENM/biodiversity/sr"), showWarnings = FALSE, recursive = TRUE)
+  dir.create(paste0(outdir, "/biodiversity/cwe"), showWarnings = FALSE, recursive = TRUE)
+  dir.create(paste0(outdir, "/biodiversity/we"), showWarnings = FALSE, recursive = TRUE)
+  dir.create(paste0(outdir, "/biodiversity/sr"), showWarnings = FALSE, recursive = TRUE)
   snowfall::sfLapply(b, sr)
   snowfall::sfLapply(b, we)
   snowfall::sfLapply(b, cwe) }
     snowfall::sfStop()  # 关闭集群
 } else{
   if(bioindex == "sr"){
-    dir.create(paste0(outdir, "/TBlabENM/biodiversity/sr"), showWarnings = FALSE, recursive = TRUE)
+    dir.create(paste0(outdir, "/biodiversity/sr"), showWarnings = FALSE, recursive = TRUE)
     for(i in b) {sr(i)} }
   if(bioindex == "we"){
-    dir.create(paste0(outdir, "/TBlabENM/biodiversity/we"), showWarnings = FALSE, recursive = TRUE)
+    dir.create(paste0(outdir, "/biodiversity/we"), showWarnings = FALSE, recursive = TRUE)
     for(i in b) {we(i)} }
   if(bioindex == "cwe"){
     for(i in b) {
-      dir.create(paste0(outdir, "/TBlabENM/biodiversity/sr"), showWarnings = FALSE, recursive = TRUE)
-      dir.create(paste0(outdir, "/TBlabENM/biodiversity/we"), showWarnings = FALSE, recursive = TRUE)
-      dir.create(paste0(outdir, "/TBlabENM/biodiversity/cwe"), showWarnings = FALSE, recursive = TRUE)
+      dir.create(paste0(outdir, "/biodiversity/sr"), showWarnings = FALSE, recursive = TRUE)
+      dir.create(paste0(outdir, "/biodiversity/we"), showWarnings = FALSE, recursive = TRUE)
+      dir.create(paste0(outdir, "/biodiversity/cwe"), showWarnings = FALSE, recursive = TRUE)
       sr(i)
       we(i)
       cwe(i)} }

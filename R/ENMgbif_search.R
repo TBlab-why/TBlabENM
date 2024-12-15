@@ -66,8 +66,8 @@
 
 ENMgbif_search <- function(spnames, range = NULL, uncertainty = 10000, rWCVP = TRUE, dist = 1,
                              outdir = NULL, filename){
-  if (is.null(outdir)) {outdir <- "./TBlabENM/gbif_data"} else {
-    outdir <- paste0(outdir, "/TBlabENM/gbif_data")
+  if (is.null(outdir)) {outdir <- "./gbif_data"} else {
+    outdir <- paste0(outdir, "/gbif_data")
   }
   dir.create(outdir, recursive = TRUE, showWarnings = FALSE)
   if (is.null(range) == FALSE) {

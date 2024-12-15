@@ -34,24 +34,26 @@
 #'            elrange = 500,
 #'            deal_NA = "none")
 ENMspcheck <- function(spdir, evdir, evselectev, elevation,
-                       elrange=500, deal_NA = "none", width,
+                       elrange = 500, deal_NA = "none", width,
                        outdir) {
 
   #获取物种名 对路径拆分并取倒数第一个字符串
-  spname1 <- stringr::str_split_1(spdir, "/")[length(stringr::str_split_1(spdir, "/"))]
-  sp_name <- stringr::str_split_1(spname1, ".csv$")[1]
+    spname1 <- stringr::str_split_1(spdir, "/")[length(stringr::str_split_1(spdir, "/"))]
+    sp_name <- stringr::str_split_1(spname1, ".csv$")[1]
+
   #读取栅格数据列表
-  biolist <- list.files(evdir, pattern = "(tif|asc)$", full.names = TRUE)
-  #选择要检查的变量，并stack
-  evselectevdir <- c()
-  for (i in seq_along(evselectev)) {
-    evselectevdir1 <- biolist[stringr::str_which(biolist, evselectev[i])]
-    evselectevdir <- c(evselectevdir, evselectevdir1)
-  }
-  biostack_t <- terra::rast(evselectevdir)
+
+    biolist <- list.files(evdir, pattern = "(tif|asc)$", full.names = TRUE)
+    #选择要检查的变量，并stack
+    evselectevdir <- c()
+    for (i in seq_along(evselectev)) {
+      evselectevdir1 <- biolist[stringr::str_which(biolist, paste0(evselectev[i],"\\."))]
+      evselectevdir <- c(evselectevdir, evselectevdir1)
+    }
+    biostack_t <- terra::rast(evselectevdir)
   #读取物种坐标数据并提取出经纬度列
-  occ1 <- utils::read.csv(spdir)
-  occ <- occ1[c(2,3)]
+    occ1 <- utils::read.csv(spdir)
+    occ <- occ1[c(2,3)]
   #提取每个坐标点对应的环境值并转为数据框
   occdata_t <- as.data.frame(terra::extract(biostack_t, occ, ID = FALSE))
   #检查缺失值所在行
@@ -66,9 +68,8 @@ ENMspcheck <- function(spdir, evdir, evselectev, elevation,
 
   #sum(occ_e)==0和length(row_na)==0说明数据都符合要求，否则发出警告
   ifelse(sum(occ_e) == 0 & length(row_na) == 0,
-         return("The data set passes the altitude range and ENM envionment variables check"),
+         cat("The data set passes the altitude range and ENM envionment variables check"),
          warning("The above coordinate points have some problem in elevation or ENM envionment variables, please check now.", call. = F))
-
 
 #相应处理
   if (deal_NA == "mv" & length(row_na) > 0) {

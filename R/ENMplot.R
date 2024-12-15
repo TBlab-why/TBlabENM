@@ -15,7 +15,7 @@
 #' @param filename 保存的文件名称
 #' @param label 标注文字，例如时期的标注
 #'
-#' @return
+#' @return picture
 #' @export
 #' @importFrom sf st_read
 #' @importFrom terra classify

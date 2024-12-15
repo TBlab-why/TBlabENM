@@ -25,7 +25,7 @@
 #' @importFrom utils read.csv
 #' @importFrom stringr str_split
 #' @importFrom dplyr bind_rows
-#' @importFrom dismo maxent
+#' @importFrom predicts MaxEnt
 #' @importFrom magrittr %>%
 #' @examples
 #'
@@ -42,76 +42,97 @@
 #'   parallel = T,
 #'   ncpu =2)
 
-maxent_single <- function(x, evdir, evlist = NULL, factors = NULL, mybgfile = NULL,
-                          nbg = 10000, args = maxent_args(), prodir = NULL,
-                          outdir = NULL, parallel = F, ncpu = 2){
+maxent_single <- function(x,
+                          evdir,
+                          evlist = NULL,
+                          factors = NULL,
+                          mybgfile = NULL,
+                          nbg = 10000,
+                          args = maxent_args(),
+                          prodir = NULL,
+                          outdir = NULL,
+                          parallel = F,
+                          ncpu = 2) {
   star_time <- Sys.time() ## 记录程序开始时间
-#检查prodir参数是否包含名字，否则报错
-  if(is.null(prodir)==FALSE){if(is.null(names(prodir))){
-    stop("The projection path does not have a valid name, please check parameter prodir")}}
+  #检查prodir参数是否包含名字，否则报错
+  if (is.null(prodir) == FALSE) {
+    if (is.null(names(prodir))) {
+      stop("The projection path does not have a valid name, please check parameter prodir")
+    }
+  }
   #获取物种名 对路径拆分并取倒数第一个字符串
   spname1 <- stringr::str_split_1(x, "/")[length(stringr::str_split_1(x, "/"))]
   sp_name <- stringr::str_split_1(spname1, ".csv$")[1]
   cat(paste("Buildding MaxEnt models for", sp_name, "\n"))
 
-   #读取环境变量
+  #读取环境变量
   biolist <- list.files(evdir, pattern = ".asc$", full.names = TRUE)
-  if(is.null(evlist)==FALSE){biolist <- biolist[evlist]}
+  if (is.null(evlist) == FALSE) {
+    biolist <- biolist[evlist]
+  }
   biostack <- terra::rast(biolist)
 
   #读取、提取背景点的环境值并转化为数据框，生成环境背景数据
-  ifelse(is.null(mybgfile), mybg <- terra::spatSample(biostack, nbg, na.rm = T, xy = T)[1:2],
-       mybg <- mybgfile)
+  ifelse(
+    is.null(mybgfile),
+    mybg <- terra::spatSample(biostack, nbg, na.rm = T, xy = T)[1:2],
+    mybg <- mybgfile
+  )
   names(mybg) <- c("longitude", "latitude")
-  mybgdata <- terra::extract(biostack, mybg, ID=FALSE)
+  mybgdata <- terra::extract(biostack, mybg, ID = FALSE)
 
   #将背景点赋值为0
   mybg$'p/b' <- rep(0, times = nrow(mybg))
 
   #读取、提取存在点的环境值并转化为数据框，生成存在环境数据
   occ <- utils::read.csv(x) #读取物种坐标数据
-  occ <- occ[c(2,3)]
+  occ <- occ[c(2, 3)]
   names(occ) <- c("longitude", "latitude")
-  occdata <- terra::extract(biostack, occ, ID=FALSE)
+  occdata <- terra::extract(biostack, occ, ID = FALSE)
   #将存在点赋值为1
   occ$'p/b' <- rep(1, times = nrow(occ))
 
-####全变量模拟####
-#组合存在环境数据与环境背景数据构成环境变量数据框
+  ####全变量模拟####
+  #组合存在环境数据与环境背景数据构成环境变量数据框
   evdata <- dplyr::bind_rows(occdata, mybgdata)
-#指定分类变量
+  #指定分类变量
   #获取变量名
   bio_name <- c()
-  for(i in seq_along(biolist)){
-  bioname1 <- stringr::str_split_1(biolist[i], "/")[length(stringr::str_split_1(biolist[i], "/"))]
-  bio_name0 <- stringr::str_split_1(bioname1, ".asc")[1]
-  bio_name <- c(bio_name, bio_name0)
+  for (i in seq_along(biolist)) {
+    bioname1 <- stringr::str_split_1(biolist[i], "/")[length(stringr::str_split_1(biolist[i], "/"))]
+    bio_name0 <- stringr::str_split_1(bioname1, ".asc")[1]
+    bio_name <- c(bio_name, bio_name0)
   }
-#
-  if(is.null(factors)==FALSE){
+  #
+  if (is.null(factors) == FALSE) {
     site <- bio_name[bio_name %in% factors]
     evdata <- evdata %>% dplyr::mutate_at(site, as.factor)
-    }
+  }
 
-#组合存在点和背景点构成坐标点数据框（包含0或1的）（要与上面的顺序一致）
+  #组合存在点和背景点构成坐标点数据框（包含0或1的）（要与上面的顺序一致）
   xydata <- dplyr::bind_rows(occ, mybg)
   args2 <- args
   #当坐标点少于25个时，将replicates=设置为坐标点数。
-  if(nrow(occ) <  25) { args2[1] <- paste0("replicates=", nrow(occ))}
-#模型模拟, xydata$`p/b`
-  if(is.null(outdir)){outdir <- "./TBlabENM/maxent/"} else{
-    outdir <- paste0(outdir, "/TBlabENM/maxent/")
+  if (nrow(occ) <  25) {
+    args2[1] <- paste0("replicates=", nrow(occ))
+  }
+  #模型模拟, xydata$`p/b`
+  if (is.null(outdir)) {
+    outdir <- "./maxent/"
+  } else{
+    outdir <- paste0(outdir, "/maxent/")
   }
 
-  if(is.null(prodir) == TRUE){
-    me1 <- dismo::maxent(evdata, xydata$`p/b` , #环境变量、坐标数据和背景点
-                args2, paste0(outdir, sp_name)) }#输出路径
+  if (is.null(prodir) == TRUE) {
+    me1 <- predicts::MaxEnt(evdata, xydata$`p/b` , #环境变量、坐标数据和背景点
+                         args2, paste0(outdir, sp_name))
+  }#输出路径
 
   ##当提供prodir时，对不同时期循环
-  if(is.null(prodir) == FALSE){
+  if (is.null(prodir) == FALSE) {
     cat(paste("Perform the projection for", sp_name, "\n"))
 
-    if(parallel ==T){
+    if (parallel == T) {
       # library(snowfall)
 
       # 开启集成
@@ -120,41 +141,62 @@ maxent_single <- function(x, evdir, evlist = NULL, factors = NULL, mybgfile = NU
       #加载需要用到的变量或函数 因为下面函数fff中要用到prodir参数
       snowfall::sfExport("prodir")
       #构建函数fff
-     fff <- function(y){dismo::maxent(evdata, xydata$`p/b` , #环境变量、坐标数据和背景点
-                               append(args2, paste0("projectionlayers=", prodir[[y]])),
-                               #新建文件夹保存模拟结果
-                               path = paste0(outdir, sp_name, "/", names(prodir)[y]))
-     }
-     snowfall::sfLapply(seq_along(prodir), fff)
-     snowfall::sfStop()  # 关闭集群
-     #将结果文件的asc格式转为tif格式以节约内存
-     df <- list.files(paste0(outdir, sp_name), full.names = TRUE) %>%
-       list.files(., pattern = "asc$", full.names = TRUE) %>%
-         as.data.frame()
-     names(df) <- "file"
-     df1 <- df %>%
-        mutate(path = map_chr(.x = file, .f = function(x){
-          stringr::str_replace(x, pattern = ".asc$", ".tif")
-        })) %>%
-        dplyr::mutate(ra = purrr::map(.x = file, .f = function(x){terra::rast(x)})) %>%
-        mutate(purrr::map2(.x = ra, .y = path, .f = function(x, y){
-          terra::writeRaster(x, y, overwrite=TRUE)}))
-       #删除asc格式
-       gg <- file.remove(list.files(paste0(outdir, sp_name), full.names = TRUE) %>%
-                     list.files(., pattern = "asc$", full.names = TRUE))
+      fff <- function(y) {
+        predicts::MaxEnt(
+          evdata,
+          xydata$`p/b` ,
+          #环境变量、坐标数据和背景点
+          append(args2, paste0("projectionlayers=", prodir[[y]])),
+          #新建文件夹保存模拟结果
+          path = paste0(outdir, sp_name, "/", names(prodir)[y])
+        )
+      }
+      snowfall::sfLapply(seq_along(prodir), fff)
+      snowfall::sfStop()  # 关闭集群
+      #将结果文件的asc格式转为tif格式以节约内存
+      df <- list.files(paste0(outdir, sp_name), full.names = TRUE) %>%
+        list.files(., pattern = "asc$", full.names = TRUE) %>%
+        as.data.frame()
+      names(df) <- "file"
+      df1 <- df %>%
+        mutate(path = map_chr(
+          .x = file,
+          .f = function(x) {
+            stringr::str_replace(x, pattern = ".asc$", ".tif")
+          }
+        )) %>%
+        dplyr::mutate(ra = purrr::map(
+          .x = file,
+          .f = function(x) {
+            terra::rast(x)
+          }
+        )) %>%
+        mutate(purrr::map2(
+          .x = ra,
+          .y = path,
+          .f = function(x, y) {
+            terra::writeRaster(x, y, overwrite = TRUE)
+          }
+        ))
+      #删除asc格式
+      gg <- file.remove(
+        list.files(paste0(outdir, sp_name), full.names = TRUE) %>%
+          list.files(., pattern = "asc$", full.names = TRUE)
+      )
 
-     end_time <- Sys.time()
-     print(end_time - star_time)
+      end_time <- Sys.time()
+      print(end_time - star_time)
 
     } else {
-
       for (b in seq_along(prodir)) {
-      args3 <-append(args2, paste0("projectionlayers=", prodir[[b]]))
-    #模型模拟, xydata$`p/b`
-      me1 <- dismo::maxent(evdata, xydata$`p/b` , #环境变量、坐标数据和背景点
-                         args3,
-                         #新建文件夹保存模拟结果
-                         path = paste0(outdir, sp_name, "/", names(prodir)[b]))
+        args3 <- append(args2, paste0("projectionlayers=", prodir[[b]]))
+        #模型模拟, xydata$`p/b`
+        me1 <- predicts::MaxEnt(evdata,
+                             xydata$`p/b` ,
+                             #环境变量、坐标数据和背景点
+                             args3,
+                             #新建文件夹保存模拟结果
+                             path = paste0(outdir, sp_name, "/", names(prodir)[b]))
 
       }
       #将结果文件的asc格式转为tif格式以节约内存
@@ -163,47 +205,69 @@ maxent_single <- function(x, evdir, evlist = NULL, factors = NULL, mybgfile = NU
         as.data.frame()
       names(df) <- "file"
       df1 <- df %>%
-        mutate(path = map_chr(.x = file, .f = function(x){
-          stringr::str_replace(x, pattern = ".asc$", ".tif")
-        })) %>%
-        mutate(purrr::map2(.x = file, .y = path, .f = function(x, y){
-          terra::writeRaster(terra::rast(x), y, overwrite=TRUE)}))
+        mutate(path = map_chr(
+          .x = file,
+          .f = function(x) {
+            stringr::str_replace(x, pattern = ".asc$", ".tif")
+          }
+        )) %>%
+        mutate(purrr::map2(
+          .x = file,
+          .y = path,
+          .f = function(x, y) {
+            terra::writeRaster(terra::rast(x), y, overwrite = TRUE)
+          }
+        ))
 
-       #删除asc格式
+      #删除asc格式
       # gg <- file.remove(list.files(paste0(outdir, sp_name), full.names = TRUE) %>%
       #                     list.files(., pattern = "asc$", full.names = TRUE))
 
       end_time <- Sys.time()
       print(end_time - star_time)
-}
-
+    }
+  #
   }
   #提取参数
-  df <- data.frame(matrix(NA,1,10))
-  names(df) <- c("species", "number", "env", "fc", "rm", "replicates", "AUCtrain", "AUCtest", "MTSStrain", "MTSStest")
+  df <- data.frame(matrix(NA, 1, 10))
+  names(df) <- c(
+    "species",
+    "number",
+    "env",
+    "fc",
+    "rm",
+    "replicates",
+    "AUCtrain",
+    "AUCtest",
+    "MTSStrain",
+    "MTSStest"
+  )
   df$species <- sp_name
 
   df$env <- paste0(sort(names(occdata)), collapse = ",")
   fc <- args2[3:7][stringr::str_detect(args2[3:7], "TRUE")]
   fc1 <- c()
   for (i in fc) {
-    fc2 <- stringr::str_split_1(i,"")[1]
+    fc2 <- stringr::str_split_1(i, "")[1]
     fc1 <- c(fc1, fc2)
   }
   df$fc <- toupper(paste0(fc1, collapse = ""))
   df$rm <- stringr::str_split_1(args2[2], "=")[2]
   df$replicates <- stringr::str_split_1(args2[1], "=")[2]
-  if(is.null(prodir)){
+  if (is.null(prodir)) {
     data <- read.csv(paste0(outdir, sp_name, "/maxentResults.csv"))
-  } else {data <- read.csv(paste0(outdir, sp_name, "/", names(prodir)[1], "/maxentResults.csv"))}
+  } else {
+    data <- read.csv(paste0(outdir, sp_name, "/", names(prodir)[1], "/maxentResults.csv"))
+  }
 
   df$AUCtest <- data$Test.AUC[length(data$Test.AUC)]
   df$AUCtrain <- data$Training.AUC[length(data$Training.AUC)]
   df$MTSStrain <- data$Maximum.training.sensitivity.plus.specificity.Logistic.threshold[length(data$Maximum.training.sensitivity.plus.specificity.Logistic.threshold)]
   df$MTSStest <- data$Maximum.test.sensitivity.plus.specificity.Logistic.threshold[length(data$Maximum.test.sensitivity.plus.specificity.Logistic.threshold)]
-  df$number <- data$X.Training.samples[1]+data$X.Test.samples[1]
+  df$number <- data$X.Training.samples[1] + data$X.Test.samples[1]
   cat(paste0("The results are saved ", outdir, sp_name, "\n"))
   write.csv(df, paste0(outdir, sp_name, "/parameters.csv"), row.names = FALSE)
+
 
   return(df)
 }

@@ -1,0 +1,151 @@
+---
+title: "**Models detail**"
+output: html_document
+params:
+  spdir: NULL
+  evdir: "F:/var2/eblf_proj/present/asc"
+  myenv: NULL
+  evlist: NULL
+  factors: NULL
+  mybgfile: NULL
+  nbg: NULL
+  args: NULL
+  fc: NULL
+  rm: NULL
+  r: NULL
+  cormethod: NULL
+  vif: NULL
+  vifth: NULL
+  opt: NULL
+  prodir: NULL
+  outdir: NULL
+---
+
+<style type="text/css"> 
+hr {
+    border: 1px solid #8B8989;
+}
+  body{
+  font-size: 12pt;
+  line-height: 1.5em;
+  text-indent: 35px;
+}
+.main-container {
+  max-width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+}
+h1 {
+   text-align: center;
+}
+</style>
+
+```{r setup, echo = FALSE, comment = '', include = FALSE}
+#全局设置，不显示代码块、结果不用#保护、结果直接作为文本、不输出警告信息、遇到错误继续执行
+knitr::opts_chunk$set(echo = FALSE, comment = '', results = 'asis', warning = FALSE, error = TRUE)
+flextable::set_flextable_defaults(
+    font.family = "Times New Roman", #英文设置Times New Roman
+    font.size = 12, #字体10.5磅等于5号字体
+    text.align = "center", #文本居中对齐
+    border.color = "black", #边框黑色
+    border.width = 0.75, #边框宽度1.5磅
+    line_spacing = 1, #单倍行距
+    eastasia.family = "宋体", #中文设置宋体
+    pct_digits = 2, #保留2位小数
+    split = F, #不允许一行内容分两页
+    padding.bottom = 4,#段后4磅约0.25行
+    padding.top = 4, #段前4磅约0.25行
+    padding.right = 0, #右侧缩进
+    padding.left = 0, #左侧缩进
+    background.color = "transparent", #单元格背景色透明
+    theme_fun = "theme_booktabs", #使用主题
+    font.color = "black" #文本字体黑色
+)
+```
+
+本页面是对建模过程的简要记录，使用TBlabENM包创建
+
+****************
+
+### **模型参数预设**
+``` {r 环境变量设置情况, echo = FALSE}
+biolist <- list.files(params$evdir, pattern = ".asc$", full.names = TRUE)
+  if(is.null(params$evlist) == FALSE){biolist <- biolist[params$evlist]}
+  bio_name <- c()
+  for(i in seq_along(biolist)){
+    bioname1 <- stringr::str_split_1(biolist[i], "/")[length(stringr::str_split_1(biolist[i], "/"))]
+    bio_name0 <- stringr::str_split_1(bioname1, ".asc")[1]
+    bio_name <- c(bio_name, bio_name0)
+  }
+```
+本次使用MaxEnt为`r length(params$spdir)` 个物种构建了生态位模型。全部环境变量共有`r length(bio_name)` 个，分别为`r bio_name`.
+特征类型(feature class, FC)设置为`r params$fc`，正则化乘数(regularization multiplier, RM)设置为`r params$rm`.背景点/伪缺席(background/)随机选择`r params$nbg`个。当发生点大于等于10个时，模型重复10次，小于10个时，模型重复次数与发生点个数次。其他参数使用默认值。投影到`r length(prodir)` 个不同的时期或地理空间，分别是`r names(prodir)`
+
+### **最佳参数选择**
+
+#### **环境变量选择**
+
+使用`r params$cormethod`系数检验环境变量之间的相关性，阈值设置为`r params$r`, 当任意两个环境变量的相关性大于等于`r params$r`则认为他们之间具有强相关性。图1
+
+![](F:/2/TBlabENM/plots/cor_heat.jpeg)
+
+将预设的所有FC和RM进行组合，共有`r length(params$fc)*length(params$rm)`个组合.见表
+```{r echo=FALSE, comment=''}
+library(purrr)
+df <- expand.grid(fc, rm, stringsAsFactors = FALSE)
+df$env <- paste0(bio_name, collapse = ",")
+names(df)[1:2] <- c("fc", "rm")
+tb <- flextable::flextable(
+    data = df, # data
+    col_keys = names(df)) %>% #要出现在表格中的列
+        flextable::set_caption(   #添加标题
+            .,
+            caption = "表1 参数组合",
+            autonum = NULL,
+            style = "Table Caption",
+            html_escape = TRUE ) %>%
+              flextable::align(., align = "center", part = "all") %>% # 居中对齐
+              flextable::bold(., i = 1, part = "header")  #表头（第一行）文字加粗
+
+tb
+```
+
+分别使用每个组合的参数构建maxent模型，获得每个环境变量的贡献百分比(Percent contribution)，首先排除贡献百分比小于0.5的变量，因为他们对模型的构建几乎没有作用。然后从贡献百分比最大的变量开始，排除与其具有强相关性的变量，如果与所有变量都没有强相关性则排除与贡献百分比第二大的变量，以此类推。
+使用剩余的变量再次构建模型，获得该组变量的贡献百分比，重复上述过程，直到所有保留的变量之间不具有强相关性。
+
+### **最优模型选择**
+
+在为每个组合选择了环境变量，使用ENMeval包对每个组合进行测试，根据`r length(params$opt)`选择最佳的参数组合。见表
+![](F:/2/TBlabENM/plots/cor_heat.jpeg)
+
+
+
+
+```{r echo=FALSE, comment=''}
+library(purrr)
+df <- read.csv(paste0(outdir, "/TBlabENM/maxent/allsp_parameters.csv"))
+tb <- flextable::flextable(
+    data = df, # data
+    col_keys = names(df)) %>% #要出现在表格中的列
+        flextable::set_caption(   #添加标题
+            .,
+            caption = "表1 参数组合",
+            autonum = NULL,
+            style = "Table Caption",
+            html_escape = TRUE ) %>%
+              flextable::align(., align = "center", part = "all") %>% # 居中对齐
+              flextable::bold(., i = 1, part = "header")  #表头（第一行）文字加粗
+
+tb
+```
+
+
+此外，使用随机数据构建了NULL模型来与优化的模型进行比较，
+
+![](F:/2/TBlabENM/plots/null_model.jpeg)
+
+
+
+
+
+

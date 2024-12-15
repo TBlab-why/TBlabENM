@@ -30,14 +30,14 @@
 ENMrefuges <- function(parameters, x = NULL, booleandir, key = NULL,
                       overwrite = FALSE, outdir = NULL,
                       parallel = F, ncpu = 2) {
-  unlink(paste0(outdir, "/TBlabENM/TBlabENMtemp1"), recursive = TRUE)
+  #unlink(paste0(outdir, "/TBlabENM/TBlabENMtemp1"), recursive = TRUE)
  #计算单个物种的避难所
   fun1 <- function(x){
     ra <- b[stringr::str_detect(b, parameters[x,1])]
     raster <- sum(terra::rast(ra))
     raster[raster<length(ra)] <- 0
     raster[raster==length(ra)] <- 1
-    terra::writeRaster(raster, paste0(outdir, "/TBlabENM/TBlabENMtemp1/", parameters[x,1], ".tif")) }
+    terra::writeRaster(raster, paste0(outdir, "/TBlabENMtemp1/", parameters[x,1], ".tif")) }
 
   star_time <- Sys.time() ## 记录程序开始时间
   #读取单个物种单个时期的二值图结果文件夹,该文件夹下不要有其他的无关tif
@@ -49,12 +49,12 @@ ENMrefuges <- function(parameters, x = NULL, booleandir, key = NULL,
   #创建保存路径
   if(is.null(outdir)){outdir = "."}
   if(is.null(x)){x <- 1:nrow(parameters)}
-  dir.create(paste0(outdir, "/TBlabENM/refuges"), showWarnings = FALSE, recursive = TRUE)
+  dir.create(paste0(outdir, "/refuges"), showWarnings = FALSE, recursive = TRUE)
 
   ##选择指定的时期的所有二值图
   if(is.null(key)){b <- rasterlist} else{
     for (i in 1:length(key)) {
-      dir.create(paste0(outdir, "/TBlabENM/TBlabENMtemp1"), showWarnings = FALSE, recursive = TRUE)
+      dir.create(paste0(outdir, "/TBlabENMtemp1"), showWarnings = FALSE, recursive = TRUE)
       a <- key[[i]]
      #提取所有a中的栅格
       b <- c()
@@ -77,10 +77,10 @@ ENMrefuges <- function(parameters, x = NULL, booleandir, key = NULL,
         }
       }
 
-      ra <- list.files(paste0(outdir, "/TBlabENM/TBlabENMtemp1"), full.names = TRUE)
+      ra <- list.files(paste0(outdir, "/TBlabENMtemp1"), full.names = TRUE)
       raster <- sum(terra::rast(ra))
-      terra::writeRaster(raster, paste0(outdir, "/TBlabENM/refuges/", names(key)[i], ".tif"), overwrite = overwrite)
-      unlink(paste0(outdir, "/TBlabENM/TBlabENMtemp1"), recursive = TRUE)
+      terra::writeRaster(raster, paste0(outdir, "/refuges/", names(key)[i], ".tif"), overwrite = overwrite)
+      unlink(paste0(outdir, "/TBlabENMtemp1"), recursive = TRUE)
     }
 
     }
