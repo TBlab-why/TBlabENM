@@ -26,7 +26,7 @@
 #' @param cormethod 计算相关性的方法，取值为"pearson" (default), "kendall", or "spearman"
 #' @param vif 逻辑型，当为T时对所有候选变量组合进行方差膨胀因子检验，排除具有强共线性的组合
 #' @param vifth 方差膨胀因子阈值
-#' @param opt 选择最佳模型的指标，可选择"aicc","seq","cbi"或NULL.当选择NULL时，则仅选择变量。
+#' @param opt 选择最佳模型的指标，可选择"auc.train, cbi.train, auc.diff.avg, auc.val.avg, cbi.val.avg, or.10p.avg, or.mtp.avg, AICc"或NULL.当选择NULL时，则仅选择变量。当选择多个指标时，则按照顺序筛选最佳模型，如果所选指标具有NA，则跳过该指标，如果所有指标都含有NA，则使用auc.val.avg代替.
 #' @param outdir 结果保存路径
 #' @param null_model 逻辑值,是否进行NULL模型检验。
 #' @param nbg 随机背景点数量，当指定参数mybgfile时忽略。
@@ -83,15 +83,68 @@ maxent_parameter <- function(x,
 
   random_num <- sample(1:100000, 1)
   #绘制模型调优结果的函数
-  p_tun <- function(data, y){
-    ggplot(mapping = aes(x = as.character(data$rm), y = data1[[y]], color = data$fc, group = data$fc)) +
-      geom_point(size = 2) +
-      geom_line() +
-      xlab("rm") +
-      ylab(y) +
-      labs(color = "fc") +
-      theme_bw()
+  p_tun <- function(cs1, opt) {
+    data <-
+      pivot_longer(
+        cs1,
+        cols = c("auc.train", "cbi.train", "auc.diff.avg", "auc.val.avg",
+                 "cbi.val.avg", "or.10p.avg", "or.mtp.avg", "AICc"),
+        names_to = "name",
+        values_to = "value"
+      ) %>%
+      dplyr::filter(., name %in% opt)
+
+    if (length(opt) > 1) {
+      p <- ggplot(data, mapping = aes(
+        x = rm,
+        y = value,
+        color = fc,
+        group = fc
+      )) +
+        geom_point(size = 2) +
+        geom_line() +
+        facet_grid(name ~ ., scales = "free") +
+        xlab("rm") +
+        labs(color = "fc") +
+        theme_bw()
+
+      ggsave(
+        filename = "model_tun.jpeg",
+        plot = p,
+        path = paste0(outdir, "/maxent/", sp_name),
+        width = 10 + (max(cs1$rm)-4)*2.5,
+        height = 3.5*length(opt),
+        units = c("cm"),
+        create.dir = TRUE,
+        #limitsize = FALSE
+      )
+    } else {
+      p <- ggplot(data, mapping = aes(
+        x = rm,
+        y = value,
+        color = fc,
+        group = fc
+      )) +
+        geom_point(size = 2) +
+        geom_line() +
+        xlab("rm") +
+        ylab(opt) +
+        labs(color = "fc") +
+        theme_bw()
+
+      ggsave(
+        filename = "model_tun.jpeg",
+        plot = p,
+        path = paste0(outdir, "/maxent/", sp_name),
+        width = 10,
+        height = 7,
+        units = c("cm"),
+        create.dir = TRUE,
+        #limitsize = FALSE
+      )
+    }
   }
+
   #修改ENMnulls函数
   ENMnulls <- function(e,
                        mod.settings,
@@ -1232,7 +1285,7 @@ maxent_parameter <- function(x,
       partitions = "jackknife"
       partition.settings = NULL
     }
-df
+
     gz <- purrr::pmap(
       df,
       .f = function(fc, rm, occdata, bgdata, ...) {
@@ -1275,32 +1328,26 @@ df
     cs <- cbind(df[1:3], gz1[c(1:16, 19)])
     cs <- cs[-(4:5)]
     cs <- dplyr::arrange(cs, AICc, auc.diff.avg, or.mtp.avg)
-
+    cs1 <- cs
     #选择最佳模型auc.train, cbi.train, auc.diff.avg, auc.val.avg, cbi.val.avg, or.10p.avg, or.mtp.avg, AICc
-    #单一指标法，顺序指标法，最大指标法。
+    #单一指标法，顺序指标法，最大指标法。#opt1为最佳模型
+    for (i in opt) { #i = opt[1]
+      if (is.na(min(cs[i]))) {
+        warning("'", paste0(i), "'", " is NA in one or more parameter combinations, skip it.")
+        next}
 
-    if (opt == "aicc") {
-      opt1 <- dplyr::filter(cs, AICc == min(AICc))
-      if (nrow(opt1) == 0) {
-        opt1 <- dplyr::filter(cs, auc.val.avg == max(auc.val.avg))
-        warning("AICC is NA, use 'auc.val.avg' instead.")
+      if (i %in% c("auc.diff.avg", "or.10p.avg", "or.mtp.avg", "AICc")) {
+        opt1 <- cs[which(min(cs[i]) == cs[[i]]),]
+        cs <- opt1
+      } else {
+        opt1 <- cs[which(max(cs[i]) == cs[[i]]),]
+        cs <- opt1
       }
-
     }
-    #使用顺序法选择最佳模型,
-    if (opt == "seq") {
-      opt1 <- cs %>%
-        dplyr::filter(or.10p.avg == min(or.10p.avg)) %>%
-        dplyr::filter(auc.val.avg == max(auc.val.avg))
-
-    }
-    #使用cbi选择最佳模型
-    if (opt == "cbi") {
-      opt1 <- dplyr::filter(cs, cbi.val.avg == max(cbi.val.avg))
-      if (nrow(opt1) == 0) {
-        opt1 <- dplyr::filter(cs, auc.val.avg == max(auc.val.avg))
-        warning("cbi.val.avg is NA, use 'auc.val.avg' instead.")
-      }
+    if (exists("opt1") == FALSE) {
+      opt1 <- dplyr::filter(cs, auc.val.avg == max(auc.val.avg))
+      opt <- append(opt, "auc.val.avg")
+      warning("'", paste0(opt), "'", " is NA in one or more parameter combinations, use 'auc.val.avg' instead.")
     }
 
     #保存结果
@@ -1314,20 +1361,36 @@ df
                      paste0(outdir, "/maxent/", sp_name, "/tuneparameter.csv"),
                      row.names = FALSE)
     #绘制模型调优图
-    if (opt == seq) {
-      p_tun(cs, opt)
-    }
+    p_tun(cs1, opt)
 
-
-
+    #最佳模型的参数df_best
+    df_best <- dplyr::filter(df, fc == opt1$fc, rm == opt1$rm)
+    env_best <- stringr::str_split_1(df_best$env, ",")
+    env_best_f <- env_best[env_best %in% factors123] #最优模型保留的分类变量
+    env_best_c <- env_best[!env_best %in% env_best_f] #最优模型保留的连续变量
+    #绘制最佳模型的相关性热图
+    mybg <- as.data.frame(tidyr::unnest(df_best[5], cols = c("bgdata")))
+    mybg1 <- mybg[env_best_c]
+    mybg2 <- mybg[env_best_f]
+    correlation1 <- cor(mybg1, method = cormethod)
+    correlation2 <- cor(mybg2, method = cormethod)
+    grDevices::jpeg(filename = paste0(outdir, "/maxent/", sp_name, "/cor_continuous_best.jpg"),
+                    width = 20, height = 20, units = "cm", res = 300)
+    corrplot::corrplot.mixed(correlation1, tl.pos = c( "lt"), tl.col = "black", diag = c("u"))
+    dev.off()
+    grDevices::jpeg(filename = paste0(outdir, "/maxent/", sp_name, "/cor_categorical_best.jpg"),
+                    width = 20, height = 20, units = "cm", res = 300)
+    corrplot::corrplot.mixed(correlation1, tl.pos = c( "lt"), tl.col = "black", diag = c("u"))
+    dev.off()
     #零模型检验
     #使用最佳模型的参数重新构建模型测试获得参数e.mx
-    cat("null model")
     if (null_model == TRUE) {
+
+      cat("null model")
       e.mx <- ENMeval::ENMevaluate(
-        occs = df$occdata,
-        bg = df$bgdata,
-        tune.args = list(fc = fc, rm = rm),
+        occs = df_best$occdata,
+        bg = df_best$bgdata,
+        tune.args = list(fc = df_best$fc, rm = df_best$rm),
         #partitions = "jackknife", #数据分区方式，有2+6种
         partitions = partitions,
         #数据分区方法|测试集、训练集划分方法
@@ -1347,13 +1410,12 @@ df
         #使用的模型，有三种
         overlap = FALSE,
         #生态位重叠
-        categoricals = factors123[factors123 %in% names(occdata)],
-        #指定分类变量,"IAWC_CLASS", , "T_USDA_TEX_CLASS"
+        categoricals = env_best_f,
         doClamp = FALSE
       )
       mod.null <- ENMnulls(
         e = e.mx,
-        mod.settings = list(fc = opt1$fc, rm = opt1$rm),
+        mod.settings = list(fc = df_best$fc, rm = df_best$rm),
         #最佳模型的参数
         no.iter = 100,
         eval.stats = c("auc.val", "or.10p"),
@@ -1378,6 +1440,7 @@ df
         create.dir = TRUE
       )
     }
+
 
 
     parameter <- opt1[1, 1:3]
