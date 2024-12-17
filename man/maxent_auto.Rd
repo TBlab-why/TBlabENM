@@ -19,7 +19,8 @@ maxent_auto(
   cormethod = "pearson",
   vif = T,
   vifth = 5,
-  opt = NULL,
+  opt = "auc.val.avg",
+  null_model = TRUE,
   prodir = NULL,
   outdir = NULL,
   p_ncpu = FALSE
@@ -55,7 +56,9 @@ maxent_auto(
 
 \item{vifth}{方差膨胀因子阈值}
 
-\item{opt}{选择最佳模型的指标，可选择"aicc","seq","cbi".}
+\item{opt}{选择最佳模型的指标，可选择"auc.train, cbi.train, auc.diff.avg, auc.val.avg, cbi.val.avg, or.10p.avg, or.mtp.avg, AICc"或NULL.当选择NULL时，则仅选择变量。当选择多个指标时，则按照顺序筛选最佳模型，如果所选指标具有NA，则跳过该指标，如果所有指标都含有NA，则使用auc.val.avg代替.}
+
+\item{null_model}{逻辑值,是否进行NULL模型检验。}
 
 \item{prodir}{用列表储存的投影文件路径，包含了投影时期的名称和与之对应的环境变量路径}
 

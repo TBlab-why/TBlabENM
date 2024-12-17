@@ -27,7 +27,8 @@
 #' @param cormethod 计算相关性的方法，取值为"pearson" (default), "kendall", or "spearman"
 #' @param vif 逻辑型，当为T时对所有候选变量组合进行方差膨胀因子检验，排除具有强共线性的组合
 #' @param vifth 方差膨胀因子阈值
-#' @param opt 选择最佳模型的指标，可选择"aicc","seq","cbi".
+#' @param null_model 逻辑值,是否进行NULL模型检验。
+#' @param opt 选择最佳模型的指标，可选择"auc.train, cbi.train, auc.diff.avg, auc.val.avg, cbi.val.avg, or.10p.avg, or.mtp.avg, AICc"或NULL.当选择NULL时，则仅选择变量。当选择多个指标时，则按照顺序筛选最佳模型，如果所选指标具有NA，则跳过该指标，如果所有指标都含有NA，则使用auc.val.avg代替.
 #' @param prodir 用列表储存的投影文件路径，包含了投影时期的名称和与之对应的环境变量路径
 #' @param outdir 结果保存路径
 #' @param p_ncpu 是否并行计算及各部分并行计算的cpu数.共有3处可能用到并行，分别是多物种并行，
@@ -67,10 +68,19 @@ maxent_auto <- function(spdir,
                         cormethod = "pearson",
                         vif = T,
                         vifth = 5,
-                        opt = NULL,
+                        opt = "auc.val.avg",
+                        null_model = TRUE,
                         prodir = NULL,
                         outdir = NULL,
                         p_ncpu = FALSE) {
+  #参数检验p_ncpu=c(F)
+  if (!is.logical(p_ncpu) & !is.numeric(p_ncpu)) {
+    stop("'p_ncpu'", " must be logical or numeric.")
+  }
+  if (!length(p_ncpu) == 1 & !length(p_ncpu) == 3) {
+    stop("The length of 'p_ncpu' must be 1 or 3.")
+  }
+################
   if (length(p_ncpu) == 1) {
     if (p_ncpu == FALSE) {
       parallel1 = FALSE
@@ -281,7 +291,7 @@ maxent_auto <- function(spdir,
     utils::setTxtProgressBar(pb, which(x == spdir) / length(spdir))
 
     ## 第三个位置关闭进度条
-    if (parallel == F) {
+    if (parallel1 == F) {
       close(pb)
       if (is.null(failed_species) == FALSE) {
         print(failed_species)

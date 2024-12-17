@@ -79,8 +79,12 @@ maxent_parameter <- function(x,
                              outdir = NULL,
                              parallel = F,
                              ncpu = 2) {
-  # unlink(paste0(outdir, "/TBlabENMtemp*") ,recursive = T)
-
+  #判断参数格式是否正确
+  if (is.null(opt) == FALSE) {
+  if (!opt %in% c("auc.train", "cbi.train", "auc.diff.avg", "auc.val.avg", "cbi.val.avg", "or.10p.avg", "or.mtp.avg", "AICc")) {
+    stop(paste0("opt buneng wei"), opt)
+  }
+    }
   random_num <- sample(1:100000, 1)
   #绘制模型调优结果的函数
   p_tun <- function(cs1, opt) {
@@ -1066,12 +1070,12 @@ maxent_parameter <- function(x,
       correlation1 <- cor(mybg1, method = cormethod)
       correlation2 <- cor(mybg2, method = cormethod)
       grDevices::jpeg(filename = paste0(outdir, "/maxent/", sp_name, "/cor_continuous.jpg"),
-                      width = 20, height = 20, units = "cm", res = 300)
+                      width = 8+nrow(correlation1), height = 8+nrow(correlation1), units = "cm", res = 300)
       corrplot::corrplot.mixed(correlation1, tl.pos = c( "lt"), tl.col = "black", diag = c("u"))
       dev.off()
       #
       grDevices::jpeg(filename = paste0(outdir, "/maxent/", sp_name, "/cor_classification.jpg"),
-                      width = 20, height = 20, units = "cm", res = 300)
+                      width = 8+nrow(correlation1), height = 8+nrow(correlation1), units = "cm", res = 300)
       corrplot::corrplot.mixed(correlation2, tl.pos = c( "lt"), tl.col = "black", diag = c("u"))
       dev.off()
   #
@@ -1245,7 +1249,7 @@ maxent_parameter <- function(x,
             xb <- c(xb, xb1)
           }
 
-          occdata <- occdata[xb2]
+          occdata <- cbind(occ, occdata[xb2]) #选择变量后添加xy坐标
         }
       )) %>%
       dplyr::mutate(bgdata = purrr::map(
@@ -1258,7 +1262,7 @@ maxent_parameter <- function(x,
             xb1 <- which(stringr::str_detect(biolist, paste0(xb2, ".asc")[i]) == T)
             xb <- c(xb, xb1)
           }
-          bgdata <- mybg[xb2]
+          bgdata <- cbind(mybgfile, mybg[xb2]) #选择变量后添加xy坐标
         }
       )) %>% #计算变量个数
       mutate(num = purrr::map_dbl(
@@ -1267,14 +1271,6 @@ maxent_parameter <- function(x,
           ncol(x)
         }
       ))
-    ##当保留的变量数只有三个时ENMevaluate会报错，需要移除只保留三个变量的结果
-    df1 <- dplyr::filter(df, num < 4)
-    df <- dplyr::filter(df, num >= 4)
-    if (nrow(df) == 0) {
-      #删除缓存文件
-      unlink(paste0(outdir, "/TBlabENMtemp", random_num) , recursive = T)
-      stop("All combined environment variables have fewer than four")
-    }
 
     #使用pmap函数并行评估（由于ENMevaluate函数的参数大于2个，所以使用pmap函数）
     #设置参数
@@ -1322,9 +1318,7 @@ maxent_parameter <- function(x,
 
     #评估的一系列参数
     gz1 <- as.data.frame(data.table::rbindlist(gz))
-
     #合并df和gz1
-
     cs <- cbind(df[1:3], gz1[c(1:16, 19)])
     cs <- cs[-(4:5)]
     cs <- dplyr::arrange(cs, AICc, auc.diff.avg, or.mtp.avg)
@@ -1354,9 +1348,7 @@ maxent_parameter <- function(x,
     #删除缓存文件
     unlink(paste0(outdir, "/TBlabENMtemp", random_num) , recursive = T)
     #dir.create(paste0(outdir, "/TBlabENM"), showWarnings = FALSE)
-
     print(paste0(outdir, "/tuneparameter_", sp_name, ".csv"))
-
     utils::write.csv(cs,
                      paste0(outdir, "/maxent/", sp_name, "/tuneparameter.csv"),
                      row.names = FALSE)
@@ -1375,11 +1367,11 @@ maxent_parameter <- function(x,
     correlation1 <- cor(mybg1, method = cormethod)
     correlation2 <- cor(mybg2, method = cormethod)
     grDevices::jpeg(filename = paste0(outdir, "/maxent/", sp_name, "/cor_continuous_best.jpg"),
-                    width = 20, height = 20, units = "cm", res = 300)
+                    width = 8+nrow(correlation1), height = 8+nrow(correlation1), units = "cm", res = 300)
     corrplot::corrplot.mixed(correlation1, tl.pos = c( "lt"), tl.col = "black", diag = c("u"))
     dev.off()
     grDevices::jpeg(filename = paste0(outdir, "/maxent/", sp_name, "/cor_categorical_best.jpg"),
-                    width = 20, height = 20, units = "cm", res = 300)
+                    width = 8+nrow(correlation1), height = 8+nrow(correlation1), units = "cm", res = 300)
     corrplot::corrplot.mixed(correlation1, tl.pos = c( "lt"), tl.col = "black", diag = c("u"))
     dev.off()
     #零模型检验
@@ -1441,18 +1433,11 @@ maxent_parameter <- function(x,
       )
     }
 
-
-
     parameter <- opt1[1, 1:3]
     parameter$species <- sp_name
     parameter$number <- nrow(occ)
     parameter <- parameter[, c(4, 5, 3, 1, 2)]
-    if (nrow(df1) >= 1) {
-      warning(
-        "The following combinations were not evaluated because the number of environment variables was less than four"
-      )
-      print(df1[1:3])
-    }
+
   }
   return(parameter)
 }
