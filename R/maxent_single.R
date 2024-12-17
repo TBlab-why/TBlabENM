@@ -190,6 +190,7 @@ maxent_single <- function(x,
     } else {
       for (b in seq_along(prodir)) {
         args3 <- append(args2, paste0("projectionlayers=", prodir[[b]]))
+        cat(paste0("Project into "), prodir[[b]])
         #模型模拟, xydata$`p/b`
         me1 <- predicts::MaxEnt(evdata,
                              xydata$`p/b` ,

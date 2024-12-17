@@ -1368,13 +1368,13 @@ maxent_parameter <- function(x,
     mybg2 <- mybg[env_best_f]
     correlation1 <- cor(mybg1, method = cormethod)
     correlation2 <- cor(mybg2, method = cormethod)
-    if (nrow(orrelation1) > 1) {
+    if (nrow(correlation1) > 1) {
     grDevices::jpeg(filename = paste0(outdir, "/maxent/", sp_name, "/cor_continuous_best.jpg"),
                     width = 8+nrow(correlation1), height = 8+nrow(correlation1), units = "cm", res = 300)
     corrplot::corrplot.mixed(correlation1, tl.pos = c( "lt"), tl.col = "black", diag = c("u"))
     dev.off()
     }
-    if (nrow(orrelation2) > 1) {
+    if (nrow(correlation2) > 1) {
     grDevices::jpeg(filename = paste0(outdir, "/maxent/", sp_name, "/cor_categorical_best.jpg"),
                     width = 8+nrow(correlation2), height = 8+nrow(correlation2), units = "cm", res = 300)
     corrplot::corrplot.mixed(correlation2, tl.pos = c( "lt"), tl.col = "black", diag = c("u"))
