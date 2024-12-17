@@ -1263,6 +1263,15 @@ maxent_parameter <- function(x,
         }
       ))
 
+    #判断保留的变量有几个，只有一个则无法调优
+    df1 <- dplyr::filter(df, num > 1)
+    if (nrow(df1) == 0) {
+      #删除缓存文件
+      df
+      unlink(paste0(outdir, "/TBlabENMtemp", random_num) , recursive = T)
+      stop("All parameter combinations end up preserving only one variable.")
+    }
+
     #使用pmap函数并行评估（由于ENMevaluate函数的参数大于2个，所以使用pmap函数）
     #设置参数
     if (nrow(occdata) >= 25) {

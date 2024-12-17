@@ -145,7 +145,7 @@ maxent_auto <- function(spdir,
       parallel = parallel2,
       ncpu = ncpu2
     )
-    print("将使用以下参数构建最终模型")
+    cat("***************将使用以下参数构建最终模型****************")
     print(pa)
     #模拟
     ##设置args参数
@@ -196,7 +196,7 @@ maxent_auto <- function(spdir,
     if (is.null(mybgfile) == FALSE) {
       mybgfile1 <- mybgfile
     } else {
-      mybgfile1 <- utils::read.csv(paste0(outdir1, "/data/", sp_name, "_bg.csv"))
+      mybgfile1 <- utils::read.csv(paste0(outdir1, sp_name, "_bg.csv"))
     }
 
     ms <- TBlabENM::maxent_single(
