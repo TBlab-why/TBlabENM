@@ -113,7 +113,7 @@ maxent_parameter <- function(x,
         theme_bw()
 
       ggsave(
-        filename = "model_tun.jpeg",
+        filename = "model_tun.jpg",
         plot = p,
         path = paste0(outdir, "/maxent/", sp_name),
         width = 10 + (max(cs1$rm)-4)*2.5,
@@ -137,7 +137,7 @@ maxent_parameter <- function(x,
         theme_bw()
 
       ggsave(
-        filename = "model_tun.jpeg",
+        filename = "model_tun.jpg",
         plot = p,
         path = paste0(outdir, "/maxent/", sp_name),
         width = 10,
@@ -1077,7 +1077,7 @@ maxent_parameter <- function(x,
     } else {
       ##绘制相关性热图
       correlation1 <- cor(mybg, method = cormethod)
-      grDevices::jpeg(filename = paste0(outdir, "/maxent/", sp_name, "/cor_continuous.jpeg"),
+      grDevices::jpeg(filename = paste0(outdir, "/maxent/", sp_name, "/cor_continuous.jpg"),
                       width = 15 + nrow(correlation1), height = 15 + nrow(correlation1), units = "cm", res = 300)
       corrplot::corrplot.mixed(correlation1, tl.pos = c( "lt"), tl.col = "black", diag = c("u"))
       dev.off()
@@ -1428,7 +1428,7 @@ maxent_parameter <- function(x,
         return.tbl = F
       )
       ggsave(
-        filename = "null_model.jpeg",
+        filename = "null_model.jpg",
         plot = p,
         path = paste0(outdir, "/maxent/", sp_name),
         width = 24,
