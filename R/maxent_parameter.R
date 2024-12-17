@@ -1060,15 +1060,17 @@ maxent_parameter <- function(x,
       #绘制相关性热图
       correlation1 <- cor(mybg1, method = cormethod)
       correlation2 <- cor(mybg2, method = cormethod)
+      if (nrow(orrelation1) > 1) {
       grDevices::jpeg(filename = paste0(outdir, "/maxent/", sp_name, "/cor_continuous.jpg"),
                       width = 8+nrow(correlation1), height = 8+nrow(correlation1), units = "cm", res = 300)
       corrplot::corrplot.mixed(correlation1, tl.pos = c( "lt"), tl.col = "black", diag = c("u"))
-      dev.off()
+      dev.off()}
       #
+      if (nrow(orrelation1) > 1) {
       grDevices::jpeg(filename = paste0(outdir, "/maxent/", sp_name, "/cor_classification.jpg"),
-                      width = 8+nrow(correlation1), height = 8+nrow(correlation1), units = "cm", res = 300)
+                      width = 8+nrow(correlation2), height = 8+nrow(correlation2), units = "cm", res = 300)
       corrplot::corrplot.mixed(correlation2, tl.pos = c( "lt"), tl.col = "black", diag = c("u"))
-      dev.off()
+      dev.off()}
   #
       correlation1 <- abs(as.data.frame(cor(mybg1, method = cormethod)))
       correlation2 <- abs(as.data.frame(cor(mybg2, method = cormethod)))
@@ -1076,7 +1078,7 @@ maxent_parameter <- function(x,
       ##绘制相关性热图
       correlation1 <- cor(mybg, method = cormethod)
       grDevices::jpeg(filename = paste0(outdir, "/maxent/", sp_name, "/cor_continuous.jpeg"),
-                      width = 30, height = 30, units = "cm", res = 300)
+                      width = 8+nrow(correlation1), height = 8+nrow(correlation1), units = "cm", res = 300)
       corrplot::corrplot.mixed(correlation1, tl.pos = c( "lt"), tl.col = "black", diag = c("u"))
       dev.off()
       correlation1 <- abs(as.data.frame(cor(mybg, method = cormethod)))
@@ -1366,14 +1368,17 @@ maxent_parameter <- function(x,
     mybg2 <- mybg[env_best_f]
     correlation1 <- cor(mybg1, method = cormethod)
     correlation2 <- cor(mybg2, method = cormethod)
+    if (nrow(orrelation1) > 1) {
     grDevices::jpeg(filename = paste0(outdir, "/maxent/", sp_name, "/cor_continuous_best.jpg"),
                     width = 8+nrow(correlation1), height = 8+nrow(correlation1), units = "cm", res = 300)
     corrplot::corrplot.mixed(correlation1, tl.pos = c( "lt"), tl.col = "black", diag = c("u"))
     dev.off()
+    }
+    if (nrow(orrelation2) > 1) {
     grDevices::jpeg(filename = paste0(outdir, "/maxent/", sp_name, "/cor_categorical_best.jpg"),
-                    width = 8+nrow(correlation1), height = 8+nrow(correlation1), units = "cm", res = 300)
-    corrplot::corrplot.mixed(correlation1, tl.pos = c( "lt"), tl.col = "black", diag = c("u"))
-    dev.off()
+                    width = 8+nrow(correlation2), height = 8+nrow(correlation2), units = "cm", res = 300)
+    corrplot::corrplot.mixed(correlation2, tl.pos = c( "lt"), tl.col = "black", diag = c("u"))
+    dev.off()}
     #零模型检验
     #使用最佳模型的参数重新构建模型测试获得参数e.mx
     if (null_model == TRUE) {
