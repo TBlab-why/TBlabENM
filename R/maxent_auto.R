@@ -196,7 +196,7 @@ maxent_auto <- function(spdir,
     if (is.null(mybgfile) == FALSE) {
       mybgfile1 <- mybgfile
     } else {
-      mybgfile1 <- utils::read.csv(paste0(outdir1, "/", sp_name, "_bg.csv"))
+      mybgfile1 <- utils::read.csv(paste0(outdir1, "/", sp_name, "/bg.csv"))
     }
 
     ms <- TBlabENM::maxent_single(
