@@ -125,7 +125,7 @@ maxent_auto <- function(spdir,
   }
 
   fun3 <- function(x) {
-    cat("*****************************************************\n")
+    cat("\n*****************************************************\n")
 
     pa <- TBlabENM::maxent_parameter(
       x = x,
