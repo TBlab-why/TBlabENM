@@ -967,16 +967,7 @@ maxent_parameter <- function(x,
     cat("The environment variable has been specified and is no longer selected !")
     evlist <- NULL
   }
-  if (is.null(opt) == FALSE) {
-    if (is.null(myenv) == FALSE &
-        length(myenv) < 4) {
-      stop("The number of environment variables must be at least three")
-    }
-    if (is.null(evlist) == FALSE &
-        length(evlist) < 4) {
-      stop("The number of environment variables must be at least three")
-    }
-  }
+
 
   tzhs <- c("L", "Q", "H", "P", "T")
   if (is.null(outdir)) {
