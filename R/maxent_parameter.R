@@ -116,8 +116,8 @@ maxent_parameter <- function(x,
         filename = "model_tun.jpg",
         plot = p,
         path = paste0(outdir, "/maxent/", sp_name),
-        width = 10 + (max(cs1$rm)-4)*2.5,
-        height = 3.5*length(opt),
+        width = 14 + (max(cs1$rm) - 4.5)*3,
+        height = 7*length(opt),
         units = c("cm"),
         create.dir = TRUE,
         #limitsize = FALSE
@@ -140,8 +140,8 @@ maxent_parameter <- function(x,
         filename = "model_tun.jpg",
         plot = p,
         path = paste0(outdir, "/maxent/", sp_name),
-        width = 10,
-        height = 7,
+        width = 14,
+        height = 10,
         units = c("cm"),
         create.dir = TRUE,
         #limitsize = FALSE
@@ -1269,7 +1269,6 @@ maxent_parameter <- function(x,
     df1 <- dplyr::filter(df, num > 1)
     if (nrow(df1) == 0) {
       #删除缓存文件
-      df
       unlink(paste0(outdir, "/TBlabENMtemp", random_num) , recursive = T)
       stop("All parameter combinations end up preserving only one variable.")
     }
@@ -1349,9 +1348,8 @@ maxent_parameter <- function(x,
     #保存结果
     #删除缓存文件
     unlink(paste0(outdir, "/TBlabENMtemp", random_num) , recursive = T)
-    #dir.create(paste0(outdir, "/TBlabENM"), showWarnings = FALSE)
     print(paste0(outdir, "/tuneparameter_", sp_name, ".csv"))
-    utils::write.csv(cs,
+    utils::write.csv(cs1,
                      paste0(outdir, "/maxent/", sp_name, "/tuneparameter.csv"),
                      row.names = FALSE)
     #绘制模型调优图
@@ -1425,7 +1423,7 @@ maxent_parameter <- function(x,
         mod.null,
         stats = c("or.10p", "auc.val"),
         plot.type = "histogram",
-        return.tbl = F
+        return.tbl = FALSE
       )
       ggsave(
         filename = "null_model.jpg",

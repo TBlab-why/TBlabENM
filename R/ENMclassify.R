@@ -17,6 +17,7 @@
 #'     为划分适生区和非适生区的阈值。
 #' @param x 数值向量,表示物种序号,与parameters中的物种序号一致。
 #' @param resultdir maxent结果文件路径。
+#' @param crs 给没有坐标系的栅格定义投影.例如"+proj=lcc +lat_1=48 +lat_2=33 +lon_0=-100 +ellps=WGS84".
 #' @param prefix 要转换的栅格文件的前缀
 #' @param suffix 要转换的栅格文件的后缀
 #' @param overwrite logical. If TRUE, filename is overwritten
@@ -45,7 +46,8 @@
 #' @examples
 #' ENMclassify(parameters = read.csv("F:/eblf/TBlabENM/spdata.csv"),
 #'            x = c(3,5,7,9),
-#'            resultdir="F:/eblf/TBlabENM/result",
+#'            resultdir = "F:/eblf/TBlabENM/result",
+#'            crs = "+proj=aea +lat_0=0 +lon_0=105 +lat_1=25 +lat_2=47 +x_0=0 +y_0=0 +ellps=krass +units=m +no_defs",
 #'            prefix = NULL,
 #'            suffix = "tif",
 #'            rcl = list("非适生区" = c(0,0.2),
@@ -57,53 +59,53 @@
 #'            parallel = T,
 #'            ncpu = 2)
 
-ENMclassify <- function(parameters, x = NULL, resultdir,
+ENMclassify <- function(parameters, x = NULL, resultdir, crs,
                         prefix = NULL, suffix, rcl,
                         overwrite = FALSE, outdir = NULL, parallel = F, ncpu = 2) {
   star_time <- Sys.time() ## 记录程序开始时间
 
   #根据threshold的类型分析
   threshold <- rcl
-  if(is.list(threshold)){
+  if (is.list(threshold)) {
     a <- c()
     for (i in 1:length(rcl)) {
-      a1 <- c(rcl[[i]], i-1)
+      a1 <- c(rcl[[i]], i - 1)
       a <- c(a,a1)}
-    parameters$reclass =  list(matrix(a, ncol=3, byrow=TRUE))
+    parameters$reclass = list(matrix(a, ncol = 3, byrow = TRUE))
   }
   # threshold = 0.2
-  if(is.numeric(threshold)){
+  if (is.numeric(threshold)) {
     a <- c(0, threshold, 0, threshold, 1000, 1)
-    parameters$reclass =  list(matrix(a, ncol=3, byrow=TRUE))
+    parameters$reclass = list(matrix(a, ncol = 3, byrow = TRUE))
   }
   # threshold = "T_MTSSte"
-  if(is.character(threshold)){
+  if (is.character(threshold)) {
     parameters$reclass <- NA
     for (i in 1:nrow(parameters)) {
       a <- list(
         matrix(c(0, parameters[i,threshold],0, parameters[i,threshold], 1000, 1),
-               ncol=3, byrow=TRUE))
+               ncol = 3, byrow = TRUE))
       parameters$reclass[i] <- a
     }
   }
 
 
   #读取模拟结果列表(只读文件夹)（以物种为单位）
-  if (file.exists(resultdir)==FALSE){
+  if (file.exists(resultdir) == FALSE){
     stop("Resultdir not find.")}
-  if(is.null(outdir)){outdir = "."}
-  if(is.null(x)){x <- 1:nrow(parameters)}
+  if (is.null(outdir)) {outdir = "."}
+  if (is.null(x)) {x <- 1:nrow(parameters)}
   spdata <- parameters
   #临时文件夹
-  star_time <- sample(1:100000,1)
-  dir.create(paste0(outdir, "/TBlabENM", star_time), recursive = T, showWarnings = FALSE)
+  random_num <- sample(1:100000, 1)
+  dir.create(paste0(outdir, "/TBlabENMtemp", random_num), recursive = T, showWarnings = FALSE)
   #创建文件夹用于保存二值图
   dir.create(paste0(outdir, "/reclass"), recursive = T, showWarnings = FALSE)
 
   #################################################函数
+  #fun1用于创建包含下面要用到的数据的数据框
   fun1 <- function(x){
     spname <- spdata[x,1]
-
     #读取栅格数据
     ra_df <- list.files(paste0(resultdir, "/", spdata[x,1]), full.names = TRUE) %>%
       list.files(., full.names = TRUE, pattern = paste0("^", prefix, ".*", suffix, "$")) %>%
@@ -112,7 +114,7 @@ ENMclassify <- function(parameters, x = NULL, resultdir,
       #生成保存文件名
       mutate(path = map_chr(.x = ., .f = function(x){
         a <- stringr::str_split_1(x, "/")
-        paste0(a[length(a)-1], ".tif")
+        paste0(a[length(a) - 1], ".tif")
       })) %>%
       #投影名
       mutate(pro = map(.x = path, .f = function(x){
@@ -123,44 +125,36 @@ ENMclassify <- function(parameters, x = NULL, resultdir,
 
     radf <- ra_df %>%
       mutate(reclass = map2(.x = ., .y = reclass, .f = function(x,y){
-        terra::classify(terra::rast(x), y)
+        terra::classify(terra::rast(x), y) #重分类
       })) %>%
-      #单个像元面积
-      mutate(unit = map(.x = reclass, .f = function(x){
-        prod(terra::res(x))
-      })) %>%
-      #统计各个分类值的像元个数*单个像元面积
-      mutate(area = map2(.x = reclass, .y = unit, .f = function(x,y){
-        count <- terra::freq(x)
-        count$count <- count$count*y
-        tidyr::spread(count, key = "value",
-                      value = "count")
-      })) %>%
+      mutate(area = map(.x = reclass, .f = function(x){
+       # if (miss(crs)) { } else {crs(x) <- crs}  #定义投影
+        crs(x) <- crs
+        terra::expanse(x, unit = "km", byValue = TRUE, wide = TRUE) #计算唯一值对应的面积
+      })) %>% #计算面积
       mutate(area1 = map2(.x = area, .y = pro, .f = function(x,y){
         x$pro = y
         x$species = spname
         x
-      })) %>%
+      })) %>% #将投影时期和物种名添加到物种面积表
       mutate(ss = map2(.x = reclass, .y = path, .f = function(x,y){
         terra::writeRaster(x,
-                           paste0(outdir, "/reclass/", spname, "_", y ),overwrite = overwrite)
-      }))
+                           paste0(outdir, "/reclass/", spname, "_", y ), overwrite = overwrite)
+      })) #保存重分类的栅格
 
     #新建数据框保存单个物种的结果
-    data <- data.frame(matrix(NA, nrow = 0, ncol = ncol(radf[,7][[1]])))
-    names(data) <- names(radf[,7][[1]])
+    data <- data.frame(matrix(NA, nrow = 0, ncol = ncol(radf[,6][[1]])))
+    names(data) <- names(radf[,6][[1]])
 
-    for (i in 1:length(radf[,7])) {
-      b1 <- radf[,7][[i]]
+    for (i in 1:length(radf[,6])) {
+      b1 <- radf[,6][[i]]
       data <- rbind(data,b1)
     }
 
-
-
-    data <- data[-1]%>%
-      relocate(pro)%>%
+    data <- data[-1] %>%
+      relocate(pro) %>%
       relocate(species)
-    write.csv(data, paste0(outdir, "/TBlabENM", star_time, "/", spname,".csv"), row.names = FALSE)
+    write.csv(data, paste0(outdir, "/TBlabENMtemp", random_num, "/", spname,".csv"), row.names = FALSE)
 
   }
 
@@ -201,21 +195,21 @@ ENMclassify <- function(parameters, x = NULL, resultdir,
   }
 
   #组合每个物种的面积
-  splist <- list.files(paste0(outdir, "/TBlabENM" , star_time), full.names = TRUE)
+  splist <- list.files(paste0(outdir, "/TBlabENMtemp", random_num), full.names = TRUE)
   v <- read.csv(splist[1])
   v <- v[0,]
   for (i in 1:length(splist)) {
     a <- read.csv(splist[i])
     v <- rbind(v, a)
   }
-  if(is.list(threshold)){names(v) <- c("species", "pro", names(rcl))} else{
+  if (is.list(threshold)) {names(v) <- c("species", "pro", names(rcl))} else{
     names(v) <- c("species", "pro", "USA", "SA")
   }
   write.csv(v, paste0(outdir, "/suitable_area.csv"), row.names = FALSE, fileEncoding = "GB18030")
-  unlink(paste0(outdir, "/TBlabENM", star_time), recursive = TRUE)
+  unlink(paste0(outdir, "/TBlabENMtemp", random_num), recursive = TRUE)
   end_time <- Sys.time()  ## 记录程序结束时间
   ## 第三个位置关闭进度条
-  if(exists("pb")){close(pb)}
+  if (exists("pb")) {close(pb)}
   print(end_time - star_time)
 
 }

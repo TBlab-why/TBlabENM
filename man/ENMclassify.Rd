@@ -8,6 +8,7 @@ ENMclassify(
   parameters,
   x = NULL,
   resultdir,
+  crs,
   prefix = NULL,
   suffix,
   rcl,
@@ -24,6 +25,8 @@ ENMclassify(
 \item{x}{数值向量,表示物种序号,与parameters中的物种序号一致。}
 
 \item{resultdir}{maxent结果文件路径。}
+
+\item{crs}{给没有坐标系的栅格定义投影.例如"+proj=lcc +lat_1=48 +lat_2=33 +lon_0=-100 +ellps=WGS84".}
 
 \item{prefix}{要转换的栅格文件的前缀}
 
@@ -65,7 +68,8 @@ rcl:rcl参数提供了栅格数据重分类的参数，如果提供的是列表�
 \examples{
 ENMclassify(parameters = read.csv("F:/eblf/TBlabENM/spdata.csv"),
            x = c(3,5,7,9),
-           resultdir="F:/eblf/TBlabENM/result",
+           resultdir = "F:/eblf/TBlabENM/result",
+           crs = "+proj=aea +lat_0=0 +lon_0=105 +lat_1=25 +lat_2=47 +x_0=0 +y_0=0 +ellps=krass +units=m +no_defs",
            prefix = NULL,
            suffix = "tif",
            rcl = list("非适生区" = c(0,0.2),
