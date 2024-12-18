@@ -990,6 +990,7 @@ maxent_parameter <- function(x,
   if (is.null(myenv)) {
     #变量名称
     biolist <- list.files(evdir, pattern = ".asc$", full.names = TRUE)
+    if (length(biolist) == 0) {stop("The environment variable does not exist. Check whether it is in `asc` format.")}
     if (is.null(evlist) == FALSE) {
       biolist <- biolist[evlist]
     }

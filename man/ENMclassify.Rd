@@ -5,7 +5,7 @@
 \title{The suitable area was reclassified and the area was calculated}
 \usage{
 ENMclassify(
-  parameters,
+  d,
   x = NULL,
   resultdir,
   crs,
@@ -19,10 +19,9 @@ ENMclassify(
 )
 }
 \arguments{
-\item{parameters}{数据框，第一列为物种名(要与resultdir下的名称保持一致),其他列位置不做要求，但是必须有一列或多列
-为划分适生区和非适生区的阈值。}
+\item{d}{字符向量或数据框.当为字符向量时为物种名称.当为数据框时第一列为物种名(要与resultdir下的名称保持一致),其他列位置不做要求，但是必须有一列或多列为划分适生区和非适生区的阈值.}
 
-\item{x}{数值向量,表示物种序号,与parameters中的物种序号一致。}
+\item{x}{当d为数据框时使用，表示物种序号, 与d中的物种序号一致.}
 
 \item{resultdir}{maxent结果文件路径。}
 
@@ -32,12 +31,7 @@ ENMclassify(
 
 \item{suffix}{要转换的栅格文件的后缀}
 
-\item{rcl}{列表,数值型或字符型,为重分类设置参数.当为列表时,分别按顺序指定非适生区
-和适生区(例如低适生区、中适生区、高适生区等)和对应的值,数值型和字符型
-是列表的特例，即二元划分：只分为适生区和非适生区。当为数值型，所有小于该值的
-都视为非适生区，重分类后值为0，所有大于该值的都视为适生区，重分类后值为1.当为
-字符型时，则在parameters参数提供的数据框中要有相同名称的列，指定以哪个值进行
-二元重分类。详见detail.}
+\item{rcl}{列表,数值型或字符型,为重分类设置参数.当为列表时,分别按顺序指定非适生区和适生区(例如低适生区、中适生区、高适生区等)和对应的值. 数值型和字符型是列表的特例，即二元划分：只分为适生区和非适生区。当为数值型，所有小于该值的都视为非适生区，重分类后值为0，所有大于该值的都视为适生区，重分类后值为1.当为字符型时，则在d参数提供的数据框中要有相同名称的列，指定以哪列值进行二元重分类。详见detail.}
 
 \item{overwrite}{logical. If TRUE, filename is overwritten}
 
@@ -48,13 +42,10 @@ ENMclassify(
 \item{ncpu}{并行时cpu个数}
 }
 \value{
-生成每个栅格重分类后的tif文件，并统计面积
+包含每个物种不同时期各类适生区面积的数据框（单位KM²）以及生成每个栅格重分类后的tif文件
 }
 \description{
-\if{html}{\out{<div class="sourceCode">}}\preformatted{依据选定的阈值从maxent的结果文件中将连续型的分布图转为Boolean图
-}\if{html}{\out{</div>}}
-
-（用1和0表示适生区和非适生区）。自动生成paste0("./TBlabENM/Booleanmap", threshold)文件保存结果。
+依据给定的阈值从maxent的结果文件中将连续型的适宜性栅格重分类为类别型的适生区栅格并计各类算面积.
 }
 \details{
 rcl:rcl参数提供了栅格数据重分类的参数，如果提供的是列表，重分类后各类的值分别为0,1,2...,
@@ -62,11 +53,11 @@ rcl:rcl参数提供了栅格数据重分类的参数，如果提供的是列表�
 "中适生区" = c(0.4,0.6), "高适生区" = c(0.6,0.1))时，重分类后值为0代表非适生区，值为1代表低适生区...,值为
 3代表高适生区.当列表中的顺序不是从小到大的顺序时，对应重分类后的值所对应的适生区类型也随之改变。
 当为数值型或字符型时，则进行二元划分，重分类后的值为0和1，0代表非适生区，1代表适生区.当为数值型
-时，对所有栅格都使用该值,常用于经验阈值，例如0.5.当为字符型时，使用parameters参数提供的数据框中与之
+时，对所有栅格都使用该值,常用于经验阈值，例如0.5.当为字符型时，使用d参数提供的数据框中与之
 对应的列的值作为划分依据,常用于固定阈值的情况，如MTSS阈值.
 }
 \examples{
-ENMclassify(parameters = read.csv("F:/eblf/TBlabENM/spdata.csv"),
+ENMclassify(d = read.csv("F:/eblf/TBlabENM/spdata.csv"),
            x = c(3,5,7,9),
            resultdir = "F:/eblf/TBlabENM/result",
            crs = "+proj=aea +lat_0=0 +lon_0=105 +lat_1=25 +lat_2=47 +x_0=0 +y_0=0 +ellps=krass +units=m +no_defs",
