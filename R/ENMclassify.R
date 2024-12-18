@@ -124,7 +124,7 @@ ENMclassify <- function(d, x = NULL, resultdir, crs,
         terra::classify(terra::rast(x), y) #重分类
       })) %>%
       mutate(area = map(.x = reclass, .f = function(x){
-        crs(x) <- crs
+        terra::crs(x) <- crs
         terra::expanse(x, unit = "km", byValue = TRUE, wide = TRUE) #计算唯一值对应的面积
       })) %>% #计算面积
       mutate(area1 = map2(.x = area, .y = pro, .f = function(x,y){
