@@ -1066,7 +1066,7 @@ maxent_parameter <- function(x,
       corrplot::corrplot.mixed(correlation1, tl.pos = c( "lt"), tl.col = "black", diag = c("u"))
       dev.off()}
       #
-      if (nrow(orrelation1) > 1) {
+      if (nrow(correlation1) > 1) {
       grDevices::jpeg(filename = paste0(outdir, "/maxent/", sp_name, "/cor_classification.jpg"),
                       width = 15 + nrow(correlation2), height = 15 + nrow(correlation2), units = "cm", res = 300)
       corrplot::corrplot.mixed(correlation2, tl.pos = c( "lt"), tl.col = "black", diag = c("u"))
