@@ -1060,7 +1060,7 @@ maxent_parameter <- function(x,
       #绘制相关性热图
       correlation1 <- cor(mybg1, method = cormethod)
       correlation2 <- cor(mybg2, method = cormethod)
-      if (nrow(orrelation1) > 1) {
+      if (nrow(correlation1) > 1) {
       grDevices::jpeg(filename = paste0(outdir, "/maxent/", sp_name, "/cor_continuous.jpg"),
                       width = 15 + nrow(correlation1), height = 15 + nrow(correlation1), units = "cm", res = 300)
       corrplot::corrplot.mixed(correlation1, tl.pos = c( "lt"), tl.col = "black", diag = c("u"))
