@@ -147,7 +147,7 @@ maxent_auto <- function(spdir,
       ncpu = ncpu2
     )
     cat("***************The following parameters are used to build the final model***************\n")
-    cat(pa)
+    print(pa)
     #模拟
     ##设置args参数
     args[3] <- "linear=FALSE"

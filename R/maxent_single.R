@@ -150,34 +150,37 @@ maxent_single <- function(x,
           #新建文件夹保存模拟结果
           path = paste0(outdir, sp_name, "/", names(prodir)[y])
         )
+
+        #将结果文件的asc格式转为tif格式以节约内存
+        df <- list.files(paste0(outdir, sp_name, "/", names(prodir)[y]), full.names = TRUE) %>%
+          list.files(., pattern = "asc$", full.names = TRUE) %>%
+          as.data.frame()
+        names(df) <- "file"
+        df1 <- df %>%
+          mutate(path = map_chr(
+            .x = file,
+            .f = function(x) {
+              stringr::str_replace(x, pattern = ".asc$", ".tif")
+            }
+          )) %>%
+          dplyr::mutate(ra = purrr::map(
+            .x = file,
+            .f = function(x) {
+              terra::rast(x)
+            }
+          )) %>%
+          mutate(purrr::map2(
+            .x = ra,
+            .y = path,
+            .f = function(x, y) {
+              terra::writeRaster(x, y, overwrite = TRUE)
+            }
+          ))
+
       }
       snowfall::sfLapply(seq_along(prodir), fff)
       snowfall::sfStop()  # 关闭集群
-      #将结果文件的asc格式转为tif格式以节约内存
-      df <- list.files(paste0(outdir, sp_name), full.names = TRUE) %>%
-        list.files(., pattern = "asc$", full.names = TRUE) %>%
-        as.data.frame()
-      names(df) <- "file"
-      df1 <- df %>%
-        mutate(path = map_chr(
-          .x = file,
-          .f = function(x) {
-            stringr::str_replace(x, pattern = ".asc$", ".tif")
-          }
-        )) %>%
-        dplyr::mutate(ra = purrr::map(
-          .x = file,
-          .f = function(x) {
-            terra::rast(x)
-          }
-        )) %>%
-        mutate(purrr::map2(
-          .x = ra,
-          .y = path,
-          .f = function(x, y) {
-            terra::writeRaster(x, y, overwrite = TRUE)
-          }
-        ))
+
       #删除asc格式
       gg <- file.remove(
         list.files(paste0(outdir, sp_name), full.names = TRUE) %>%

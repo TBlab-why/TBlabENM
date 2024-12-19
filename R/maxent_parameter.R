@@ -1128,19 +1128,29 @@ maxent_parameter <- function(x,
       snowfall::sfExport("r")
       # snowfall::sfExport("correlation2")
       # snowfall::sfExport("maxent_single")
+fit <- try(  #报错调试
       k <- snowfall::sfLapply(1:nrow(combin), fun4)
+      )
+if ('try-error' %in% class(fit)) {snowfall::sfStop()
+  unlink(paste0(outdir, "/TBlabENMtemp", random_num) , recursive = T)
+  }
       snowfall::sfStop()  # 关闭集群
 
       df$env <- unlist(k)
 
 
     } else{
+fit <- try(  #报错调试
       for (i in 1:nrow(combin)) {
         #设置好fc和rm后进行模拟保留最重要变量i=1
         var <- fun2(fc1 = combin[i, 1] , rm1 = combin[i, 2])
         df[i, 3] <- paste0(var, collapse = ",")
       }
+      )
+      if ('try-error' %in% class(fit)) {unlink(paste0(outdir, "/TBlabENMtemp", random_num) , recursive = T)}
     }
+    #删除缓存文件
+    unlink(paste0(outdir, "/TBlabENMtemp", random_num) , recursive = T)
   } else {
     biolist <- list.files(evdir, pattern = ".asc$", full.names = TRUE)
     #判断分类变量factors是否包含在给定的环境数据集内
@@ -1175,15 +1185,14 @@ maxent_parameter <- function(x,
       if (length(factors) != length(factors1)) {
         stop(
           paste0("Only variable '", factors,
-            "' is identified as a categorical variable. Please check whether other categorical variables are in the given set of environment variables"
+            "' is identified as a categorical variable. Please check whether other categorical variables are in the given set of environment variables."
           )
         )
       }
       cat(paste(
         "Variable:",
         paste(factors, collapse = ","),
-        "as categorical variable",
-        "\n"
+        "as categorical variable\n"
       ))
     }
 
@@ -1345,11 +1354,12 @@ maxent_parameter <- function(x,
 
     #保存结果
     #删除缓存文件
-    unlink(paste0(outdir, "/TBlabENMtemp", random_num) , recursive = T)
-    print(paste0(outdir, "/tuneparameter_", sp_name, ".csv"))
+    #unlink(paste0(outdir, "/TBlabENMtemp", random_num) , recursive = T)
+    cat(paste0(outdir, "/maxent/", sp_name, "/tuneparameter.csv"))
     utils::write.csv(cs1,
                      paste0(outdir, "/maxent/", sp_name, "/tuneparameter.csv"),
                      row.names = FALSE)
+
     #绘制模型调优图
     p_tun(cs1, opt)
 
