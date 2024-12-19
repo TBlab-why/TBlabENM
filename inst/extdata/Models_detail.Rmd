@@ -87,7 +87,8 @@ biolist <- list.files(params$evdir, pattern = ".asc$", full.names = TRUE)
 
 使用`r params$cormethod`系数检验环境变量之间的相关性，阈值设置为`r params$r`, 当任意两个环境变量的相关性大于等于`r params$r`则认为他们之间具有强相关性。图1
 
-![](F:/2/TBlabENM/plots/cor_heat.jpeg)
+![](F:/example/maxent/Symplocos adenophylla/cor_continuous.jpg)
+![](F:/example/maxent/Symplocos adenophylla/cor_classification.jpg)
 
 将预设的所有FC和RM进行组合，共有`r length(params$fc)*length(params$rm)`个组合.见表
 ```{r echo=FALSE, comment=''}
@@ -116,7 +117,8 @@ tb
 ### **最优模型选择**
 
 在为每个组合选择了环境变量，使用ENMeval包对每个组合进行测试，根据`r length(params$opt)`选择最佳的参数组合。见表
-![](F:/2/TBlabENM/plots/cor_heat.jpeg)
+![](F:/example/maxent/Symplocos adenophylla/cor_continuous_best.jpg)
+![](F:/example/maxent/Symplocos adenophylla/cor_classification_best.jpg)
 
 
 
@@ -139,10 +141,13 @@ tb <- flextable::flextable(
 tb
 ```
 
+![](F:/example/maxent/Symplocos adenophylla/model_tun.jpg)
+
+
 
 此外，使用随机数据构建了NULL模型来与优化的模型进行比较，
 
-![](F:/2/TBlabENM/plots/null_model.jpeg)
+![](F:/example/maxent/Symplocos adenophylla/null_model.jpg)
 
 
 

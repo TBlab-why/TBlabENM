@@ -82,7 +82,7 @@ maxent_parameter <- function(x,
   #判断参数格式是否正确
   if (is.null(opt) == FALSE) {
   if (!opt %in% c("auc.train", "cbi.train", "auc.diff.avg", "auc.val.avg", "cbi.val.avg", "or.10p.avg", "or.mtp.avg", "AICc")) {
-    stop(paste0("opt buneng wei"), opt)
+    stop("'opt' must be a subset of c('auc.train', 'cbi.train', 'auc.diff.avg', 'auc.val.avg', 'cbi.val.avg', 'or.10p.avg', 'or.mtp.avg, AICc') or NULL.")
   }
     }
   random_num <- sample(1:100000, 1)
@@ -1065,7 +1065,7 @@ maxent_parameter <- function(x,
       dev.off()}
       #
       if (nrow(correlation1) > 1) {
-      grDevices::jpeg(filename = paste0(outdir, "/maxent/", sp_name, "/cor_classification.jpg"),
+      grDevices::jpeg(filename = paste0(outdir, "/maxent/", sp_name, "/cor_categorical.jpg"),
                       width = 15 + nrow(correlation2), height = 15 + nrow(correlation2), units = "cm", res = 300)
       corrplot::corrplot.mixed(correlation2, tl.pos = c( "lt"), tl.col = "black", diag = c("u"))
       dev.off()}
