@@ -11,9 +11,9 @@ ENMspthin(spdir, spec.col, long.col, lat.col, thin.par, outdir = NULL)
 
 \item{spec.col}{物种名所在的列名.}
 
-\item{long.col}{经度所在的列名.}
+\item{long.col}{经度所在的列名.该列只能为地理坐标系的经度.}
 
-\item{lat.col}{纬度所在的列名.}
+\item{lat.col}{纬度所在的列名.该列只能为地理坐标系的纬度.}
 
 \item{thin.par}{数值型，地理空间过滤距离（km）.}
 

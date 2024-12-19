@@ -18,7 +18,7 @@ maxent_parameter(
   cormethod = "pearson",
   vif = T,
   vifth = 5,
-  opt = "aicc",
+  opt = "auc.val.avg",
   null_model = TRUE,
   outdir = NULL,
   parallel = F,
@@ -92,7 +92,7 @@ maxent_parameter(x = system.file("extdata", "species/Phoebe sheareri.csv", packa
        r = 0.7,
        vif = T,
        vifth = 5,
-       opt = "aicc",
+       opt = "auc.val.avg",
        parallel = F,
        ncpu = 2)
 }

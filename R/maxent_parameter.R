@@ -57,7 +57,7 @@
 #'        r = 0.7,
 #'        vif = T,
 #'        vifth = 5,
-#'        opt = "aicc",
+#'        opt = "auc.val.avg",
 #'        parallel = F,
 #'        ncpu = 2)
 
@@ -74,7 +74,7 @@ maxent_parameter <- function(x,
                              cormethod = "pearson",
                              vif = T,
                              vifth = 5,
-                             opt = "aicc",
+                             opt = "auc.val.avg",
                              null_model = TRUE,
                              outdir = NULL,
                              parallel = F,
@@ -961,13 +961,11 @@ maxent_parameter <- function(x,
     df[i, 3] <- paste0(var, collapse = ",")
   }
 
-
   #####################################################################
   if (is.null(myenv) == FALSE) {
-    cat("The environment variable has been specified and is no longer selected !")
+    cat("\nThe environment variable has been specified and is no longer selected!\n")
     evlist <- NULL
   }
-
 
   tzhs <- c("L", "Q", "H", "P", "T")
   if (is.null(outdir)) {
@@ -990,7 +988,7 @@ maxent_parameter <- function(x,
   if (is.null(myenv)) {
     #变量名称
     biolist <- list.files(evdir, pattern = ".asc$", full.names = TRUE)
-    if (length(biolist) == 0) {stop("The environment variable does not exist. Check whether it is in `asc` format.")}
+    if (length(biolist) == 0) {stop("The environment variable does not exist. Check whether it is in `asc` format.\n")}
     if (is.null(evlist) == FALSE) {
       biolist <- biolist[evlist]
     }
@@ -1025,8 +1023,7 @@ maxent_parameter <- function(x,
       cat(paste(
         "Variable:",
         paste(factors, collapse = ","),
-        "as categorical variable",
-        "\n"
+        "as categorical variable\n"
       ))
     }
     cat("***********Selecting parameters***********\n")
@@ -1036,7 +1033,7 @@ maxent_parameter <- function(x,
     occ <- utils::read.csv(x) #读取物种坐标数据
 
     occ <- occ[c(2, 3)]
-
+    names(occ) <- c("x", "y")
     occdata <- terra::extract(biostack, occ, ID = FALSE)
 
     #提取背景值并计算变量相关性
@@ -1049,7 +1046,7 @@ maxent_parameter <- function(x,
                 row.names = FALSE)
       mybg <- mybg0[-(1:2)]
     } else{
-      cat("The background points has been specified !")
+      cat("The background points has been specified!\n")
       mybg <- terra::extract(biostack, mybgfile, ID = FALSE)
     }
     ##判断是否存在分类变量，若存在则分开计算
@@ -1381,8 +1378,6 @@ maxent_parameter <- function(x,
     #零模型检验
     #使用最佳模型的参数重新构建模型测试获得参数e.mx
     if (null_model == TRUE) {
-
-      cat("null model")
       e.mx <- ENMeval::ENMevaluate(
         occs = df_best$occdata,
         bg = df_best$bgdata,
@@ -1409,6 +1404,7 @@ maxent_parameter <- function(x,
         categoricals = env_best_f,
         doClamp = FALSE
       )
+      cat("\n**************null model test*****************\n")
       mod.null <- ENMnulls(
         e = e.mx,
         mod.settings = list(fc = df_best$fc, rm = df_best$rm),

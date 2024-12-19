@@ -41,17 +41,18 @@
 #' @examples
 #' maxent_auto(sp = system.file("extdata", "species/Phoebe sheareri.csv", package = "TBlabENM"),
 #' evdir = system.file("extdata", "envar/asc", package = "TBlabENM"),
+#' myenv = NULL,
 #' evlist = 1:7,
 #' factors = c("dr", "fao90"),
-#' nbg = 1000,
+#' nbg = 10000,
 #' args = maxent_args(),
-#' myenv = NULL,
 #' fc = c("lph", "q", "lq"),
 #' rm = 1:2,
 #' r = 0.7,
 #' vif = T,
 #' vifth = 5,
-#' opt = "aicc",
+#' opt = "auc.val.avg",
+#' null_model = TRUE,
 #' outdir = NULL)
 #'
 maxent_auto <- function(spdir,
@@ -145,8 +146,8 @@ maxent_auto <- function(spdir,
       parallel = parallel2,
       ncpu = ncpu2
     )
-    cat("***************将使用以下参数构建最终模型***************\n")
-    print(pa)
+    cat("***************The following parameters are used to build the final model***************\n")
+    cat(pa)
     #模拟
     ##设置args参数
     args[3] <- "linear=FALSE"

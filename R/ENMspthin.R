@@ -9,8 +9,8 @@
 #' @param thin.par 数值型，地理空间过滤距离（km）.
 #' @param outdir 结果保存路径，未指定时在当前工作路径自动生成保存路径.
 #' @param spec.col 物种名所在的列名.
-#' @param long.col 经度所在的列名.
-#' @param lat.col 纬度所在的列名.
+#' @param long.col 经度所在的列名.该列只能为地理坐标系的经度.
+#' @param lat.col 纬度所在的列名.该列只能为地理坐标系的纬度.
 #'
 #' @return 一个文件夹,包含每个物种过滤后的csv文件和过滤前后的连接文件.
 #' @export

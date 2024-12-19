@@ -54,6 +54,7 @@ ENMspcheck <- function(spdir, evdir, evselectev, elevation,
   #读取物种坐标数据并提取出经纬度列
     occ1 <- utils::read.csv(spdir)
     occ <- occ1[c(2,3)]
+    names(occ) <- c("x", "y")
   #提取每个坐标点对应的环境值并转为数据框
   occdata_t <- as.data.frame(terra::extract(biostack_t, occ, ID = FALSE))
   #检查缺失值所在行
@@ -67,9 +68,12 @@ ENMspcheck <- function(spdir, evdir, evselectev, elevation,
   occ_e[which(is.na(occ_e))] <- F
 
   #sum(occ_e)==0和length(row_na)==0说明数据都符合要求，否则发出警告
-  ifelse(sum(occ_e) == 0 & length(row_na) == 0,
-         cat("The data set passes the altitude range and ENM envionment variables check"),
-         warning("The above coordinate points have some problem in elevation or ENM envionment variables, please check now.", call. = F))
+  if (sum(occ_e) == 0 & length(row_na) == 0) {
+    cat("The data set passes the altitude range and ENM envionment variables check.")
+  } else {
+    warning("The above coordinate points have some problem in elevation or ENM envionment variables, please check now.")
+  }
+
 
 #相应处理
   if (deal_NA == "mv" & length(row_na) > 0) {
@@ -85,6 +89,7 @@ ENMspcheck <- function(spdir, evdir, evselectev, elevation,
   new_ra[terra::cellFromXY(new_ra, cellsite_xy)] <- 1
   #构建缓冲区
   new_ra_buffer <- terra::buffer(new_ra, width = width)
+
   #计算缓冲区的每个栅格与point之间的距离
   df <- which(new_ra_buffer[] == TRUE) %>%  #提取缓冲区内每个栅格的索引
     as.data.frame() %>%
@@ -97,14 +102,15 @@ ENMspcheck <- function(spdir, evdir, evselectev, elevation,
     if (nrow(df) > 0) {
       df <- df %>%
       mutate(xy = map(.x = ., .f = function(x){
-        terra::xyFromCell(new_ra_buffer, x)})) %>%   #获取栅格中心坐标
+        as.data.frame(terra::xyFromCell(new_ra_buffer, x))
+        })) %>%  #获取栅格中心坐标
       mutate(point = map(.x = ., .f = function(x){
         point
       })) %>%
       mutate(distant = map2_dbl(.x = xy, .y = point, .f = function(x, y){
-        stats::dist(rbind(x, y))
+         stats::dist(rbind(x,y))
       })) %>%
-      arrange(., distant)}
+      dplyr::arrange(., distant)}
   #将原数据替换为距离最近的栅格的中心坐标
     if (nrow(df) > 0) {
     occ1[n, 2:3] <- df$xy[[1]]
@@ -115,7 +121,7 @@ ENMspcheck <- function(spdir, evdir, evselectev, elevation,
      write.csv(occ1, paste0(outdir, "/", sp_name, "_check.csv"), row.names = FALSE)}
   }
   }
-  if (deal_NA == "rm") {
+  if (deal_NA == "rm" & length(row_na) > 0) {
     occ1 <- occ1[-n, ]
     if (exists("outdir")) {
       write.csv(occ1, paste0(outdir, "/", sp_name, "_check.csv"), row.names = FALSE)}
