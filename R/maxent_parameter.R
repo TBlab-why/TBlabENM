@@ -3,15 +3,8 @@
 #' @description
 #' 本函数为MaxEnt模型选择最适合的环境变量组合、正则化乘数和特征函数组合。
 #' @details
-#' 工作流程：首先对fc和rm进行所有可能的组合，对于每个组合，使用全部变量进行建模获得变量贡献大小，
-#'     依据变量贡献大小排除与最重要变量具有强相关性的变量。然后使用保留的变量继续建模获得该组变量
-#'     贡献大小，依据变量贡献大小排除与第二重要的变量具有强相关性的变量。重复上述过程直到保留的
-#'     变量之间不具有强相关性。经过此步骤就为每个fc和rm组合获得了一组不具有强相关性且保留了贡献大
-#'     的候选变量，当vif=T时，还对这一系列候选变量组合进行方差膨胀因子分析，进一步排除具有强共线性
-#'     的组合。最后使用ENMevaluate对每个组合进行测试，获得相应的指标（例如“aicc”），根据指标选择
-#'     最佳的一组组合作为模型最终参数。
-#'  注意：当物种发生数据过少时，可能无法得出正确的AICC和CBI值，如果opt选择aicc或cbi，则使用
-#'     auc.val.avg值进行代替。
+#' 工作流程：首先对fc和rm进行所有可能的组合，对于每个组合，使用全部变量进行建模获得变量贡献大小，依据变量贡献大小排除与最重要变量具有强相关性的变量。然后使用保留的变量继续建模获得该组变量贡献大小，依据变量贡献大小排除与第二重要的变量具有强相关性的变量。重复上述过程直到保留的变量之间不具有强相关性。经过此步骤就为每个fc和rm组合获得了一组不具有强相关性且保留了贡献大的候选变量，当vif=T时，还对这一系列候选变量组合进行方差膨胀因子分析，进一步排除具有强共线性的组合。最后使用ENMevaluate对每个组合进行测试，获得相应的指标（例如“AICc”），根据指标选择最佳的一组组合作为模型最终参数。
+#' 注意：当物种发生数据过少时，可能无法得出正确的AICc和cbi值，如果opt选择AICc或cbi，则使用auc.val.avg值进行代替。
 #'
 #' @param x 要模拟的物种文件的路径，包括文件名（.csv）。
 #' @param evdir 环境变量路径,格式为.asc
@@ -972,7 +965,7 @@ maxent_parameter <- function(x,
     outdir <- "."
   }
   #dir.create(paste0(outdir, "/TBlabENM"),recursive = TRUE, showWarnings = FALSE)
-
+  mybgfile_rmd <- mybgfile
   factors123 <- factors
   biolistall <- list.files(evdir, pattern = ".asc$", full.names = TRUE)
 
@@ -998,6 +991,7 @@ maxent_parameter <- function(x,
       bio_name0 <- stringr::str_split_1(bioname1, ".asc")[1]
       bio_name <- c(bio_name, bio_name0)
     }
+    bio_name_all <- bio_name
     cat(paste("Initial variable:", paste(bio_name, collapse = ","), "\n"))
 
     #判断分类变量factors是否包含在给定的环境数据集内
@@ -1035,7 +1029,7 @@ maxent_parameter <- function(x,
     occ <- occ[c(2, 3)]
     names(occ) <- c("x", "y")
     occdata <- terra::extract(biostack, occ, ID = FALSE)
-
+    n_na <- nrow(occdata) - nrow(occ)
     #提取背景值并计算变量相关性
     ##随机生成10000个点
     if (is.null(mybgfile)) {
@@ -1137,7 +1131,6 @@ if ('try-error' %in% class(fit)) {snowfall::sfStop()
       snowfall::sfStop()  # 关闭集群
 
       df$env <- unlist(k)
-
 
     } else{
 fit <- try(  #报错调试
@@ -1449,5 +1442,31 @@ fit <- try(  #报错调试
     parameter <- parameter[, c(4, 5, 3, 1, 2)]
 
   }
+
+  ###rmarkdown file
+  wendang <- function(x, n_na, occdata, sp_name, evdir, bio_name_all, factors, mybgfile_rmd, nbg,
+                      fc, rm, r, cormethod, vif, vifth, opt, bestpar, outdir, null_model){
+    rmarkdown::render(
+     input = system.file("extdata", "Models_detail.Rmd", package = "TBlabENM"),
+     #input = "C:/Users/why/TBlabENM/inst/extdata/Models_detail.Rmd",
+                      output_file = paste0(outdir, "/maxent/", sp_name, "/Models_tuning.html"),
+                      quiet = TRUE,
+                      params = list("sp_name" = sp_name, "x" = x, "occdata" = occdata, "n_na" = n_na,
+                                    "evdir" = evdir, "bio_name_all" = bio_name_all,
+                                    "factors" = factors, "mybgfile_rmd" = mybgfile_rmd, "nbg" = nbg,
+                                    "fc" = fc, "rm" = rm, "r" = r, "cormethod" = cormethod, "vif" = vif,
+                                    "vifth" = vifth, "opt" = opt, "bestpar" = bestpar, "outdir" = outdir,
+                                    "null_model" = null_model))
+  }
+
+  wendang(sp_name = sp_name, x = x, occdata = occdata, n_na = n_na,
+          evdir = evdir, bio_name_all = bio_name_all,
+          factors = factors123,
+          mybgfile_rmd = mybgfile_rmd, nbg = nbg, fc = fc,
+          rm = rm, r = r, cormethod = cormethod, vif = vif, vifth = vifth,
+          opt = opt, bestpar = opt1, outdir = outdir,
+          null_model = null_model)
+
+  cat("\n")
   return(parameter)
 }

@@ -113,9 +113,18 @@ maxent_single <- function(x,
   xydata <- dplyr::bind_rows(occ, mybg)
   args2 <- args
   #当坐标点少于25个时，将replicates=设置为坐标点数。
-  if (nrow(occ) <  25) {
-    args2[1] <- paste0("replicates=", nrow(occ))
-  }
+  if (nrow(occ) < 25) {
+    args2[1] <- paste0("replicates=", nrow(occdata))
+    n_na <-  nrow(occ) - nrow(occdata)}
+
+  if (nrow(occ) >= 25) {
+    args2[1] <- "replicates=10"
+    n_na <-  nrow(occ) - nrow(occdata)}
+
+  if (n_na > 0) {
+    warning(paste0(n_na, "occurs points has a missing value on the environment grid, removed by default."))
+    }
+
   #模型模拟, xydata$`p/b`
   if (is.null(outdir)) {
     outdir <- "./maxent/"
