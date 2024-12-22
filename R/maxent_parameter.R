@@ -1380,6 +1380,7 @@ fit <- try(  #报错调试
     dev.off()}
     #零模型检验
     #使用最佳模型的参数重新构建模型测试获得参数e.mx
+
     if (null_model == TRUE) {
       e.mx <- ENMeval::ENMevaluate(
         occs = df_best$occdata,

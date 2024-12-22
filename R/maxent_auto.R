@@ -142,6 +142,7 @@ maxent_auto <- function(spdir,
       vif = vif,
       vifth = vifth,
       opt = opt,
+      null_model = null_model,
       outdir = outdir,
       parallel = parallel2,
       ncpu = ncpu2
