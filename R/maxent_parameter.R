@@ -1447,6 +1447,7 @@ fit <- try(  #报错调试
   ###rmarkdown file
   wendang <- function(x, n_na, occdata, sp_name, evdir, bio_name_all, factors, mybgfile_rmd, nbg,
                       fc, rm, r, cormethod, vif, vifth, opt, bestpar, outdir, null_model){
+    Sys.setenv(RSTUDIO_PANDOC = Sys.getenv("RSTUDIO_PANDOC"))
     rmarkdown::render(
      input = system.file("extdata", "Models_detail.Rmd", package = "TBlabENM"),
      #input = "C:/Users/why/TBlabENM/inst/extdata/Models_detail.Rmd",
