@@ -211,7 +211,7 @@ knitr::include_graphics(p1_path)
 p1_path <- paste0(params$outdir, "/maxent/", sp_name, "/cor_continuous_best.jpg")
 p2_path <- paste0(params$outdir, "/maxent/", sp_name, "/cor_categorical_best.jpg")
 categorical_test <- sum(env_best_f %in% factors)
-continuous_test <- sum(env_best_c %in% factors)
+continuous_test <- sum(!env_best_c %in% factors)
   if (continuous_test > 1) {knitr::include_graphics(p1_path)}
   if (categorical_test > 1) {knitr::include_graphics(p2_path)} 
 
