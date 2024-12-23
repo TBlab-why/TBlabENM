@@ -115,7 +115,7 @@ if(nrow(params$occdata) >= 25) {cat("Random k-fold")} else {
 }
 ``` 
 * **模型重复次数(replicates)** 
- ``` {r echo = FALSE}
+``` {r echo = FALSE}
 if(nrow(params$occdata) >= 25) {cat("10")} else {
   cat(nrow(params$occdata))
 }
