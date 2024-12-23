@@ -81,7 +81,7 @@ flextable::set_flextable_defaults(
 
 ****************
 
-### **模型参数预设**
+# **模型参数预设**
 
 ``` {r echo = FALSE}
 if (is.null(factors)) {factors_text <- "全部为连续变量"} else {factors_text <- paste0("其中", paste0(params$factors, collapse = ", "), "为分类变量，其他为连续变量")
@@ -127,7 +127,7 @@ print(params$n_na)
 * **其他参数**  
   默认
 
-### **环境变量选择**
+# **环境变量选择**
 
 使用`r params$cormethod`相关系数检验环境变量之间的相关性，阈值设置为`r params$r`, 当任意两个环境变量的相关性>=`r params$r`则认为他们之间具有强相关性。图1为所有环境变量之间的相关性：
 
@@ -172,7 +172,7 @@ tb <- flextable::flextable(
 tb
 ```
 
-### **最优模型选择**
+# **最优模型选择**
 
 在为每个组合选择了合适的环境变量后，使用ENMeval包对每个组合进行性能评估，表2为模型相关性能指标结果：
 
