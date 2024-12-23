@@ -114,8 +114,13 @@ if(nrow(params$occdata) >= 25) {cat("Random k-fold")} else {
   cat("Jackknife (leave-one-out)")
 }
 ``` 
-* **模型重复次数(replicates)**  
-  `r nrow(params$occdata)` (当发生点数>=25时，模型重复10次，发生点数<25时，模型重复次数为发生点数)
+* **模型重复次数(replicates)** 
+ ``` {r echo = FALSE}
+if(nrow(params$occdata) >= 25) {cat("10")} else {
+  cat(nrow(params$occdata))
+}
+``` 
+(当发生点数>=25时，模型重复10次，发生点数<25时，模型重复次数为发生点数)
   
 ``` {r echo = FALSE}
 if (params$n_na > 0) {text <- "有缺失值"
