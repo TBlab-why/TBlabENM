@@ -28,6 +28,8 @@ params:
   bestpar: NULL
   outdir: NULL
   null_model: NULL
+  env_best_f: NULL
+  env_best_c: NULL
 ---
 
 <style type="text/css"> 
@@ -46,7 +48,7 @@ body {
 }
 
 h1 {
-   text-align: center;
+   font-size: 24pt;
 }
 </style>
 
@@ -108,7 +110,7 @@ if(is.null(params$mybgfile_rmd)) {cat(paste(params$nbg, " 随机生成"))} else 
   `r params$rm`
 * **模型评估方法(model evaluation)**  
 ``` {r echo = FALSE}
-if(nrow(params$occdata) < 25) {cat("Random k-fold")} else {
+if(nrow(params$occdata) >= 25) {cat("Random k-fold")} else {
   cat("Jackknife (leave-one-out)")
 }
 ``` 
@@ -180,7 +182,7 @@ df <- read.csv(paste0(params$outdir, "/maxent/", sp_name, "/tuneparameter.csv"))
 df <- dplyr::arrange(df, tune.args)
 tb <- flextable::flextable(
     data = df, # data
-    col_keys = names(df)[4:16]) %>% #要出现在表格中的列
+    col_keys = names(df)[4:17]) %>% #要出现在表格中的列
         flextable::set_caption(   #添加标题
             .,
             caption = "模型性能指标",
@@ -206,8 +208,8 @@ knitr::include_graphics(p1_path)
 ``` {r, echo=FALSE, fig.cap="最佳模型环境变量的相关性", fig.align = "center", fig.show='hold'} 
 p1_path <- paste0(params$outdir, "/maxent/", sp_name, "/cor_continuous_best.jpg")
 p2_path <- paste0(params$outdir, "/maxent/", sp_name, "/cor_categorical_best.jpg")
-categorical_test <- sum(names(occdata) %in% factors)
-continuous_test <- sum(!names(occdata) %in% factors)
+categorical_test <- sum(env_best_f %in% factors)
+continuous_test <- sum(env_best_c %in% factors)
   if (continuous_test > 1) {knitr::include_graphics(p1_path)}
   if (categorical_test > 1) {knitr::include_graphics(p2_path)} 
 

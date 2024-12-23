@@ -1055,13 +1055,15 @@ maxent_parameter <- function(x,
       if (nrow(correlation1) > 1) {
       grDevices::jpeg(filename = paste0(outdir, "/maxent/", sp_name, "/cor_continuous.jpg"),
                       width = 15 + nrow(correlation1), height = 15 + nrow(correlation1), units = "cm", res = 300)
-      corrplot::corrplot.mixed(correlation1, tl.pos = c( "lt"), tl.col = "black", diag = c("u"))
+      corrplot::corrplot.mixed(correlation1, tl.pos = c( "lt"), tl.col = "black",
+                               diag = c("u"), title = "continuous variable")
       dev.off()}
       #
       if (nrow(correlation1) > 1) {
       grDevices::jpeg(filename = paste0(outdir, "/maxent/", sp_name, "/cor_categorical.jpg"),
                       width = 15 + nrow(correlation2), height = 15 + nrow(correlation2), units = "cm", res = 300)
-      corrplot::corrplot.mixed(correlation2, tl.pos = c( "lt"), tl.col = "black", diag = c("u"))
+      corrplot::corrplot.mixed(correlation2, tl.pos = c( "lt"), tl.col = "black",
+                               diag = c("u"), title = "categorical variable")
       dev.off()}
   #
       correlation1 <- abs(as.data.frame(cor(mybg1, method = cormethod)))
@@ -1370,13 +1372,15 @@ fit <- try(  #报错调试
     if (nrow(correlation1) > 1) {
     grDevices::jpeg(filename = paste0(outdir, "/maxent/", sp_name, "/cor_continuous_best.jpg"),
                     width = 15 + nrow(correlation1), height = 15 + nrow(correlation1), units = "cm", res = 300)
-    corrplot::corrplot.mixed(correlation1, tl.pos = c( "lt"), tl.col = "black", diag = c("u"))
+    corrplot::corrplot.mixed(correlation1, tl.pos = c( "lt"), tl.col = "black",
+                             diag = c("u"), title = "continuous variable")
     dev.off()
     }
     if (nrow(correlation2) > 1) {
     grDevices::jpeg(filename = paste0(outdir, "/maxent/", sp_name, "/cor_categorical_best.jpg"),
                     width = 15 + nrow(correlation2), height = 15 + nrow(correlation2), units = "cm", res = 300)
-    corrplot::corrplot.mixed(correlation2, tl.pos = c( "lt"), tl.col = "black", diag = c("u"))
+    corrplot::corrplot.mixed(correlation2, tl.pos = c( "lt"), tl.col = "black",
+                             diag = c("u"), title = "categorical variable")
     dev.off()}
     #零模型检验
     #使用最佳模型的参数重新构建模型测试获得参数e.mx
@@ -1446,7 +1450,7 @@ fit <- try(  #报错调试
 
   ###rmarkdown file
   wendang <- function(x, n_na, occdata, sp_name, evdir, bio_name_all, factors, mybgfile_rmd, nbg,
-                      fc, rm, r, cormethod, vif, vifth, opt, bestpar, outdir, null_model){
+                      fc, rm, r, cormethod, vif, vifth, opt, bestpar, outdir,env_best_f,env_best_c, null_model){
     Sys.setenv(RSTUDIO_PANDOC = Sys.getenv("RSTUDIO_PANDOC"))
     rmarkdown::render(
      input = system.file("extdata", "Models_detail.Rmd", package = "TBlabENM"),
@@ -1458,6 +1462,7 @@ fit <- try(  #报错调试
                                     "factors" = factors, "mybgfile_rmd" = mybgfile_rmd, "nbg" = nbg,
                                     "fc" = fc, "rm" = rm, "r" = r, "cormethod" = cormethod, "vif" = vif,
                                     "vifth" = vifth, "opt" = opt, "bestpar" = bestpar, "outdir" = outdir,
+                                    "env_best_f" = env_best_f, "env_best_c" = env_best_c,
                                     "null_model" = null_model))
   }
 
@@ -1466,7 +1471,7 @@ fit <- try(  #报错调试
           factors = factors123,
           mybgfile_rmd = mybgfile_rmd, nbg = nbg, fc = fc,
           rm = rm, r = r, cormethod = cormethod, vif = vif, vifth = vifth,
-          opt = opt, bestpar = opt1, outdir = outdir,
+          opt = opt, bestpar = opt1, outdir = outdir,env_best_f = env_best_f, env_best_c = env_best_c,
           null_model = null_model)
 
   cat("\n")
