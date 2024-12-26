@@ -736,7 +736,7 @@ maxent_parameter <- function(x,
           #获取保留的变量存储路径的下标
           evlist <- c()
           for (i in seq_along(bio_name)) {
-            evlist1 <- which(stringr::str_detect(biolistall, paste0(bio_name, ".asc")[i]) ==
+            evlist1 <- which(stringr::str_detect(biolistall, paste0(bio_name, ".asc|.tif")[i]) ==
                                T)
             evlist <- c(evlist, evlist1)
           }
@@ -868,7 +868,7 @@ maxent_parameter <- function(x,
           #获取保留的变量存储路径的下标
           evlist <- c()
           for (i in seq_along(bio_name)) {
-            evlist1 <- which(stringr::str_detect(biolistall, paste0(bio_name, ".asc")[i]) == TRUE)
+            evlist1 <- which(stringr::str_detect(biolistall, paste0(bio_name, ".asc|.tif")[i]) == TRUE)
             evlist <- c(evlist, evlist1)
           }
 
@@ -941,7 +941,7 @@ maxent_parameter <- function(x,
         )  #下次模拟的变量
         evlist <- c()
         for (i in seq_along(bio_name)) {
-          evlist1 <- which(stringr::str_detect(biolistall, paste0(bio_name, ".asc")[i]) ==
+          evlist1 <- which(stringr::str_detect(biolistall, paste0(bio_name, ".asc|.tif")[i]) ==
                              T)
           evlist <- c(evlist, evlist1)
         }
@@ -992,7 +992,7 @@ maxent_parameter <- function(x,
     bio_name <- c()
     for (i in seq_along(biolist)) {
       bioname1 <- stringr::str_split_1(biolist[i], "/")[length(stringr::str_split_1(biolist[i], "/"))]
-      bio_name0 <- stringr::str_split_1(bioname1, ".asc")[1]
+      bio_name0 <- stringr::str_split_1(bioname1, ".asc|.tif")[1]
       bio_name <- c(bio_name, bio_name0)
     }
     bio_name_all <- bio_name
@@ -1171,7 +1171,7 @@ fit <- try(  #报错调试
     bio_name_all <- c()
     for (i in seq_along(biolistall)) {
       bioname1 <- stringr::str_split_1(biolistall[i], "/")[length(stringr::str_split_1(biolistall[i], "/"))]
-      bio_name0 <- stringr::str_split_1(bioname1, ".asc")[1]
+      bio_name0 <- stringr::str_split_1(bioname1, ".asc|.tif")[1]
       bio_name_all <- c(bio_name_all, bio_name0)
     }
 
@@ -1213,7 +1213,7 @@ fit <- try(  #报错调试
     ##获取bio_name的下标
     xb <- c()
     for (i in bio_name) {
-      xb1 <- which(stringr::str_detect(biolistall, paste0(i, ".asc")) == T)
+      xb1 <- which(stringr::str_detect(biolistall, paste0(i, ".asc|.tif")) == T)
       xb <- c(xb, xb1)
     }
     biostack <- terra::rast(biolistall[xb])
@@ -1258,7 +1258,7 @@ fit <- try(  #报错调试
           xb <- c()
           xb2 <- stringr::str_split_1(x, ",")
           for (i in seq_along(xb2)) {
-            xb1 <- which(stringr::str_detect(biolist, paste0(xb2, ".asc")[i]) == T)
+            xb1 <- which(stringr::str_detect(biolist, paste0(xb2, ".asc|.tif")[i]) == T)
             xb <- c(xb, xb1)
           }
 
@@ -1272,7 +1272,7 @@ fit <- try(  #报错调试
           xb <- c()
           xb2 <- stringr::str_split_1(x, ",")
           for (i in seq_along(xb2)) {
-            xb1 <- which(stringr::str_detect(biolist, paste0(xb2, ".asc")[i]) == T)
+            xb1 <- which(stringr::str_detect(biolist, paste0(xb2, ".asc|.tif")[i]) == T)
             xb <- c(xb, xb1)
           }
           bgdata <- cbind(mybgfile, mybg[xb2]) #选择变量后添加xy坐标
