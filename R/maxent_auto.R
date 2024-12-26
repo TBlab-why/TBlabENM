@@ -18,6 +18,7 @@
 #' 数字代表要选用的变量，默认使用所有变量。
 #' @param factors 字符型向量。指定哪些变量是分类变量。未指定时，则默认全为连续变量。
 #' @param nbg 随机背景点数量，当指定参数mybgfile时忽略。
+#' @param bgwidth 数值型(单位m), 以发生点为中心, 以bgwidth为半径创建一个缓冲区, 用来选择背景点.如果为NULL则在整个环境层范围内选择背景点.
 #' @param mybgfile 自定义的背景数据，包含两列（经度、纬度）
 #' @param args 自定义的MaxEnt模型参数，详见\code{\link[TBlabENM]{maxent_args}}。
 #' @param myenv 指定的一组环境变量，当提供此参数时，将不会再根据相关性进行变量筛选
@@ -45,6 +46,7 @@
 #' evlist = 1:7,
 #' factors = c("dr", "fao90"),
 #' nbg = 10000,
+#' bgwidth = 500000,
 #' args = maxent_args(),
 #' fc = c("lph", "q", "lq"),
 #' rm = 1:2,
@@ -62,6 +64,7 @@ maxent_auto <- function(spdir,
                         factors = NULL,
                         mybgfile = NULL,
                         nbg = 10000,
+                        bgwidth = NULL,
                         args = maxent_args(),
                         fc,
                         rm,
@@ -136,6 +139,7 @@ maxent_auto <- function(spdir,
       factors = factors,
       mybgfile = mybgfile,
       nbg = nbg,
+      bgwidth = bgwidth,
       fc = fc,
       rm = rm,
       r = r,

@@ -12,6 +12,7 @@
 #' 数字代表要选用的变量，默认使用所有变量。
 #' @param factors 字符型向量。指定哪些变量是分类变量。未指定时，则默认全为连续变量。
 #' @param nbg 随机背景点数量，当指定参数mybgfile时忽略。
+#' @param bgwidth 数值型(单位m), 以发生点为中心, 以bgwidth为半径创建一个缓冲区, 用来选择背景点.如果为NULL则在整个环境层范围内选择背景点.
 #' @param mybgfile 自定义的背景点。包含两列（经度、纬度）
 #' 未指定时，随机从环境层生成。
 #' @param args 自定义的MaxEnt模型参数，详见\code{\link[TBlabENM]{maxent_args}}。
@@ -35,6 +36,7 @@
 #'   evlist = 1:7,
 #'   factors = c("dr", "fao90"),
 #'   nbg = 1000,
+#'   bgwidth = 500000,
 #'   args = maxent_args(),
 #'   prodir = list(present = system.file("extdata", "envar/asc", package = "TBlabENM"),
 #'               present1 = system.file("extdata", "envar/asc", package = "TBlabENM")
@@ -48,6 +50,7 @@ maxent_single <- function(x,
                           factors = NULL,
                           mybgfile = NULL,
                           nbg = 10000,
+                          bgwidth = NULL,
                           args = maxent_args(),
                           prodir = NULL,
                           outdir = NULL,
@@ -72,23 +75,43 @@ maxent_single <- function(x,
   }
   biostack <- terra::rast(biolist)
 
+  #读取、提取存在点的环境值并转化为数据框，生成存在环境数据
+  occ <- utils::read.csv(x) #读取物种坐标数据
+  occ <- occ[c(2, 3)]
+  names(occ) <- c("x", "y")
+
+  if (is.null(bgwidth) == FALSE & is.null(mybgfile)) {
+    #将发生点转为sf对象
+    occs.sf <- sf::st_as_sf(occ, coords = c("x","y"), crs = terra::crs(biostack))
+    #转为等面积投影
+    eckertIV <- "+proj=eck4 +lon_0=0 +x_0=0 +y_0=0 +datum=WGS84 +units=m +no_defs"
+    occs.sf <- sf::st_transform(occs.sf, crs = eckertIV)
+    #创建缓冲区
+    occs.buf <- sf::st_buffer(occs.sf, dist = bgwidth) |>
+      sf::st_union() |>
+      sf::st_sf() |>
+      sf::st_transform(crs = terra::crs(biostack)) #再转为经纬度投影
+    #将环境变量裁剪至缓冲区
+    biostack <- terra::crop(biostack, occs.buf)
+    biostack <- terra::mask(biostack, occs.buf)}
+
+  occdata <- terra::extract(biostack, occ, ID = FALSE)
+
   #读取、提取背景点的环境值并转化为数据框，生成环境背景数据
-  ifelse(
-    is.null(mybgfile),
-    mybg <- terra::spatSample(biostack, nbg, na.rm = T, xy = T)[1:2],
+  if (is.null(mybgfile)) {
+    mybg <- terra::spatSample(biostack, nbg, na.rm = T, xy = T)[1:2]
+    mybgdata <- mybg[-(1:2)]
+  } else {
     mybg <- mybgfile
-  )
-  names(mybg) <- c("longitude", "latitude")
-  mybgdata <- terra::extract(biostack, mybg, ID = FALSE)
+    names(mybg) <- c("x", "y")
+    mybgdata <- terra::extract(biostack, mybg, ID = FALSE)
+  }
 
   #将背景点赋值为0
   mybg$'p/b' <- rep(0, times = nrow(mybg))
 
-  #读取、提取存在点的环境值并转化为数据框，生成存在环境数据
-  occ <- utils::read.csv(x) #读取物种坐标数据
-  occ <- occ[c(2, 3)]
-  names(occ) <- c("longitude", "latitude")
-  occdata <- terra::extract(biostack, occ, ID = FALSE)
+
+
   #将存在点赋值为1
   occ$'p/b' <- rep(1, times = nrow(occ))
 

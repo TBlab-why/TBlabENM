@@ -11,6 +11,7 @@ maxent_single(
   factors = NULL,
   mybgfile = NULL,
   nbg = 10000,
+  bgwidth = NULL,
   args = maxent_args(),
   prodir = NULL,
   outdir = NULL,
@@ -32,6 +33,8 @@ maxent_single(
 未指定时，随机从环境层生成。}
 
 \item{nbg}{随机背景点数量，当指定参数mybgfile时忽略。}
+
+\item{bgwidth}{数值型(单位m), 以发生点为中心, 以bgwidth为半径创建一个缓冲区, 用来选择背景点.如果为NULL则在整个环境层范围内选择背景点.}
 
 \item{args}{自定义的MaxEnt模型参数，详见\code{\link[TBlabENM]{maxent_args}}。}
 
@@ -62,6 +65,7 @@ maxent_single(
   evlist = 1:7,
   factors = c("dr", "fao90"),
   nbg = 1000,
+  bgwidth = 500000,
   args = maxent_args(),
   prodir = list(present = system.file("extdata", "envar/asc", package = "TBlabENM"),
               present1 = system.file("extdata", "envar/asc", package = "TBlabENM")
