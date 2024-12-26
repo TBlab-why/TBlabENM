@@ -971,7 +971,7 @@ maxent_parameter <- function(x,
   #dir.create(paste0(outdir, "/TBlabENM"),recursive = TRUE, showWarnings = FALSE)
   mybgfile_rmd <- mybgfile
   factors123 <- factors
-  biolistall <- list.files(evdir, pattern = ".asc$", full.names = TRUE)
+  biolistall <- list.files(evdir, pattern = ".asc$|.tif$", full.names = TRUE)
 
   #获取物种名 对路径拆分并取倒数第一个字符串
   spname1 <- stringr::str_split_1(x, "/")[length(stringr::str_split_1(x, "/"))]
@@ -984,7 +984,7 @@ maxent_parameter <- function(x,
   #当指定环境变量时不再进行变量的选择
   if (is.null(myenv)) {
     #变量名称
-    biolist <- list.files(evdir, pattern = ".asc$", full.names = TRUE)
+    biolist <- list.files(evdir, pattern = ".asc$|.tif$", full.names = TRUE)
     if (length(biolist) == 0) {stop("The environment variable does not exist. Check whether it is in `asc` format.\n")}
     if (is.null(evlist) == FALSE) {
       biolist <- biolist[evlist]
@@ -1165,7 +1165,7 @@ fit <- try(  #报错调试
     #删除缓存文件
     unlink(paste0(outdir, "/TBlabENMtemp", random_num) , recursive = T)
   } else {
-    biolist <- list.files(evdir, pattern = ".asc$", full.names = TRUE)
+    biolist <- list.files(evdir, pattern = ".asc$|.tif$", full.names = TRUE)
     #判断分类变量factors是否包含在给定的环境数据集内
     ##全部变量名称
     bio_name_all <- c()
