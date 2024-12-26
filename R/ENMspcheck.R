@@ -55,6 +55,7 @@ ENMspcheck <- function(spdir, evdir, evselectev, elevation,
     occ1 <- utils::read.csv(spdir)
     occ <- occ1[c(2,3)]
     names(occ) <- c("x", "y")
+
   #提取每个坐标点对应的环境值并转为数据框
   occdata_t <- as.data.frame(terra::extract(biostack_t, occ, ID = FALSE))
   #检查缺失值所在行
@@ -77,15 +78,23 @@ ENMspcheck <- function(spdir, evdir, evselectev, elevation,
 
 #相应处理
   if (deal_NA == "mv" & length(row_na) > 0) {
+    de_n <- c()
   #提取含有缺失值的点所在栅格的中心坐标
+  point_err <- occ[row_na, ] #有缺失值的点
+  cell_extract <- terra::extract(biostack_t, point_err[1:2], xy = T, ID = FALSE)
   for (i in seq_along(row_na)) {
   point <- occ[row_na[i], ]
   n <- as.numeric(rownames(point)) #有缺失值的点的行号
-  cellsite_ext <- terra::extract(biostack_t, point[1:2], xy = T, ID = FALSE)
+  cellsite_ext <- cell_extract[i,]
   cellsite_xy <- cellsite_ext[(length(cellsite_ext) - 1):length(cellsite_ext)]
+  if (is.nan(cellsite_xy[1,1])) {de_n <- c(de_n, n)
+  next}
+  #将栅格裁剪至有问题的点周围，这里设置为1°应该可以满足大部分需求
+  ex <- terra::ext(cellsite_xy$x-1, cellsite_xy$x+1, cellsite_xy$y-1, cellsite_xy$y+1)
+  biostack_t1 <- terra::crop(biostack_t, ex)
   #以其中一个栅格为模版创建空栅格并对site赋值
-  new_ra <- terra::rast(ncols = ncol(biostack_t), nrows  = nrow(biostack_t),
-                     crs = terra::crs(biostack_t), extent = terra::ext(biostack_t))
+  new_ra <- terra::rast(ncols = ncol(biostack_t1), nrows  = nrow(biostack_t1),
+                     crs = terra::crs(biostack_t1), extent = terra::ext(biostack_t1))
   new_ra[terra::cellFromXY(new_ra, cellsite_xy)] <- 1
   #构建缓冲区
   new_ra_buffer <- terra::buffer(new_ra, width = width)
@@ -94,7 +103,7 @@ ENMspcheck <- function(spdir, evdir, evselectev, elevation,
   df <- which(new_ra_buffer[] == TRUE) %>%  #提取缓冲区内每个栅格的索引
     as.data.frame() %>%
     mutate(value = map(.x = ., .f = function(x){
-      biostack_t[x]})) %>%  #提取栅格值
+      biostack_t1[x]})) %>%  #提取栅格值
     mutate(sum = map(.x = value, .f = function(x){
       sum(x)})) %>%     #求和，当值为NA时说明至少在一个图层中有缺失，下面移除这些缺失的栅格
     filter(., !grepl('NA', sum))
@@ -115,11 +124,13 @@ ENMspcheck <- function(spdir, evdir, evselectev, elevation,
     if (nrow(df) > 0) {
     occ1[n, 2:3] <- df$xy[[1]]
     } else {
-      occ1 <- occ1[-n, ]
+      de_n <- c(de_n, n)
     }
-  if (exists("outdir")) {
-     write.csv(occ1, paste0(outdir, "/", sp_name, "_check.csv"), row.names = FALSE)}
+
   }
+  if (length(de_n)>0) { occ1 <- occ1[-de_n, ]}
+  if (exists("outdir")) {
+    write.csv(occ1, paste0(outdir, "/", sp_name, "_check.csv"), row.names = FALSE)}
   }
   if (deal_NA == "rm" & length(row_na) > 0) {
     occ1 <- occ1[-n, ]

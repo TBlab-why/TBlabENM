@@ -26,6 +26,7 @@
 #' @param myenv 指定的一组环境变量，当提供此参数时，将不会再根据相关性进行变量筛选
 #' @param parallel 是否并行计算
 #' @param ncpu 如果并行，使用的cpu数
+#' @param bgwidth 数值型(单位m), 以发生点为中心, 以bgwidth为半径创建一个缓冲区, 用来选择背景点.如果为NULL则在整个环境层范围内选择背景点.
 #'
 #' @importFrom dplyr mutate arrange select
 #' @importFrom stringr str_split_1
@@ -45,6 +46,7 @@
 #'        evlist = 1:7,
 #'        factors = c("dr", "fao90"),
 #'        nbg = 1000,
+#'        bgwidth = 500000,
 #'        fc = c("LPH", "Q", "LQ"),
 #'        rm = 1:5,
 #'        r = 0.7,
@@ -61,6 +63,7 @@ maxent_parameter <- function(x,
                              factors = NULL,
                              mybgfile = NULL,
                              nbg = 10000,
+                             bgwidth = NULL,
                              fc,
                              rm,
                              r = 0.7,
@@ -72,6 +75,7 @@ maxent_parameter <- function(x,
                              outdir = NULL,
                              parallel = F,
                              ncpu = 2) {
+
   #判断参数格式是否正确
   if (is.null(opt) == FALSE) {
   if (!opt %in% c("auc.train", "cbi.train", "auc.diff.avg", "auc.val.avg", "cbi.val.avg", "or.10p.avg", "or.mtp.avg", "AICc")) {
@@ -1023,16 +1027,30 @@ maxent_parameter <- function(x,
     cat("***********Selecting parameters***********\n")
     #提取发生数据的环境值
     biostack <- terra::rast(biolist)
-
     occ <- utils::read.csv(x) #读取物种坐标数据
-
     occ <- occ[c(2, 3)]
     names(occ) <- c("x", "y")
+    if (is.null(bgwidth) == FALSE & is.null(mybgfile)) {
+      #将发生点转为sf对象
+      occs.sf <- sf::st_as_sf(occ, coords = c("x","y"), crs = terra::crs(biostack))
+      #转为等面积投影
+      eckertIV <- "+proj=eck4 +lon_0=0 +x_0=0 +y_0=0 +datum=WGS84 +units=m +no_defs"
+      occs.sf <- sf::st_transform(occs.sf, crs = eckertIV)
+      #创建缓冲区
+      occs.buf <- sf::st_buffer(occs.sf, dist = bgwidth) |>
+        sf::st_union() |>
+        sf::st_sf() |>
+        sf::st_transform(crs = terra::crs(biostack)) #再转为经纬度投影
+      #将环境变量裁剪至缓冲区
+      biostack <- terra::crop(biostack, occs.buf)
+      biostack <- terra::mask(biostack, occs.buf)}
+
     occdata <- terra::extract(biostack, occ, ID = FALSE)
     n_na <- nrow(occdata) - nrow(occ)
     #提取背景值并计算变量相关性
     ##随机生成10000个点
     if (is.null(mybgfile)) {
+
       mybg0 <- terra::spatSample(biostack, nbg, na.rm = T, xy = T)
       mybgfile <- mybg0[1:2]
       write.csv(mybgfile,

@@ -12,6 +12,7 @@ maxent_parameter(
   factors = NULL,
   mybgfile = NULL,
   nbg = 10000,
+  bgwidth = NULL,
   fc,
   rm,
   r = 0.7,
@@ -40,6 +41,8 @@ maxent_parameter(
 \item{mybgfile}{自定义的背景数据，包含两列（经度、纬度）}
 
 \item{nbg}{随机背景点数量，当指定参数mybgfile时忽略。}
+
+\item{bgwidth}{数值型(单位m), 以发生点为中心, 以bgwidth为半径创建一个缓冲区, 用来选择背景点.如果为NULL则在整个环境层范围内选择背景点.}
 
 \item{fc}{特征函数,取值为L,Q,P,H,T,及它们的组合}
 
@@ -80,6 +83,7 @@ maxent_parameter(x = system.file("extdata", "species/Phoebe sheareri.csv", packa
        evlist = 1:7,
        factors = c("dr", "fao90"),
        nbg = 1000,
+       bgwidth = 500000,
        fc = c("LPH", "Q", "LQ"),
        rm = 1:5,
        r = 0.7,
