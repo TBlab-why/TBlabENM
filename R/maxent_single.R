@@ -192,7 +192,7 @@ maxent_single <- function(x,
           mutate(path = map_chr(
             .x = file,
             .f = function(x) {
-              stringr::str_replace(x, pattern = ".asc$", ".tif")
+              stringr::str_replace(x, pattern = ".asc", ".tif")
             }
           )) %>%
           dplyr::mutate(ra = purrr::map(
@@ -244,7 +244,7 @@ maxent_single <- function(x,
         mutate(path = map_chr(
           .x = file,
           .f = function(x) {
-            stringr::str_replace(x, pattern = ".asc$", ".tif")
+            stringr::str_replace(x, pattern = ".asc", ".tif")
           }
         )) %>%
         mutate(purrr::map2(

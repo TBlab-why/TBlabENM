@@ -1446,6 +1446,7 @@ fit <- try(  #报错调试
         #最佳模型的参数
         no.iter = 100,
         eval.stats = c("auc.val", "or.10p"),
+        user.eval.type = "knonspatial",
         parallel = parallel,
         numCores = ncpu,
         parallelType = "doSNOW",
