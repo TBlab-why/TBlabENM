@@ -69,7 +69,7 @@ maxent_single <- function(x,
   cat(paste("Buildding MaxEnt models for", sp_name, "\n"))
 
   #读取环境变量
-  biolist <- list.files(evdir, pattern = ".asc$|.tif", full.names = TRUE)
+  biolist <- list.files(evdir, pattern = ".asc$|.tif$", full.names = TRUE)
   if (is.null(evlist) == FALSE) {
     biolist <- biolist[evlist]
   }
