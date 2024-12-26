@@ -1295,9 +1295,12 @@ fit <- try(  #报错调试
 
     #使用pmap函数并行评估（由于ENMevaluate函数的参数大于2个，所以使用pmap函数）
     #设置参数
+    block <- ENMeval::get.randomkfold(occ, mybgfile, kfolds = 5)
     if (nrow(occdata) >= 25) {
-      partitions = "randomkfold"
-      partition.settings = list(kfolds = 10)
+      #partitions = "randomkfold"
+      #partition.settings = list(kfolds = 10)
+      partitions = "user"
+      user.grp = block
     } else {
       partitions = "jackknife"
       partition.settings = NULL
@@ -1312,16 +1315,17 @@ fit <- try(  #报错调试
           tune.args = list(fc = fc, rm = rm),
           #partitions = "jackknife", #数据分区方式，有2+6种
           partitions = partitions,
+          user.grp = block,
           #数据分区方法|测试集、训练集划分方法
-          partition.settings =  partition.settings,
+         # partition.settings =  partition.settings,
           #数据分区设置
-          other.settings =  list(
-            abs.auc.diff = TRUE,
-            pred.type = "logistic",
-            validation.bg = "full",
+        #  other.settings =  list(
+        #    abs.auc.diff = TRUE,
+         #   pred.type = "logistic",
+        #    validation.bg = "full",
             #与partitions参数分区类型对应
-            other.args = NULL
-          ),
+        #    other.args = NULL
+       #   ),
           #其他额外设置，有默认值
           taxon.name = sp_name,
           n.bg = nbg,
@@ -1410,16 +1414,7 @@ fit <- try(  #报错调试
         tune.args = list(fc = df_best$fc, rm = df_best$rm),
         #partitions = "jackknife", #数据分区方式，有2+6种
         partitions = partitions,
-        #数据分区方法|测试集、训练集划分方法
-        partition.settings =  partition.settings,
-        #数据分区设置
-        other.settings =  list(
-          abs.auc.diff = TRUE,
-          pred.type = "logistic",
-          validation.bg = "full",
-          #与partitions参数分区类型对应
-          other.args = NULL
-        ),
+        user.grp = block,
         #其他额外设置，有默认值
         taxon.name = sp_name,
         n.bg = nbg,
