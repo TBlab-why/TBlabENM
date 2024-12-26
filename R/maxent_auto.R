@@ -184,8 +184,10 @@ maxent_auto <- function(spdir,
     biolistall <- list.files(evdir, pattern = ".asc$|.tif", full.names = TRUE)
     evlist <- c()
     for (i in seq_along(bio_name)) {
-      evlist1 <- which(stringr::str_detect(biolistall, paste0(bio_name, ".asc|.tif")[i]) ==
-                         T)
+      evlist1 <- which(stringr::str_detect(biolistall, paste0(bio_name, ".asc")[i]) == T)
+      if (length(evlist1) == 0) {
+        evlist1 <- which(stringr::str_detect(biolistall, paste0(bio_name, ".tif")[i]) == T)
+      }
       evlist <- c(evlist, evlist1)
     }
 
