@@ -99,8 +99,9 @@ maxent_single <- function(x,
 
   #读取、提取背景点的环境值并转化为数据框，生成环境背景数据
   if (is.null(mybgfile)) {
-    mybg <- terra::spatSample(biostack, nbg, na.rm = T, xy = T)[1:2]
-    mybgdata <- mybg[-(1:2)]
+    mybg0 <- terra::spatSample(biostack, nbg, na.rm = T, xy = T)
+    mybg <- mybg0[1:2]
+    mybgdata <- mybg0[-(1:2)]
   } else {
     mybg <- mybgfile
     names(mybg) <- c("x", "y")
@@ -184,8 +185,9 @@ maxent_single <- function(x,
         )
 
         #将结果文件的asc格式转为tif格式以节约内存
-        df <- list.files(paste0(outdir, sp_name, "/", names(prodir)[y]), full.names = TRUE) %>%
-          list.files(., pattern = "asc$", full.names = TRUE) %>%
+        df <- list.files(
+          paste0(outdir, sp_name, "/", names(prodir)[y]),
+          pattern = "asc$",full.names = TRUE) %>%
           as.data.frame()
         names(df) <- "file"
         df1 <- df %>%
@@ -236,8 +238,9 @@ maxent_single <- function(x,
 
       }
       #将结果文件的asc格式转为tif格式以节约内存
-      df <- list.files(paste0(outdir, sp_name), full.names = TRUE) %>%
-        list.files(., pattern = "asc$", full.names = TRUE) %>%
+      df <- list.files(
+        paste0(outdir, sp_name, "/", names(prodir)[b]),
+        pattern = "asc$", full.names = TRUE) %>%
         as.data.frame()
       names(df) <- "file"
       df1 <- df %>%
