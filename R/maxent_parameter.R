@@ -1430,8 +1430,7 @@ fit <- try(  #报错调试
         bg = df_best$bgdata,
         tune.args = list(fc = df_best$fc, rm = df_best$rm),
         #partitions = "jackknife", #数据分区方式，有2+6种
-        partitions = partitions,
-        user.grp = block,
+        partitions = "randomkfold",
         #其他额外设置，有默认值
         taxon.name = sp_name,
         n.bg = nbg,
@@ -1449,7 +1448,7 @@ fit <- try(  #报错调试
         #最佳模型的参数
         no.iter = 100,
         eval.stats = c("auc.val", "or.10p"),
-        user.eval.type = "knonspatial",
+       # user.eval.type = "knonspatial",
         parallel = parallel,
         numCores = ncpu,
         parallelType = "doSNOW",
@@ -1457,7 +1456,7 @@ fit <- try(  #报错调试
       )
       p <- ENMeval::evalplot.nulls(
         mod.null,
-        stats = c("or.10p", "auc.val"),
+        stats = c("auc.val", "or.10p"),
         plot.type = "histogram",
         return.tbl = FALSE
       )
