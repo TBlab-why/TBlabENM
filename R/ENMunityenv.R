@@ -71,12 +71,23 @@ ENMunityenv <- function(radir, ref, proname = NULL, factors = NULL, method = "bi
 
     fun1 <- function(x){
       ra <- terra::rast(x)
-      if(terra::crs(ref, proj = TRUE)== terra::crs(ra, proj = TRUE)){
-        ra_r <- terra::crop(ra, ref, mask = T) %>% terra::mask(., ref)} else{
-          if(class(ref) == "SpatRaster"){ra <- terra::project(ra, ref, method = radf$method[which(x==radf[1])])
-          } else { ra <- terra::project(ra, terra::crs(ref), method = radf$method[[which(x==radf[1])]], res = res) }
+      if (terra::crs(ref, proj = TRUE) == terra::crs(ra, proj = TRUE)) {
+        ra_r <- terra::crop(ra, ref, mask = T) %>% terra::mask(., ref)
+        if (terra::ext(ra_r) != terra::ext(ref)) {
+          ra_r <- terra::resample(ra_r, ref, "near")
+                                                    }
+         } else{
+
+          if (class(ref) == "SpatRaster") {
+            ra <- terra::project(ra, ref, method = radf$method[which(x == radf[1])]) } else {
+            ra <- terra::project(ra, terra::crs(ref), method = radf$method[[which(x==radf[1])]], res = res) }
+
           ra_r <- terra::crop(ra, ref, mask = T) %>% terra::mask(., ref)
-        }
+          if (terra::ext(ra_r) != terra::ext(ref)) {
+            ra_r <- terra::resample(ra_r, ref, "near")
+          }
+
+          }
 
 
       if(is.null(proname)){
