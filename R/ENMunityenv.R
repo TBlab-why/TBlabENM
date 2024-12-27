@@ -91,10 +91,13 @@ ENMunityenv <- function(radir, ref, proname = NULL, factors = NULL, method = "bi
 
 
       if(is.null(proname)){
-        terra::writeRaster(ra_r, paste0(outdir, "/env/",radf$name[which(x==radf[1])], ".", format),
-                           NAflag = -9999, overwrite = overwrite)}else{
-                             dir.create(paste0(outdir, "/env/", radf$proname[which(x==radf[1])]), recursive = TRUE, showWarnings = FALSE)
-                             writeRaster(ra_r, paste0(outdir, "/env/",radf$proname[which(x==radf[1])], "/", radf$name[which(x==radf[1])], ".", format),
+        terra::writeRaster(
+          ra_r, paste0(outdir, "/env/",radf$name[which(x==radf[1])], ".", format),
+                        NAflag = -9999, overwrite = overwrite) } else {
+          dir.create(paste0(outdir, "/env/", radf$proname[which(x==radf[1])]),
+                     recursive = TRUE, showWarnings = FALSE)
+        terra::writeRaster(ra_r, paste0(outdir, "/env/",radf$proname[which(x==radf[1])], "/",
+                                        radf$name[which(x==radf[1])], ".", format),
                                          NAflag = -9999, overwrite = overwrite) }
     }
   if(parallel == TRUE){
