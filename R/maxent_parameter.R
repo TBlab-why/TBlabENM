@@ -1422,7 +1422,7 @@ fit <- try(  #报错调试
     mybg1 <- mybg[env_best_c]
     mybg2 <- mybg[env_best_f]
     correlation1 <- cor(mybg1, method = cormethod)
-    correlation2 <- cor(mybg2, method = cormethod)
+    correlation2 <- cor(as.data.frame(lapply(mybg2,as.numeric)), method = cormethod)
     if (nrow(correlation1) > 1) {
     grDevices::jpeg(filename = paste0(outdir, "/maxent/", sp_name, "/cor_continuous_best.jpg"),
                     width = 15 + nrow(correlation1), height = 15 + nrow(correlation1), units = "cm", res = 300)
