@@ -79,7 +79,7 @@ maxent_parameter <- function(x,
   #判断参数格式是否正确
   if (is.null(opt) == FALSE) {
   if (!opt %in% c("auc.train", "cbi.train", "auc.diff.avg", "auc.val.avg", "cbi.val.avg", "or.10p.avg", "or.mtp.avg", "AICc")) {
-    stop("'opt' must be a subset of c('auc.train', 'cbi.train', 'auc.diff.avg', 'auc.val.avg', 'cbi.val.avg', 'or.10p.avg', 'or.mtp.avg, AICc') or NULL.")
+    stop("'opt' must be a subset of c('auc.train', 'cbi.train', 'auc.diff.avg', 'auc.val.avg', 'cbi.val.avg', 'or.10p.avg', 'or.mtp.avg', 'AICc') or NULL.")
   }
     }
   random_num <- sample(1:100000, 1)
@@ -1301,6 +1301,21 @@ fit <- try(  #报错调试
           ncol(x)
         }
       ))
+    #将分类变量转为因子型
+    for (i in 1:nrow(df)) {
+      dff4 <- df[[i,4]]
+      dff5 <- df[[i,5]]
+      categoricals <- factors123[factors123 %in% names(dff4)]
+      if (length(categoricals) > 0) {
+      num <- which(names(dff4) %in% factors123 == T)
+      for (j in num) {
+        dff4[,j] <- factor(dff4[,j] )
+        dff5[,j] <- factor(dff5[,j] )
+      }
+      df[[i,4]] <- dff4
+      df[[i,5]] <- dff5
+                                     }
+    }
 
     #判断保留的变量有几个，只有一个则无法调优
     df1 <- dplyr::filter(df, num > 1)
@@ -1350,7 +1365,7 @@ fit <- try(  #报错调试
           #使用的模型，有三种
           overlap = FALSE,
           #生态位重叠
-          categoricals = factors123[factors123 %in% names(occdata)],
+         # categoricals = factors123[factors123 %in% names(occdata)],
           #指定分类变量,"IAWC_CLASS", , "T_USDA_TEX_CLASS"
           doClamp = FALSE
         )
@@ -1438,7 +1453,7 @@ fit <- try(  #报错调试
         #使用的模型，有三种
         overlap = FALSE,
         #生态位重叠
-        categoricals = env_best_f,
+       # categoricals = env_best_f,
         doClamp = FALSE
       )
       cat("\n**************null model test*****************\n")
