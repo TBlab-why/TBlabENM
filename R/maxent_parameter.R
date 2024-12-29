@@ -78,7 +78,7 @@ maxent_parameter <- function(x,
 
   #判断参数格式是否正确
   if (is.null(opt) == FALSE) {
-    for (i in opt) {
+    for (i in 1:length(opt)) {
       if (!opt[i] %in% c("auc.train", "cbi.train", "auc.diff.avg", "auc.val.avg", "cbi.val.avg", "or.10p.avg", "or.mtp.avg", "AICc")) {
         stop("'opt' must be a subset of c('auc.train', 'cbi.train', 'auc.diff.avg', 'auc.val.avg', 'cbi.val.avg', 'or.10p.avg', 'or.mtp.avg', 'AICc') or NULL.")
       }
