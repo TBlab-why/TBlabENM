@@ -78,9 +78,11 @@ maxent_parameter <- function(x,
 
   #判断参数格式是否正确
   if (is.null(opt) == FALSE) {
-  if (!opt %in% c("auc.train", "cbi.train", "auc.diff.avg", "auc.val.avg", "cbi.val.avg", "or.10p.avg", "or.mtp.avg", "AICc")) {
-    stop("'opt' must be a subset of c('auc.train', 'cbi.train', 'auc.diff.avg', 'auc.val.avg', 'cbi.val.avg', 'or.10p.avg', 'or.mtp.avg', 'AICc') or NULL.")
-  }
+    for (i in opt) {
+      if (!opt[i] %in% c("auc.train", "cbi.train", "auc.diff.avg", "auc.val.avg", "cbi.val.avg", "or.10p.avg", "or.mtp.avg", "AICc")) {
+        stop("'opt' must be a subset of c('auc.train', 'cbi.train', 'auc.diff.avg', 'auc.val.avg', 'cbi.val.avg', 'or.10p.avg', 'or.mtp.avg', 'AICc') or NULL.")
+      }
+    }
     }
   random_num <- sample(1:100000, 1)
   #绘制模型调优结果的函数

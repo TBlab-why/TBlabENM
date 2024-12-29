@@ -14,7 +14,7 @@
 #' @param d 字符向量或数据框.当为字符向量时为物种名称.当为数据框时第一列为物种名(要与resultdir下的名称保持一致),其他列位置不做要求，但是必须有一列或多列为划分适生区和非适生区的阈值.
 #' @param x 当d为数据框时使用，表示物种序号, 与d中的物种序号一致.
 #' @param resultdir maxent结果文件路径。
-#' @param crs 给没有坐标系的栅格定义投影.例如"+proj=lcc +lat_1=48 +lat_2=33 +lon_0=-100 +ellps=WGS84".
+#' @param crs 给缺乏投影的栅格定义投影. 例如"epsg:4326". 栅格的投影应与环境变量保持一致，错误的投影会得到错误的结果。
 #' @param prefix 要转换的栅格文件的前缀
 #' @param suffix 要转换的栅格文件的后缀
 #' @param overwrite logical. If TRUE, filename is overwritten
@@ -39,7 +39,7 @@
 #' ENMclassify(d = read.csv("F:/eblf/TBlabENM/spdata.csv"),
 #'            x = c(3,5,7,9),
 #'            resultdir = "F:/eblf/TBlabENM/result",
-#'            crs = "+proj=aea +lat_0=0 +lon_0=105 +lat_1=25 +lat_2=47 +x_0=0 +y_0=0 +ellps=krass +units=m +no_defs",
+#'            crs = "epsg:4326",
 #'            prefix = NULL,
 #'            suffix = "tif",
 #'            rcl = list("非适生区" = c(0,0.2),
@@ -124,7 +124,7 @@ ENMclassify <- function(d, x = NULL, resultdir, crs,
         terra::classify(terra::rast(x), y) #重分类
       })) %>%
       mutate(area = map(.x = reclass, .f = function(x){
-        terra::crs(x) <- crs
+        if (terra::crs(x) == "") {terra::crs(x) <- crs}
         terra::expanse(x, unit = "km", byValue = TRUE, wide = TRUE) #计算唯一值对应的面积
       })) %>% #计算面积
       mutate(area1 = map2(.x = area, .y = pro, .f = function(x,y){

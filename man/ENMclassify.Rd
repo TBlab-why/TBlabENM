@@ -25,7 +25,7 @@ ENMclassify(
 
 \item{resultdir}{maxent结果文件路径。}
 
-\item{crs}{给没有坐标系的栅格定义投影.例如"+proj=lcc +lat_1=48 +lat_2=33 +lon_0=-100 +ellps=WGS84".}
+\item{crs}{给缺乏投影的栅格定义投影. 例如"epsg:4326". 栅格的投影应与环境变量保持一致，错误的投影会得到错误的结果。}
 
 \item{prefix}{要转换的栅格文件的前缀}
 
@@ -60,7 +60,7 @@ rcl:rcl参数提供了栅格数据重分类的参数，如果提供的是列表�
 ENMclassify(d = read.csv("F:/eblf/TBlabENM/spdata.csv"),
            x = c(3,5,7,9),
            resultdir = "F:/eblf/TBlabENM/result",
-           crs = "+proj=aea +lat_0=0 +lon_0=105 +lat_1=25 +lat_2=47 +x_0=0 +y_0=0 +ellps=krass +units=m +no_defs",
+           crs = "epsg:4326",
            prefix = NULL,
            suffix = "tif",
            rcl = list("非适生区" = c(0,0.2),
