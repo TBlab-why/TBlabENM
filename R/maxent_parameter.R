@@ -1055,7 +1055,9 @@ maxent_parameter <- function(x,
         sf::st_transform(crs = terra::crs(biostack)) #再转为经纬度投影
       #将环境变量裁剪至缓冲区
       biostack <- terra::crop(biostack, occs.buf)
-      biostack <- terra::mask(biostack, occs.buf)}
+      biostack <- terra::mask(biostack, occs.buf)
+      cat(paste0("Crop the environment variable to a buffer with a radius of", bgwidth/1000, "km centered on the point of occurrence\n") )
+      }
 
     occdata <- terra::extract(biostack, occ, ID = FALSE)
     n_na <- nrow(occdata) - nrow(occ)
@@ -1069,6 +1071,7 @@ maxent_parameter <- function(x,
                 paste0(outdir, "/maxent/", sp_name, "/bg.csv"),
                 row.names = FALSE)
       mybg <- mybg0[-(1:2)]
+      cat(paste0(nbg ," background points are randomly generated.\n"))
     } else{
       cat("The background points has been specified!\n")
       mybg <- terra::extract(biostack, mybgfile, ID = FALSE)
