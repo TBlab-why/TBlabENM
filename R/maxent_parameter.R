@@ -1123,8 +1123,9 @@ maxent_parameter <- function(x,
     names(df) <- c("fc", "rm", "env")
 
     #根据组合设置 args参数
+
     args1 <- TBlabENM::maxent_args(
-      l = FALSE ,
+      l = FALSE,
       q = FALSE,
       p = FALSE,
       h = FALSE,

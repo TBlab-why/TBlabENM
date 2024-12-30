@@ -141,9 +141,9 @@ maxent_single <- function(x,
     args2[1] <- paste0("replicates=", nrow(occdata))
     n_na <-  nrow(occ) - nrow(occdata)}
 
-  if (nrow(occ) >= 25) {
-    args2[1] <- "replicates=10"
-    n_na <-  nrow(occ) - nrow(occdata)}
+  # if (nrow(occ) >= 25) {
+  #   args2[1] <- "replicates=10"
+  #   n_na <-  nrow(occ) - nrow(occdata)}
 
   if (n_na > 0) {
     warning(paste0(n_na, "occurs points has a missing value on the environment grid, removed by default."))
