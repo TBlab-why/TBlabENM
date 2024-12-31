@@ -1056,7 +1056,7 @@ maxent_parameter <- function(x,
       #将环境变量裁剪至缓冲区
       biostack <- terra::crop(biostack, occs.buf)
       biostack <- terra::mask(biostack, occs.buf)
-      cat(paste0("Crop the environment variable to a buffer with a radius of", bgwidth/1000, "km centered on the point of occurrence\n") )
+      cat(paste0("Crop the environment variable to a buffer with a radius of", bgwidth/1000, " km centered on the point of occurrence\n") )
       }
 
     occdata <- terra::extract(biostack, occ, ID = FALSE)
