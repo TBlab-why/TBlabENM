@@ -103,8 +103,9 @@ ENMclassify <- function(d, x = NULL, resultdir, crs,
   fun1 <- function(x){
     spname <- spdata[x,1]
     #读取栅格数据
-    ra_df <- list.files(paste0(resultdir, "/", spdata[x,1]), full.names = TRUE) %>%
-      list.files(., full.names = TRUE, pattern = paste0("^", prefix, ".*", suffix, "$")) %>%
+    ra_df <- list.files(paste0(resultdir, "/", spdata[x,1]),
+                        full.names = TRUE, recursive = TRUE,
+                        pattern = paste0("^", prefix, ".*", suffix, "$")) %>%
       as.data.frame() %>%
       mutate(reclass = spdata[x, "reclass"]) %>%
       #生成保存文件名

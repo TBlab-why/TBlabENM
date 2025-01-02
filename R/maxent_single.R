@@ -27,7 +27,6 @@
 #' @importFrom stringr str_split
 #' @importFrom dplyr bind_rows
 #' @importFrom predicts MaxEnt
-#' @importFrom magrittr %>%
 #' @examples
 #'
 #' maxent_single(
@@ -130,7 +129,7 @@ maxent_single <- function(x,
   #
   if (is.null(factors) == FALSE) {
     site <- bio_name[bio_name %in% factors]
-    evdata <- evdata %>% dplyr::mutate_at(site, as.factor)
+    evdata <- evdata |> dplyr::mutate_at(site, as.factor)
   }
 
   #组合存在点和背景点构成坐标点数据框（包含0或1的）（要与上面的顺序一致）
@@ -187,22 +186,22 @@ maxent_single <- function(x,
         #将结果文件的asc格式转为tif格式以节约内存
         df <- list.files(
           paste0(outdir, sp_name, "/", names(prodir)[y]),
-          pattern = "asc$",full.names = TRUE) %>%
+          pattern = "asc$",full.names = TRUE) |>
           as.data.frame()
         names(df) <- "file"
-        df1 <- df %>%
+        df1 <- df |>
           mutate(path = map_chr(
             .x = file,
             .f = function(x) {
               stringr::str_replace(x, pattern = ".asc", ".tif")
             }
-          )) %>%
+          )) |>
           dplyr::mutate(ra = purrr::map(
             .x = file,
             .f = function(x) {
               terra::rast(x)
             }
-          )) %>%
+          )) |>
           mutate(purrr::map2(
             .x = ra,
             .y = path,
@@ -217,8 +216,8 @@ maxent_single <- function(x,
 
       #删除asc格式
       gg <- file.remove(
-        list.files(paste0(outdir, sp_name), full.names = TRUE) %>%
-          list.files(., pattern = "asc$", full.names = TRUE)
+        list.files(paste0(outdir, sp_name), full.names = TRUE) |>
+          list.files(pattern = "asc$", full.names = TRUE)
       )
 
       end_time <- Sys.time()
@@ -240,16 +239,16 @@ maxent_single <- function(x,
       #将结果文件的asc格式转为tif格式以节约内存
       df <- list.files(
         paste0(outdir, sp_name, "/", names(prodir)[b]),
-        pattern = "asc$", full.names = TRUE) %>%
+        pattern = "asc$", full.names = TRUE) |>
         as.data.frame()
       names(df) <- "file"
-      df1 <- df %>%
+      df1 <- df |>
         mutate(path = map_chr(
           .x = file,
           .f = function(x) {
             stringr::str_replace(x, pattern = ".asc", ".tif")
           }
-        )) %>%
+        )) |>
         mutate(purrr::map2(
           .x = file,
           .y = path,
@@ -259,7 +258,7 @@ maxent_single <- function(x,
         ))
 
       #删除asc格式
-      # gg <- file.remove(list.files(paste0(outdir, sp_name), full.names = TRUE) %>%
+      # gg <- file.remove(list.files(paste0(outdir, sp_name), full.names = TRUE) |>
       #                     list.files(., pattern = "asc$", full.names = TRUE))
 
       end_time <- Sys.time()

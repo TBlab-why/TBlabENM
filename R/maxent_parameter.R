@@ -31,7 +31,6 @@
 #' @importFrom dplyr mutate arrange select
 #' @importFrom stringr str_split_1
 #' @importFrom utils read.csv tail write.csv
-#' @importFrom magrittr %>%
 #' @importFrom purrr map_chr map map_dbl
 #' @importFrom foreach %dopar%
 #' @importFrom ggplot2 ggsave
@@ -94,8 +93,8 @@ maxent_parameter <- function(x,
                  "cbi.val.avg", "or.10p.avg", "or.mtp.avg", "AICc"),
         names_to = "name",
         values_to = "value"
-      ) %>%
-      dplyr::filter(., name %in% opt)
+      ) |>
+      dplyr::filter(name %in% opt)
 
     if (length(opt) > 1) {
       p <- ggplot(data, mapping = aes(
@@ -260,7 +259,7 @@ maxent_parameter <- function(x,
                             collapse = "_",
                             sep = ".")
     emp.mod <- e@models[[mod.tune.args]]
-    emp.mod.res <- e@results %>% dplyr::filter(tune.args == mod.tune.args)
+    emp.mod.res <- e@results |> dplyr::filter(tune.args == mod.tune.args)
 
     ############################## #
     # build null models ####
@@ -318,7 +317,7 @@ maxent_parameter <- function(x,
         for (k in 1:nk) {
           # sample null occurrences only from
           # the records in partition group k
-          null.samps.k <- null.samps %>% dplyr::filter(grp == k)
+          null.samps.k <- null.samps |> dplyr::filter(grp == k)
           # randomly sample n null occurrences, where n equals the number
           # of empirical occurrence in partition group k
           samp.k <- sample(1:nrow(null.samps.k), occs.grp.tbl[k])
@@ -346,7 +345,7 @@ maxent_parameter <- function(x,
         if (e@partition.method == "jackknife")
           null.occs.i.df$grp <- get.jackknife(null.occs.i.df, e@bg)$occs.grp
       }
-      null.occs.i.z <- null.occs.i.df %>% dplyr::select(-grp)
+      null.occs.i.z <- null.occs.i.df |> dplyr::select(-grp)
       # shortcuts
       categoricals <- names(which(sapply(e@occs, is.factor)))
       if (length(categoricals) == 0)
@@ -399,15 +398,15 @@ maxent_parameter <- function(x,
       })
 
       if (is.null(null.e.i)) {
-        results.na <- e@results[1, ] %>% dplyr::mutate(dplyr::across(auc.train:ncoef, ~
+        results.na <- e@results[1, ] |> dplyr::mutate(dplyr::across(auc.train:ncoef, ~
                                                                        NA))
         mod.settings.i <- paste(names(mod.settings),
                                 mod.settings,
                                 collapse = "_",
                                 sep = ".")
         if (nrow(e@results.partitions) > 0) {
-          results.partitions.na <- e@results.partitions %>% dplyr::filter(tune.args == mod.settings.i) %>% dplyr::mutate(dplyr::across(3:ncol(.), ~
-                                                                                                                                         NA)) %>% dplyr::mutate(iter = i)
+          results.partitions.na <- e@results.partitions |> dplyr::filter(tune.args == mod.settings.i) |> dplyr::mutate(dplyr::across(3:ncol(.), ~
+                                                                                                                                         NA)) |> dplyr::mutate(iter = i)
         } else{
           results.partitions.na <- e@results.partitions
         }
@@ -416,7 +415,7 @@ maxent_parameter <- function(x,
       } else{
         out <- list(
           results = null.e.i@results,
-          results.partitions = null.e.i@results.partitions %>% dplyr::mutate(iter = i) %>% dplyr::select(iter, dplyr::everything())
+          results.partitions = null.e.i@results.partitions |> dplyr::mutate(iter = i) |> dplyr::select(iter, dplyr::everything())
         )
         # restore NA row if partition evaluation is missing (model was NULL)
         if (eval.type != "testing") {
@@ -427,7 +426,7 @@ maxent_parameter <- function(x,
             newrow[, 4:ncol(newrow)] <- NA
             for (ind in inds) {
               out$results.partitions <- dplyr::bind_rows(out$results.partitions,
-                                                         newrow %>% dplyr::mutate(fold = ind))
+                                                         newrow |> dplyr::mutate(fold = ind))
             }
             out$results.partitions <- dplyr::arrange(out$results.partitions, fold)
           }
@@ -465,24 +464,24 @@ maxent_parameter <- function(x,
       x$results)
     nulls.grp.ls <- lapply(outs, function(x)
       x$results.partitions)
-    nulls <- dplyr::bind_rows(nulls.ls) %>% dplyr::select(!dplyr::contains("AIC"))
+    nulls <- dplyr::bind_rows(nulls.ls) |> dplyr::select(!dplyr::contains("AIC"))
     nulls.grp <- dplyr::bind_rows(nulls.grp.ls)
     if (eval.type %in% c("testing", "none")) {
-      nulls.avgs <- nulls %>% dplyr::select(dplyr::ends_with("train"),
-                                            dplyr::contains(eval.stats)) %>% dplyr::summarize_all(mean, na.rm = TRUE)
-      nulls.sds <- nulls %>% dplyr::select(dplyr::ends_with("train"),
-                                           dplyr::contains(eval.stats)) %>% dplyr::summarise_all(sd, na.rm = TRUE)
+      nulls.avgs <- nulls |> dplyr::select(dplyr::ends_with("train"),
+                                            dplyr::contains(eval.stats)) |> dplyr::summarize_all(mean, na.rm = TRUE)
+      nulls.sds <- nulls |> dplyr::select(dplyr::ends_with("train"),
+                                           dplyr::contains(eval.stats)) |> dplyr::summarise_all(sd, na.rm = TRUE)
       # get empirical model evaluation statistics for comparison
-      emp.avgs <- emp.mod.res %>% dplyr::select(dplyr::ends_with("train"),
+      emp.avgs <- emp.mod.res |> dplyr::select(dplyr::ends_with("train"),
                                                 dplyr::contains(eval.stats))
     } else{
-      nulls.avgs <- nulls %>% dplyr::select(dplyr::ends_with("train"), paste0(eval.stats, ".avg")) %>% dplyr::summarize_all(mean, na.rm = TRUE)
-      nulls.sds <- nulls %>% dplyr::select(dplyr::ends_with("train"), paste0(eval.stats, ".sd")) %>% dplyr::summarise_all(sd, na.rm = TRUE)
+      nulls.avgs <- nulls |> dplyr::select(dplyr::ends_with("train"), paste0(eval.stats, ".avg")) |> dplyr::summarize_all(mean, na.rm = TRUE)
+      nulls.sds <- nulls |> dplyr::select(dplyr::ends_with("train"), paste0(eval.stats, ".sd")) |> dplyr::summarise_all(sd, na.rm = TRUE)
       # get empirical model evaluation statistics for comparison
-      emp.avgs <- emp.mod.res %>% dplyr::select(dplyr::ends_with("train"), paste0(eval.stats, ".avg"))
+      emp.avgs <- emp.mod.res |> dplyr::select(dplyr::ends_with("train"), paste0(eval.stats, ".avg"))
     }
     if (sum(grepl("sd", names(emp.mod.res))) > 0) {
-      emp.sds <- emp.mod.res %>% dplyr::select(paste0(eval.stats, ".sd"))
+      emp.sds <- emp.mod.res |> dplyr::select(paste0(eval.stats, ".sd"))
     } else{
       emp.sds <- NULL
     }
@@ -696,9 +695,9 @@ maxent_parameter <- function(x,
           #变量重要性
           ev_cb <- read.csv(
             paste0(outdir, "/TBlabENMtemp", random_num, "/", fc1, rm1, n, "/maxent/", sp_name, "/maxentResults.csv")
-          ) %>%
-            dplyr::select(., paste0(bio_name, ".contribution")) %>%
-            utils::tail(., n = 1) %>% t() %>% as.data.frame()
+          ) |>
+            dplyr::select(paste0(bio_name, ".contribution")) |>
+            utils::tail(n = 1) |> t() |> as.data.frame()
           names(ev_cb) <- "value"
 
           ##排除贡献小于0.5的变量
@@ -778,9 +777,9 @@ maxent_parameter <- function(x,
           #变量重要性
           ev_cb <- read.csv(
             paste0(outdir, "/TBlabENMtemp", random_num, "/", fc1, rm1, n, "/maxent/", sp_name, "/maxentResults.csv")
-          ) %>%
-            dplyr::select(., paste0(bio_name, ".contribution")) %>%
-            utils::tail(., n = 1) %>% t() %>% as.data.frame()
+          ) |>
+            dplyr::select(paste0(bio_name, ".contribution")) |>
+            utils::tail(n = 1) |> t() |> as.data.frame()
           names(ev_cb) <- "value"
 
           ##排除贡献小于0.5的变量
@@ -926,9 +925,9 @@ maxent_parameter <- function(x,
         #变量重要性
         ev_cb <- read.csv(
           paste0(outdir, "/TBlabENMtemp", random_num, "/", fc1, rm1, n, "/maxent/", sp_name, "/maxentResults.csv")
-        ) %>%
-          dplyr::select(., paste0(bio_name, ".contribution")) %>%
-          utils::tail(., n = 1) %>% t() %>% as.data.frame()
+        ) |>
+          dplyr::select(paste0(bio_name, ".contribution")) |>
+          utils::tail(n = 1) |> t() |> as.data.frame()
         names(ev_cb) <- "value"
 
         ##排除贡献小于0.5的变量
@@ -1113,7 +1112,7 @@ maxent_parameter <- function(x,
 
     #组合fc和 rm
     fc <- toupper(fc)
-    combin <- expand.grid(fc, rm, stringsAsFactors = FALSE) %>%
+    combin <- expand.grid(fc, rm, stringsAsFactors = FALSE) |>
       dplyr::mutate(fc = purrr::map_chr(
         .x = Var1,
         .f = function(x) {
@@ -1249,7 +1248,7 @@ fit <- try(  #报错调试
 
     #组合fc和 rm
     fc <- toupper(fc)
-    combin <- expand.grid(fc, rm, stringsAsFactors = FALSE) %>%
+    combin <- expand.grid(fc, rm, stringsAsFactors = FALSE) |>
       mutate(fc = purrr::map_chr(
         .x = Var1,
         .f = function(x) {
@@ -1268,7 +1267,7 @@ fit <- try(  #报错调试
     parameter <- df
   } else{
     #剩余的组合进行evaluate通过AICC确定最佳组合
-    df <- df %>%
+    df <- df |>
       dplyr::mutate(occdata = purrr::map(
         .x = env,
         .f = function(x) {
@@ -1285,7 +1284,7 @@ fit <- try(  #报错调试
 
           occdata <- cbind(occ, occdata[xb2]) #选择变量后添加xy坐标
         }
-      )) %>%
+      )) |>
       dplyr::mutate(bgdata = purrr::map(
         .x = env,
         .f = function(x) {
@@ -1300,7 +1299,7 @@ fit <- try(  #报错调试
           }
           bgdata <- cbind(mybgfile, mybg[xb2]) #选择变量后添加xy坐标
         }
-      )) %>% #计算变量个数
+      )) |> #计算变量个数
       mutate(num = purrr::map_dbl(
         .x = occdata,
         .f = function(x) {
