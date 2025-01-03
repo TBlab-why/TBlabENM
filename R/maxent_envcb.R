@@ -20,7 +20,6 @@
 #' @importFrom purrr map_dbl map map2 map2_chr
 #' @importFrom ggsci scale_fill_npg
 #' @importFrom stats aggregate
-#' @importFrom magrittr %>%
 #'
 #' @examples
 #' maxent_envcb(parameters = read.csv("F:/4/TBlabENM/maxent/parameters.csv"),
@@ -62,13 +61,13 @@ maxent_envcb <- function(parameters,
     "Variable contribution size2"
   )
 
-  ss <- spdata %>%
+  ss <- spdata |>
     mutate(nenv = map_dbl(
       .x = env,
       .f = function(x) {
         str_count(x, ",") + 1
       }
-    )) %>%
+    )) |>
     mutate(path = map_chr(
       .x = species,
       .f = function(x) {
@@ -79,13 +78,13 @@ maxent_envcb <- function(parameters,
           recursive = TRUE
         )[1]
       }
-    )) %>%
+    )) |>
     mutate(par = map(
       .x = path,
       .f = function(x) {
         read.csv(x)
       }
-    )) %>%
+    )) |>
     #提取变量重要性
     mutate(ev_cb = map2(
       .x = par,
@@ -95,27 +94,27 @@ maxent_envcb <- function(parameters,
         names(dt) <- "value"
         dplyr::arrange(dt, dplyr::desc(value))
       }
-    )) %>%
+    )) |>
     mutate(var = map(
       .x = ev_cb,
       .f = function(x) {
         site <- unlist(stringr::str_split(rownames(x), "\\."))
         site <- site[seq(1, length(site), 2)]
       }
-    )) %>%
+    )) |>
     mutate(v1 = map2_chr(
       .x = var,
       .y = ev_cb,
       .f = function(x, y) {
         paste(paste0(x, "(", y$value, "%)", collapse = ","))
       }
-    )) %>%
+    )) |>
     mutate(v2 = map_chr(
       .x = var,
       .f = function(x) {
         paste(paste0(x, collapse = ","))
       }
-    )) %>%
+    )) |>
     mutate(v3 = map2_chr(
       .x = var,
       .y = ev_cb,

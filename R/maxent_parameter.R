@@ -1055,7 +1055,7 @@ maxent_parameter <- function(x,
       #将环境变量裁剪至缓冲区
       biostack <- terra::crop(biostack, occs.buf)
       biostack <- terra::mask(biostack, occs.buf)
-      cat(paste0("Crop the environment variable to a buffer with a radius of", bgwidth/1000, " km centered on the point of occurrence\n") )
+      cat(paste0("Crop the environment variable to a buffer with a radius of", bgwidth/1000, " km centered on the point of occurrence.\n") )
       }
 
     occdata <- terra::extract(biostack, occ, ID = FALSE)
@@ -1136,6 +1136,7 @@ maxent_parameter <- function(x,
       jackknife = FALSE,
       pictures = FALSE
     )
+    cat("Select environment variables for each fc and rm combination./n")
     ##并行计算
     if (parallel == T) {
       # 开启集成
@@ -1332,6 +1333,7 @@ fit <- try(  #报错调试
 
     #使用pmap函数并行评估（由于ENMevaluate函数的参数大于2个，所以使用pmap函数）
     #设置参数
+    cat("Model evaluation metrics for each combination were evaluated using ENMeval./n")
     block <- ENMeval::get.randomkfold(occ, mybgfile, kfolds = 5)
     if (nrow(occdata) >= 25) {
       #partitions = "randomkfold"
@@ -1369,6 +1371,7 @@ fit <- try(  #报错调试
           algorithm = "maxent.jar",
           #使用的模型，有三种
           overlap = FALSE,
+          quiet = TRUE,
           #生态位重叠
          # categoricals = factors123[factors123 %in% names(occdata)],
           #指定分类变量,"IAWC_CLASS", , "T_USDA_TEX_CLASS"
@@ -1457,6 +1460,7 @@ fit <- try(  #报错调试
         algorithm = "maxent.jar",
         #使用的模型，有三种
         overlap = FALSE,
+        quiet = TRUE,
         #生态位重叠
        # categoricals = env_best_f,
         doClamp = FALSE

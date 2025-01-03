@@ -31,7 +31,6 @@
 #' @importFrom purrr map map_chr pmap
 #' @importFrom purrr map2
 #' @importFrom purrr map2_chr
-#' @importFrom magrittr %>%
 #' @importFrom dplyr mutate relocate
 #'
 #'
@@ -144,7 +143,7 @@ ENMclassify <- function(d, x = NULL, resultdir, crs,
 
     for (i in 1:length(radf[,6])) {
       b1 <- radf[,6][[i]]
-      data <- rbind(data,b1)
+      data <- merge(data, b1, all = TRUE)
     }
 
     data <- data[-1] %>%
