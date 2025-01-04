@@ -13,7 +13,7 @@
 #' @return 物种丰富度图，.tif格式。
 #' @importFrom terra writeRaster
 #' @importFrom dplyr mutate
-#' @importFrom purrr map map2
+#' @importFrom purrr map map2 %>%
 #' @importFrom stringr str_detect
 
 #'
@@ -56,7 +56,7 @@ ENMsprichness <- function(parameters, x = NULL, booleandir, key = NULL,
   if(length(rasterlist) == 0) {rasterlist <- booleandir}
   #提取想要的时期
   if(is.null(key)==FALSE){
-    rasterlist <- unlist(key) |> as.data.frame() |>
+    rasterlist <- unlist(key) %>% as.data.frame() %>%
       #ra为不同时期的所有路径
       mutate(ra  = map(.x = ., .f = function(x){
         as.data.frame(rasterlist[str_detect(rasterlist, x)])
@@ -97,15 +97,15 @@ ENMsprichness <- function(parameters, x = NULL, booleandir, key = NULL,
       raster1 <- rasterlist[str_detect(rasterlist, parameters[i,1])]
       raster <- c(raster, raster1)
     }
-    df <- raster |>
-      as.data.frame() |>
-      mutate(path = 1:length(raster)) |>
+    df <- raster %>%
+      as.data.frame() %>%
+      mutate(path = 1:length(raster)) %>%
       mutate(ra = map(.x = ., .f = function(x){
         terra::rast(x)
-      })) |>
+      })) %>%
      mutate(we = map(.x = ra, .f = function(x){
        x*(1/(terra::freq(x)[2,3]))
-     })) |>
+     })) %>%
       mutate(map2(.x = we, .y = path, .f = function(x,y){
         terra::writeRaster(x, paste0(outdir, "/TBlabENMtemp3/",  bb[b%in%z], "/", y, ".tif"), overwrite = overwrite)
       }))
