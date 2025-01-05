@@ -5,7 +5,7 @@
 \title{Species Richness Analysis}
 \usage{
 ENMsprichness(
-  parameters,
+  d,
   x = NULL,
   booleandir,
   key = NULL,
@@ -17,40 +17,32 @@ ENMsprichness(
 )
 }
 \arguments{
-\item{parameters}{数据框，第一列为物种名(要与resultdir下的名称保持一致),其他列位置不做要求，但是必须有一列或多列
-为划分适生区和非适生区的阈值。}
+\item{d}{数据框或字符向量, 提供要计算的物种名称. 为数据框时, 第一列为物种名. (物种名称要与booleandir下的表示物种存在/不存在栅格文件名保持一致)}
 
-\item{x}{数值向量,表示物种序号,与parameters中的物种序号一致。}
+\item{x}{数值向量, 表示要纳入分析的物种序号, 与d中的物种序号一致. 默认使用全部物种.}
 
-\item{booleandir}{适生区和非适生区结果文件路径。}
+\item{booleandir}{物种的存在/不存在栅格文件所在路径. 文件名要包含d中指定的物种.}
 
-\item{key}{要提取的关键词，一般对应投影时期}
+\item{key}{列表, 用于提取booleandir中对应的栅格进行分析. 例如分别计算不同时期的物种丰富度.}
 
-\item{bioindex}{丰富度指数，可选sr,we,cwe}
+\item{bioindex}{丰富度指数, 可选sr, we, cwe中的任意一个. 如果为cwe, 同时计算sr和we.}
 
-\item{overwrite}{logical. If TRUE, filename is overwritten}
+\item{overwrite}{logical. If TRUE, filename is overwritten.}
 
 \item{outdir}{输出文件夹}
 
 \item{parallel}{是否并行}
 
 \item{ncpu}{并行时cpu个数}
-
-\item{spdata}{spdata 由ENMspdata()生成的标准文件。也可手动创建或修改，但是不建议。
-当maxent结果文件出现变动后，强烈建议重新运行ENMspdata()。}
-
-\item{proname}{想要计算的物种丰富度的时期名称.}
-
-\item{path}{输出结果路径。}
 }
 \value{
 物种丰富度图，.tif格式。
 }
 \description{
-根据布尔图进行叠加，计算物种丰富度。
+叠加不同物种的存在/不存在栅格，计算物种丰富度.
 }
 \examples{
-ENMsprichness(parameters = read.csv("F:/eblf/TBlabENM/spdata.csv"),
+ENMsprichness(d = read.csv("F:/eblf/TBlabENM/spdata.csv"),
               x = c(3,5,7,9),
               booleandir = "F:/eblf/TBlabENM/BooleanmapT_MTSStr",
               key = list("2050RCP8.5"= "2050RCP8.5",

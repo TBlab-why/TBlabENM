@@ -100,25 +100,25 @@ ENMspcheck <- function(spdir, evdir, evselectev, elevation,
   new_ra_buffer <- terra::buffer(new_ra, width = width)
 
   #计算缓冲区的每个栅格与point之间的距离
-  df <- which(new_ra_buffer[] == TRUE) |>  #提取缓冲区内每个栅格的索引
-    as.data.frame() |>
+  df <- which(new_ra_buffer[] == TRUE) %>%  #提取缓冲区内每个栅格的索引
+    as.data.frame() %>%
     mutate(value = map(.x = ., .f = function(x){
-      biostack_t1[x]})) |>  #提取栅格值
+      biostack_t1[x]})) %>%  #提取栅格值
     mutate(sum = map(.x = value, .f = function(x){
-      sum(x)})) |>     #求和，当值为NA时说明至少在一个图层中有缺失，下面移除这些缺失的栅格
+      sum(x)})) %>%     #求和，当值为NA时说明至少在一个图层中有缺失，下面移除这些缺失的栅格
     filter(!grepl('NA', sum))
 
     if (nrow(df) > 0) {
-      df <- df |>
+      df <- df %>%
       mutate(xy = map(.x = ., .f = function(x){
         as.data.frame(terra::xyFromCell(new_ra_buffer, x))
-        })) |>  #获取栅格中心坐标
+        })) %>%  #获取栅格中心坐标
       mutate(point = map(.x = ., .f = function(x){
         point
-      })) |>
+      })) %>%
       mutate(distant = map2_dbl(.x = xy, .y = point, .f = function(x, y){
          stats::dist(rbind(x,y))
-      })) |>
+      })) %>%
       dplyr::arrange(distant)}
   #将原数据替换为距离最近的栅格的中心坐标
     if (nrow(df) > 0) {

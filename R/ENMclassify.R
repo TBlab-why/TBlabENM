@@ -122,6 +122,7 @@ ENMclassify <- function(d, x = NULL, resultdir, crs,
     radf <- ra_df %>%
       mutate(reclass = map2(.x = ., .y = reclass, .f = function(x,y){
         terra::classify(terra::rast(x), y) #重分类
+
       })) %>%
       mutate(area = map(.x = reclass, .f = function(x){
         if (terra::crs(x) == "") {terra::crs(x) <- crs}

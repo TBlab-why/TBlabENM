@@ -81,8 +81,8 @@ ENMgbif_search <- function(spnames, range = NULL, uncertainty = 10000, rWCVP = T
   ##详细用法见https://docs.ropensci.org/rgbif/articles/getting_occurrence_data.html
   ####首先从GBIF下载初步筛选的记录。由于做分布区相关研究，记录只选择来自标本馆的，并做相应筛选####
   #0.1获取需要下载物种的识别号(key)
-  keylist <- spnames|>
-    as.data.frame() |>
+  keylist <- spnames%>%
+    as.data.frame() %>%
     mutate(key = map_int(.x = ., .f = function(x){
       key <- rgbif::name_suggest(q = x, rank = 'species')$data$key[1]
       print(key)
@@ -153,34 +153,34 @@ ENMgbif_search <- function(spnames, range = NULL, uncertainty = 10000, rWCVP = T
   #查看引文doi,安息香科数据集'0048799-230530130749713'
   #rgbif::gbif_citation('0048799-230530130749713')
   #0.4下载到电脑并读取到R
-  d <- occ_download_get(gbif_download, outdir)|>
+  d <- occ_download_get(gbif_download, outdir)%>%
     occ_download_import()
   table(d$species)
   ####数据过滤####
   #将使用"CoordinateCleaner"包(Zizka et al. 2019)。以帮助检测和删除有问题的记录,本教
   #程将检测记录点坐标是否围绕首都、国家的中心，是否落入海洋，为零，或在饲养动物的博
   #物馆(机构)周围。读者也可以使用世界自然保护联盟的物种分布范围来剔除分布范围以外的所有记录。
-  d1 <- d|>
-    cc_cen(buffer = 2000)|> # remove country centroids within 2km
-    cc_cap(buffer = 2000)|> # remove capitals centroids within 2km
-    cc_inst(buffer = 2000)|> # remove zoo and herbaria within 2km
-    cc_sea()|> # remove from ocean
-    cc_val()|> #emoves or flags non-numeric and not available coordinates
-    cc_equ()|> #删除经纬度相等的坐标
-    #cc_coun(iso3 = "countryCode")|> #删除或标记地理坐标与其他国家信息之间的不匹配
-    cc_zero(buffer = 0.5)|> #删除坐标为0周围的数据
-    #cc_outl()|>
-    setNames(tolower(names(.)))|> #将列名转换为小写方便后面CoordinateCleaner包的处理
-    filter(year > 1950)|> #只选择1950年后的记录
-    filter(coordinateprecision < 0.01 | is.na(coordinateprecision))|>
-    filter(!coordinateuncertaintyinmeters %in% c(301,3036,999,9999))|> #已知有错误的坐标不确定度
-    #filter(!decimallatitude == 0 | !decimallongitude == 0)|> #剔除坐标为0的记录
+  d1 <- d%>%
+    cc_cen(buffer = 2000)%>% # remove country centroids within 2km
+    cc_cap(buffer = 2000)%>% # remove capitals centroids within 2km
+    cc_inst(buffer = 2000)%>% # remove zoo and herbaria within 2km
+    cc_sea()%>% # remove from ocean
+    cc_val()%>% #emoves or flags non-numeric and not available coordinates
+    cc_equ()%>% #删除经纬度相等的坐标
+    #cc_coun(iso3 = "countryCode")%>% #删除或标记地理坐标与其他国家信息之间的不匹配
+    cc_zero(buffer = 0.5)%>% #删除坐标为0周围的数据
+    #cc_outl()%>%
+    setNames(tolower(names(.)))%>% #将列名转换为小写方便后面CoordinateCleaner包的处理
+    filter(year > 1950)%>% #只选择1950年后的记录
+    filter(coordinateprecision < 0.01 | is.na(coordinateprecision))%>%
+    filter(!coordinateuncertaintyinmeters %in% c(301,3036,999,9999))%>% #已知有错误的坐标不确定度
+    #filter(!decimallatitude == 0 | !decimallongitude == 0)%>% #剔除坐标为0的记录
     distinct(decimallongitude, decimallatitude, specieskey, datasetkey, .keep_all = TRUE) #去重
 
   #从d中提取“物种名称”、“经度”、“纬度”、位置，“国家名称”，并重命名
   datasel <- dplyr::select(d1, species, decimallongitude, decimallatitude, elevation,
                            names(d1)[18], locality, countrycode, names(d1)[30], names(d1)[37],
-                           names(d1)[38], names(d1)[39], names(d1)[45])|>
+                           names(d1)[38], names(d1)[39], names(d1)[45])%>%
     rename(species = species, longitude = decimallongitude, latitude = decimallatitude,
            province = stateprovince)
 
@@ -199,7 +199,7 @@ ENMgbif_search <- function(spnames, range = NULL, uncertainty = 10000, rWCVP = T
   if (rWCVP == TRUE){
     cat("Use rWCVP package to filter distribution points outside the country of origin.")
     #使用rWCVP过滤原产地外的分布点
-    occs <- datasel|>
+    occs <- datasel%>%
       st_as_sf(coords=c("longitude", "latitude"), crs = st_crs(4326)) #这里是wgs84坐标系
 
     #按种进行过滤
@@ -223,13 +223,13 @@ ENMgbif_search <- function(spnames, range = NULL, uncertainty = 10000, rWCVP = T
                                        sparse = FALSE)[,1])
       #图层文件的坐标系是基于度的，所以1km大约为0.009度。但随着纬度升高，0.009度会比1km越来越长，
       #这就要求根据数据和分布区位置做相应的调整。让我们观察一下有多少分布记录落在原生区外1km内。
-      buffered_dist <- native_range|>
-        st_union()|>
+      buffered_dist <- native_range%>%
+        st_union()%>%
         st_buffer(dist)  #构建一个缓冲区
       suppressMessages(occs$native_buffer <- st_intersects(occs, buffered_dist, sparse=FALSE)[,1])
 
       #现在，我们可以丢弃在原生范围之外 >100 公里（大约）的记录。
-      occs_filtered <- occs|> filter(native_buffer)
+      occs_filtered <- occs%>% filter(native_buffer)
       occs_i <- rbind(occs_i, occs_filtered)
     }
     occs_i <- arrange(occs_i, species)

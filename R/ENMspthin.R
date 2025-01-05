@@ -42,7 +42,7 @@ ENMspthin <- function(spdir,
 
   for (i in seq_along(spdir)) {
     occdata <- utils::read.csv(spdir[i], fileEncoding = "GB18030")
-  name <- stringr::str_split_1(spdir[i], pattern = "/")[length(stringr::str_split_1(spdir[i], pattern = "/"))] |>
+  name <- stringr::str_split_1(spdir[i], pattern = "/")[length(stringr::str_split_1(spdir[i], pattern = "/"))] %>%
       stringr::str_split_1(pattern = ".csv$")
     if (file.exists(paste0(outdir, "/occthin", thin.par, "km/", name[1], "_thin1.csv"))) {
       file.remove(paste0(outdir, "/occthin", thin.par, "km/", name[1], "_thin1.csv"))

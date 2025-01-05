@@ -45,17 +45,17 @@ ENMunityenv <- function(radir, ref, proname = NULL, factors = NULL, method = "bi
           ralist <- c(ralist, ralist1)
     }}
    #构建栅格列表数据框
-    radf <- as.data.frame(ralist) |>
+    radf <- as.data.frame(ralist) %>%
       mutate(name = map_chr(.x = ralist, .f = function(x){
         a <- stringr::str_split_1(x, "/")[length(stringr::str_split_1(x, "/"))]
         a <- stringr::str_split_1(a, ".tif|.asc")[1]
-      })) |>
+      })) %>%
       mutate(method = map_chr(.x = name, .f = function(x){
         if(x %in% factors){method <- "near"} else {method <- method}
-      })) |>
+      })) %>%
       mutate(factor = map_int(.x = name, .f = function(x){
         if(x %in% factors){factor <- 1} else {method <- 0}
-      })) |>
+      })) %>%
       mutate(proname = map_chr(.x = ralist, .f = function(x){
         if(is.null(proname)){
           a <- NA
@@ -72,7 +72,7 @@ ENMunityenv <- function(radir, ref, proname = NULL, factors = NULL, method = "bi
     fun1 <- function(x){
       ra <- terra::rast(x)
       if (terra::crs(ref, proj = TRUE) == terra::crs(ra, proj = TRUE)) {
-        ra_r <- terra::crop(ra, ref, mask = T) |> terra::mask(ref)
+        ra_r <- terra::crop(ra, ref, mask = T) %>% terra::mask(ref)
         if (terra::ext(ra_r) != terra::ext(ref)) {
           ra_r <- terra::resample(ra_r, ref, "near")
                                                     }
@@ -82,7 +82,7 @@ ENMunityenv <- function(radir, ref, proname = NULL, factors = NULL, method = "bi
             ra <- terra::project(ra, ref, method = radf$method[which(x == radf[1])]) } else {
             ra <- terra::project(ra, terra::crs(ref), method = radf$method[[which(x==radf[1])]], res = res) }
 
-          ra_r <- terra::crop(ra, ref, mask = T) |> terra::mask(ref)
+          ra_r <- terra::crop(ra, ref, mask = T) %>% terra::mask(ref)
           if (terra::ext(ra_r) != terra::ext(ref)) {
             ra_r <- terra::resample(ra_r, ref, "near")
           }
