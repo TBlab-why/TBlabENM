@@ -1,161 +1,146 @@
-# 单层连续栅格绘图
-##下载美国行政边界数据
-aus_map <- geodata::gadm(country = "AUS", level = 1, path = tempdir())
-aus_map1 <- aus_map
-aus_map <- aus_map1
-aus_map <- geodata::gadm(country = "PRK", level = 1, path = tempdir())
-plot(aus_map)
-##栅格数据
-tavg <- geodata::worldclim_global("tavg", res = 10, path = tempdir(), version = "2.1")
-tavg_aus <- terra::crop(tavg, aus_map, mask = T)
-plot(tavg_aus)
-##1月
-tavg_aus_Jan <- tavg_aus[[1]]
-terra::plot(tavg_aus_Jan)
-##绘图
-ENMplots(spatraster = tavg_aus_Jan,
-         spatvector = aus_map)
-###更改陆地的颜色和水体的颜色
-ENMplots(spatraster = tavg_aus_Jan_class,
-         spatvector = aus_map,
-         landcolor = "grey60",
-         watercolor = "#BEE8FF")
-###自定义颜色
-ENMplots(spatraster = tavg_aus_Jan,
-         spatvector = aus_map,
-         rastercolors = c("yellow", "green"))
-###更改投影坐标系
-ENMplots(spatraster = tavg_aus_Jan,
-         spatvector = aus_map,
-         rastercolors = NULL,
-         crs = "epsg:4544")
-###仅绘制一个省份
-zone <- crop(tavg_aus_Jan, ext(tavg_aus_Jan)+ c(-27,-5,0,-30))
-ENMplots(spatraster = tavg_aus_Jan,
-         spatvector = aus_map,
-         zones = zone)
-###保存图片
 
-ENMplots(spatraster = tavg_aus_Jan,
-         spatvector = aus_map,
-         outdir = "your path",
-         filename = "plot.jpg",
-         width = 10,
-         height = 10)
-
-### 添加其他ggplot对象
-### ENMplots()返回的是ggplot对象，可以与其他ggplot扩展结合，拥有更大的灵活性
-p <- ENMplots(spatraster = tavg_aus_Jan,
-              spatvector = aus_map)
-####使用调色盘颜色
-p + scale_fill_viridis_c()
-
-
-#单层分类栅格绘图
-
-##将澳大利亚1月的平均温重分类为高中低三个类别
-rcl <- matrix(c(0,20,1,20,30,2,30,35,3), ncol = 3, byrow = TRUE)
-tavg_aus_Jan_class <- terra::classify(tavg_aus_Jan, rcl = rcl)
-plot(tavg_aus_Jan_class)
-##绘图
-p <- ENMplots(spatraster = tavg_aus_Jan_class,
-              spatvector = aus_map,
-              rastercolors = NULL,
-              crs = "epsg:4324",
-              landcolor = "white",
-              #  zones = ra_crop,
-              categories = T,
-              maxcell = 5e+05,
-              watercolor = "#BEE8FF",
-              arrange = list(2, 3, "v"),
-              outdir = "D:/Desktop",
-              filename = "2.jpg",
-              width = 10,
-              height = 10)
-p
-##指定坐标系
-p <- ENMplots(spatraster = tavg_aus_Jan_class,
-              spatvector = aus_map,
-              rastercolors = NULL,
-              crs = "epsg:4324",
-              landcolor = "white",
-              #  zones = ra_crop,
-              categories = T,
-              maxcell = 5e+05,
-              watercolor = "#BEE8FF",
-              arrange = list(2, 3, "v"),
-              outdir = "D:/Desktop",
-              filename = "2.jpg",
-              width = 10,
-              height = 10)
-# 多层连续栅格绘图
-
-
-
-xy <- read.csv("F:/eblf/species/thin1km/allspecies_tidy/EAcheckoccthin/occthin1km/wz0001_thin1.csv")
-ra_crop <- terra::crop(ra1, china_vect, mask = T)
-
-ra1 <- terra::rast("F:/example/ra.tif")
-
-
-ralist <- list.files("F:/example", pattern = "tif$", full.names = T)
-ra <- terra::rast(ralist)
-names(ra) <- c("sp_2030", "sp_2050", "sp_2070", "sp_2090")
- +
-  ggplot2::geom_point(data = xy, aes(x = longitude, y = latitude))
-
-
-#' Draw pictures for ENM
+#' Draw pictures for ENM results
 #' @description
-#' 绘制适生区的图
+#' 主要用于绘制适生区的图, 例如maxent生成的连续型适宜性栅格, 重分类后的分类适宜性栅格等. 预设一套背景模版, 可以在该模版上替换不同的栅格和矢量绘制常用的地图. 也可以结合ggplot2及其扩展绘制更个性化的地图.
 #'
-#' @param spatraster spatraster, 适宜性栅格
-#' @param spatvector spatvector, 矢量地图
-#' @param rastercolors 适宜性栅格的颜色
-#' @param crs 投影
-#' @param zones 区域
-#' @param landcolor 大陆颜色
-#' @param watercolor 水体颜色
-#' @param arrange 图形排列方式
-#' @param categories 是否为类别型栅格
-#' @param maxcell 最大栅格数
-#' @param outdir 图片保存路径
-#' @param filename 图片名称
-#' @param width 图片宽度
-#' @param height 图片高度
+#' @param spatraster spatraster对象, 通常为物种分布的适宜性栅格.
+#' @param spatvector spatvector对象, 通常为研究区的矢量地图.
+#' @param rastercolors 字符型, 创建渐变色(continuous scale)或分类色(discrete scale)用于设置适宜性栅格的颜色.
+#' @param crs The coordinate reference system (CRS) into which all data should be projected before plotting. If not specified, will use the CRS defined in the first sf layer of the plot.
+#' @param zones NULL or SpatRaster with the same geometry identifying zones in spatraster.
+#' @param landcolor 除研究区外的其他陆地颜色. 用来做背景色.
+#' @param watercolor 缺失值的颜色, 通常代表水体颜色.
+#' @param arrange 包含3个元素的列表, 分别为nrow, ncol, dir. 当spatraster为多层时, 将使用分面绘制每层栅格, nrow和ncol 设置一张图片上分图的行列数, dir设置分图的排列方向, dir = "v"则按水平方向排列, dir = "h"则按垂直方向排列. 如果层数大于nrow* ncol, 则会生成多张图片, 直到绘制完所有层.
+#' @param categories 逻辑值. 将spatraster视为类别型还是连续型栅格.
+#' @param maxcell positive integer. Maximum number of cells to use for the plot.
+#' @param outdir 图片保存路径.
+#' @param filename 图片名称.
+#' @param width 图片宽度(cm).
+#' @param height 图片高度(cm).
 #'
 #' @return
-#' ggplot对象和图
+#' ggplot2对象
 #' @export
 #'
 #' @examples
+#'
+#' # 单层栅格绘图
+#' ##下载澳大利亚行政边界数据
+#' aus_map <- geodata::gadm(country = "AUS", level = 1, path = tempdir())
+#' ##下载全球12个月的平均温度栅格数据
+#' tavg <- geodata::worldclim_global("tavg", res = 10, path = tempdir(), version = "2.1")
+#' ##裁剪至澳大利亚范围
+#' tavg_aus <- terra::crop(tavg, aus_map, mask = T)
+#' ##提取1月的数据
+#' tavg_aus_Jan <- tavg_aus[[1]]
+#' ##绘图
+#' ENMplots(spatraster = tavg_aus_Jan,
+#'          spatvector = aus_map)
+#' ##更改陆地的颜色和水体的颜色
+#' ###如果不需要陆地和水体颜色可以将颜色设置为"transparent", 透明色.
+#' ENMplots(spatraster = tavg_aus_Jan_class,
+#'          spatvector = aus_map,
+#'          landcolor = "grey60",
+#'          watercolor = "#BEE8FF")
+#' ##自定义温度栅格的颜色
+#' ENMplots(spatraster = tavg_aus_Jan,
+#'          spatvector = aus_map,
+#'          rastercolors = c("yellow", "green"))
+#' ##移除指北针和比例尺
+#' ENMplots(spatraster = tavg_aus_Jan,
+#'          spatvector = aus_map,
+#'          annotation_north_arrow = F,
+#'          annotation_scale = F)
+#' ##更改投影坐标系
+#' ENMplots(spatraster = tavg_aus_Jan,
+#'          spatvector = aus_map,
+#'          crs = "epsg:4544")
+#' ##仅绘制区域地图
+#' ###区域地图需要提前准备一个与spatraster具有相同地理参考的栅格数据. 如果只想展示研究区的一部分结果可能很有用, 例如某个省.
+#' zone <- terra::crop(tavg_aus_Jan, terra::ext(tavg_aus_Jan) + c(-27,-5,0,-30))
+#' ENMplots(spatraster = tavg_aus_Jan,
+#'          spatvector = aus_map,
+#'          zones = zone)
+#' ##保存图片
+#' ###可以在函数中使用参数保存图片, 请在filename中指定图片格式. 支持的格式同ggplot2::ggsave().
+#' ENMplots(spatraster = tavg_aus_Jan,
+#'          spatvector = aus_map,
+#'          outdir = "your path",
+#'          filename = "plot.jpg",
+#'          width = 10,
+#'          height = 10)
+#'
+#' ##添加其他ggplot对象
+#' ### ENMplots()返回的是ggplot对象，可以与其他ggplot扩展结合，拥有更大的灵活性
+#' ###使用tidyverse包的调色盘并更换主题
+#' ENMplots(spatraster = tavg_aus_Jan, spatvector = aus_map) +
+#'   scale_fill_whitebox_c(
+#'     palette = "high_relief",
+#'     labels = scales::label_number(suffix = "º"),
+#'     n.breaks = 12,
+#'     guide = guide_legend(reverse = TRUE)
+#'   )  +
+#'   theme_bw()
+#' ###如果添加了额外的ggplot对象，则需要使用ggplot2::ggsave()在外部保存图片.
+#'
+#' ##此外还可以绘制简单的样本分布点
+#' ###随机选择100个点当做样本分布点
+#' point <- terra::spatSample(tavg_aus_Jan, 100, xy = T, na.rm = T)
+#' ENMplots(spatraster = NULL,  #如果不需要温度栅格就设置为NULL
+#'          spatvector = aus_map) +
+#'   ggplot2::geom_point(data = point, aes(x = x, y = y))
 
-ENMplots <- function(spatraster,
-                     spatvector,
-                     rastercolors = c("green2", "#FF4500"),
-                     crs = NULL,
+#' ##单层分类栅格绘图
+#' ##将澳大利亚1月的平均温重分类为高中低(3, 2, 1)三个类别
+#' rcl <- matrix(c(0,20,1,20,30,2,30,35,3), ncol = 3, byrow = TRUE)
+#' tavg_aus_Jan_class <- terra::classify(tavg_aus_Jan, rcl = rcl)
+#' ##绘图
+#' ###如果想要对分类栅格绘图，需要设置categories=T. 同样, 如果想要对连续栅格绘图需要设置categories=F.
+#' ENMplots(spatraster = tavg_aus_Jan_class,
+#'          spatvector = aus_map,
+#'          categories = T)
+#' # 多层栅格绘图
+#' ##多层栅格绘图主要用于批量绘图并对图片排版
+#' ###首先需要创建含有多层的spatraster, tavg_aus包含了12个层(12个月的平均温度).
+#' ENMplots(spatraster = tavg_aus,
+#'          spatvector = aus_map,
+#'          categories = F,
+#'          arrange = list(2, 3, "v"), #使用arrange参数设置每张图片上各个分图的数量及排列方式.
+#'          outdir = "your path",
+#'          device = "pdf",
+#'          width = 20,
+#'          height = 20)
+#' ####注意: 当多层绘图时不用对生成的图片命名, 内部会自动对每张图进行编号. 需要通过device参数设置图片格式.
+
+ENMplots <- function(spatraster = NULL,
+                     spatvector = NULL,
                      zones = NULL,
+                     rastercolors = NULL,
                      landcolor = "white",
                      watercolor = "#BEE8FF",
-                     arrange = list(nrow = 2, ncol = 2, dir = "v"),
                      maxcell = 5e+03,
                      categories = F,
-                     outdir,
-                     filename,
+                     crs = NULL,
+                     annotation_north_arrow = T,
+                     annotation_scale = T,
+                     arrange = list(nrow = 2, ncol = 2, dir = "v"),
                      width,
-                     height
+                     height,
+                     device = "jpg",
+                     filename,
+                     outdir
                      ) {
   #参数检查
   if (is.null(names(arrange))) {
     names(arrange) <- c("nrow", "ncol", "dir")
   }
   if ("" %in% names(arrange)) {
-    names(arrange)[which(names(arrange) %in% "")] <- c("ncol", "nrow", "dir")[which(names(arrange) %in% "")]
+    names(arrange)[which(names(arrange) %in% "")] <- c("nrow", "ncol", "dir")[which(names(arrange) %in% "")]
   }
 
   #分类/数值型栅格
   if (categories == TRUE) { #分类栅格
-    if (terra::is.factor(ra2) == FALSE) {
+    if (terra::is.factor(spatraster) == FALSE) {
       spatraster <- terra::as.factor(spatraster)
     }
     ##设置颜色
@@ -166,11 +151,11 @@ ENMplots <- function(spatraster,
       )
     } else {
       p_color <- #自定义离散颜色
-        ggplot2::scale_fill_manual(colors = rastercolors, na.value = "transparent")
+        ggplot2::scale_fill_manual(values = rastercolors, na.value = "transparent")
     }
 
   } else { #数值栅格
-    if (terra::is.factor(ra2)) {
+    if (terra::is.factor(spatraster)) {
       spatraster <- terra::as.numeric(spatraster)
     }
     #设置颜色
@@ -186,9 +171,25 @@ ENMplots <- function(spatraster,
     }
   }
 
+  #添加指北针和比例尺
+  if (annotation_north_arrow == FALSE) {zbz <- NULL} else {
+    zbz <- ggspatial::annotation_north_arrow(
+      location = "tl",  # 指北针位置
+      style = ggspatial::north_arrow_fancy_orienteering,  # 更改为 minimal 样式
+      which_north = "true",  # 使用真实北方向
+      pad_x = unit(0.5, "cm"),  # 调整指北针的水平边距
+      pad_y = unit(0.5, "cm")   # 调整指北针的垂直边距
+    )
+  }
+  if (annotation_scale == FALSE) {blc <- NULL} else {
+  blc <- ggspatial::annotation_scale(
+    location = "bl",  # 比例尺位置
+    style = "ticks"
+    )
+  }
   #读取内置世界地图矢量数据
-  word_vect <- terra::vect("C:/Users/why/Documents/ArcGIS/中国地图/世界地图/世界国家.shp")
-
+  #word_vect <- terra::vect("C:/Users/why/Documents/ArcGIS/中国地图/世界地图/世界国家.shp")
+  word_vect <- terra::vect(paste0(system.file(package = "TBlabENM"), "/extdata/land/continent.shp"))
   ##裁剪世界地图至研究区域
   if (is.null(landcolor)) {
     word_vect_crop <- NULL
@@ -200,16 +201,13 @@ ENMplots <- function(spatraster,
   if (is.null(zones) == FALSE) {
     spatraster <- terra::crop(spatraster, zones, mask = TRUE)
   }
-
-
-
   #没有栅格的情况
   if (is.null(spatraster)) {
     p1 <- ggplot2::ggplot() +
-      tidyterra::geom_spatvector(data = word_vect_crop, fill = landcolor) +
-      tidyterra::geom_spatvector(data = spatvector, fill = NA) +
-      ggplot2::scale_y_continuous(expand = c(0, 0)) +
-      ggplot2::scale_x_continuous(expand = c(0, 0))
+          tidyterra::geom_spatvector(data = word_vect_crop, fill = landcolor) +
+          tidyterra::geom_spatvector(data = spatvector, fill = NA) +
+          ggplot2::scale_y_continuous(expand = c(0, 0)) +
+          ggplot2::scale_x_continuous(expand = c(0, 0))
 
     p2 <- p1 + p_color +
       ggplot2::theme(
@@ -298,13 +296,13 @@ ENMplots <- function(spatraster,
           linetype = 'dashed',
           colour = "gray40"
         )
-      ) +
+      ) + zbz + blc
+
       ggplot2::coord_sf(crs = crs)
     if (missing(outdir) == FALSE) {
       ggplot2::ggsave(
-        filename = paste0("plots_", i, ".jpg"),
+        filename = paste0("plots_", i, ".", device),
         plot = p2,
-        #device = "jpg",
         path = outdir,
         scale = 1,
         width = width,
