@@ -177,8 +177,8 @@ ENMplots <- function(spatraster = NULL,
       location = "tl",  # 指北针位置
       style = ggspatial::north_arrow_fancy_orienteering,  # 更改为 minimal 样式
       which_north = "true",  # 使用真实北方向
-      pad_x = unit(0.5, "cm"),  # 调整指北针的水平边距
-      pad_y = unit(0.5, "cm")   # 调整指北针的垂直边距
+      pad_x = ggplot2::unit(0.5, "cm"),  # 调整指北针的水平边距
+      pad_y = ggplot2::unit(0.5, "cm")   # 调整指北针的垂直边距
     )
   }
   if (annotation_scale == FALSE) {blc <- NULL} else {
@@ -218,7 +218,7 @@ ENMplots <- function(spatraster = NULL,
           colour = "gray40"
         )
       ) +
-      ggplot2::coord_sf(crs = crs)
+      ggplot2::coord_sf(crs = crs) + zbz + blc
     if (missing(outdir) == FALSE) {
       ggplot2::ggsave(
         filename = filename,
@@ -254,7 +254,7 @@ ENMplots <- function(spatraster = NULL,
             colour = "gray40"
           )
         ) +
-        ggplot2::coord_sf(crs = crs)
+        ggplot2::coord_sf(crs = crs) + zbz + blc
       if (missing(outdir) == FALSE) {
         ggplot2::ggsave(
           filename = filename,
