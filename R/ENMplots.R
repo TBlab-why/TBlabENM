@@ -40,7 +40,7 @@
 #'          spatvector = aus_map)
 #' ##更改陆地的颜色和水体的颜色
 #' ###如果不需要陆地和水体颜色可以将颜色设置为"transparent", 透明色.
-#' ENMplots(spatraster = tavg_aus_Jan_class,
+#' ENMplots(spatraster = tavg_aus_Jan,
 #'          spatvector = aus_map,
 #'          landcolor = "grey60",
 #'          watercolor = "#BEE8FF")
@@ -63,6 +63,11 @@
 #' ENMplots(spatraster = tavg_aus_Jan,
 #'          spatvector = aus_map,
 #'          zones = zone)
+#' ###指定croptoraster = T将绘图范围裁剪至zone
+#' ENMplots(spatraster = tavg_aus_Jan,
+#'          spatvector = aus_map,
+#'          croptoraster = T,
+#'          zones = zone)
 #' ##保存图片
 #' ###可以在函数中使用参数保存图片, 请在filename中指定图片格式. 支持的格式同ggplot2::ggsave().
 #' ENMplots(spatraster = tavg_aus_Jan,
@@ -76,7 +81,7 @@
 #' ### ENMplots()返回的是ggplot对象，可以与其他ggplot扩展结合，拥有更大的灵活性
 #' ###使用tidyverse包的调色盘并更换主题
 #' ENMplots(spatraster = tavg_aus_Jan, spatvector = aus_map) +
-#'   scale_fill_whitebox_c(
+#'   tidyterra::scale_fill_whitebox_c(
 #'     palette = "high_relief",
 #'     labels = scales::label_number(suffix = "º"),
 #'     n.breaks = 12,
@@ -149,10 +154,13 @@ ENMplots <- function(spatraster = NULL,
   if (missing(width)) {width = NA}
   if (missing(height)) {height = NA}
   #分类/数值型栅格
-  if (categories == TRUE) { #分类栅格
-    if (terra::is.factor(spatraster) == FALSE) {
-      spatraster <- terra::as.factor(spatraster)
-    }
+  if (categories == TRUE & is.null(spatraster) == FALSE) { #分类栅格
+    for (i in 1:terra::nlyr(spatraster)) {
+      if (terra::is.factor(spatraster[[i]]) == FALSE) {
+        spatraster <- terra::as.factor(spatraster)
+      }
+  }
+
     ##设置颜色
     if (is.null(rastercolors)) {
       p_color <- tidyterra::scale_fill_whitebox_d(
@@ -165,8 +173,12 @@ ENMplots <- function(spatraster = NULL,
     }
 
   } else { #数值栅格
-    if (terra::is.factor(spatraster)) {
-      spatraster <- terra::as.numeric(spatraster)
+    if (is.null(spatraster) == FALSE) {
+    for (i in 1:terra::nlyr(spatraster)) {
+      if (terra::is.factor(spatraster[[i]])) {
+        spatraster <- terra::as.numeric(spatraster)
+      }
+    }
     }
     #设置颜色
     if (is.null(rastercolors)) {
@@ -197,6 +209,11 @@ ENMplots <- function(spatraster = NULL,
     style = "ticks"
     )
   }
+  #裁剪地图至指定区域
+  if (is.null(zones) == FALSE & is.null(spatraster) == FALSE) {
+    #zones <- terra::align(terra::ext(zones), spatraster)
+    spatraster <- terra::crop(spatraster, zones, mask = TRUE)
+  }
 
   #转换投影到指定的crs
   # if (is.null(crs) == FALSE) {
@@ -205,18 +222,21 @@ ENMplots <- function(spatraster = NULL,
   #   }
   # }
   #统一spatvector和spatraster投影
-  if (is.null(spatvector) == FALSE) {
+  if (is.null(spatvector) == FALSE & is.null(spatraster) == FALSE) {
     spatvector <- terra::project(spatvector, terra::crs(spatraster))}
-  if (croptoraster == T) {
-    spatvector <- terra::crop(spatvector, spatraster)
+  #矢量裁剪至栅格范围
+  if (croptoraster == T & is.null(spatraster) == FALSE) {
+    spatvector <- terra::crop(spatvector, terra::ext(spatraster), ext = TRUE)
   }
   #读取内置世界地图矢量数据
   if (is.null(landcolor) == FALSE) {
     #word_vect <- terra::vect("C:/Users/why/Documents/ArcGIS/中国地图/世界地图/世界国家.shp")
-    word_vect <- terra::vect(paste0(system.file(package = "TBlabENM"), "/extdata/land/continent.shp")) %>%
-      terra::project(terra::crs(spatraster))
-  }
+    word_vect <- terra::vect(paste0(system.file(package = "TBlabENM"), "/extdata/land/continent.shp"))
+    if (is.null(spatraster) == FALSE) {
+      terra::project(word_vect, terra::crs(spatraster))
+    }
 
+  }
   ##裁剪世界地图至研究区域
   if (is.null(landcolor)) {
     word_vect_crop <- NULL
@@ -224,12 +244,6 @@ ENMplots <- function(spatraster = NULL,
     word_vect_crop <- terra::crop(word_vect, terra::ext(spatvector)*expand) |>
       terra::aggregate()
   }
-  #裁剪地图至指定区域
-  if (is.null(zones) == FALSE) {
-    zones <- terra::resample(zones, spatraster)
-    spatraster <- terra::crop(spatraster, zones, mask = TRUE)
-  }
-
   #没有栅格的情况
   if (is.null(spatraster)) {
     p1 <- ggplot2::ggplot() +

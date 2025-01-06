@@ -81,7 +81,7 @@ ENMplots(spatraster = tavg_aus_Jan,
          spatvector = aus_map)
 ##更改陆地的颜色和水体的颜色
 ###如果不需要陆地和水体颜色可以将颜色设置为"transparent", 透明色.
-ENMplots(spatraster = tavg_aus_Jan_class,
+ENMplots(spatraster = tavg_aus_Jan,
          spatvector = aus_map,
          landcolor = "grey60",
          watercolor = "#BEE8FF")
@@ -104,6 +104,11 @@ zone <- terra::crop(tavg_aus_Jan, terra::ext(tavg_aus_Jan) + c(-27,-5,0,-30))
 ENMplots(spatraster = tavg_aus_Jan,
          spatvector = aus_map,
          zones = zone)
+###指定croptoraster = T将绘图范围裁剪至zone
+ENMplots(spatraster = tavg_aus_Jan,
+         spatvector = aus_map,
+         croptoraster = T,
+         zones = zone)
 ##保存图片
 ###可以在函数中使用参数保存图片, 请在filename中指定图片格式. 支持的格式同ggplot2::ggsave().
 ENMplots(spatraster = tavg_aus_Jan,
@@ -117,7 +122,7 @@ ENMplots(spatraster = tavg_aus_Jan,
 ### ENMplots()返回的是ggplot对象，可以与其他ggplot扩展结合，拥有更大的灵活性
 ###使用tidyverse包的调色盘并更换主题
 ENMplots(spatraster = tavg_aus_Jan, spatvector = aus_map) +
-  scale_fill_whitebox_c(
+  tidyterra::scale_fill_whitebox_c(
     palette = "high_relief",
     labels = scales::label_number(suffix = "º"),
     n.breaks = 12,
