@@ -8,10 +8,11 @@ ENMplots(
   spatraster = NULL,
   spatvector = NULL,
   zones = NULL,
+  expand = 1.05,
   rastercolors = NULL,
   landcolor = "white",
   watercolor = "#BEE8FF",
-  maxcell = 5000,
+  maxcell = 5e+05,
   categories = F,
   crs = NULL,
   annotation_north_arrow = T,
@@ -30,6 +31,8 @@ ENMplots(
 \item{spatvector}{spatvector对象, 通常为研究区的矢量地图.}
 
 \item{zones}{NULL or SpatRaster with the same geometry identifying zones in spatraster.}
+
+\item{expand}{数值向量, 大于等于1, 长度为1或4. 按比例扩展绘图范围. 当长度为4时分别对应左右下上.}
 
 \item{rastercolors}{字符型, 创建渐变色(continuous scale)或分类色(discrete scale)用于设置适宜性栅格的颜色.}
 

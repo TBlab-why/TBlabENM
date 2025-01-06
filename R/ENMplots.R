@@ -13,6 +13,7 @@
 #' @param arrange 包含3个元素的列表, 分别为nrow, ncol, dir. 当spatraster为多层时, 将使用分面绘制每层栅格, nrow和ncol 设置一张图片上分图的行列数, dir设置分图的排列方向, dir = "v"则按水平方向排列, dir = "h"则按垂直方向排列. 如果层数大于nrow* ncol, 则会生成多张图片, 直到绘制完所有层.
 #' @param categories 逻辑值. 将spatraster视为类别型还是连续型栅格.
 #' @param maxcell positive integer. Maximum number of cells to use for the plot.
+#' @param expand 数值向量, 大于等于1, 长度为1或4. 按比例扩展绘图范围. 当长度为4时分别对应左右下上.
 #' @param outdir 图片保存路径.
 #' @param filename 图片名称.
 #' @param width 图片宽度(cm).
@@ -115,10 +116,11 @@
 ENMplots <- function(spatraster = NULL,
                      spatvector = NULL,
                      zones = NULL,
+                     expand = 1.05,
                      rastercolors = NULL,
                      landcolor = "white",
                      watercolor = "#BEE8FF",
-                     maxcell = 5e+03,
+                     maxcell = 5e+05,
                      categories = F,
                      crs = NULL,
                      annotation_north_arrow = T,
@@ -131,13 +133,19 @@ ENMplots <- function(spatraster = NULL,
                      outdir
                      ) {
   #参数检查
+  if (sum(length(expand) == c(1, 4)) == 0) {stop("The length of expand must be 1 or 4.")}
+  for (i in length(expand)) {
+    if (expand[i] < 1) {stop("Expand must be greater than or equal to 1.")}
+  }
+
   if (is.null(names(arrange))) {
     names(arrange) <- c("nrow", "ncol", "dir")
   }
   if ("" %in% names(arrange)) {
     names(arrange)[which(names(arrange) %in% "")] <- c("nrow", "ncol", "dir")[which(names(arrange) %in% "")]
   }
-
+  if (missing(width)) {width = NA}
+  if (missing(height)) {height = NA}
   #分类/数值型栅格
   if (categories == TRUE) { #分类栅格
     if (terra::is.factor(spatraster) == FALSE) {
@@ -187,20 +195,36 @@ ENMplots <- function(spatraster = NULL,
     style = "ticks"
     )
   }
+
+  #转换投影到指定的crs
+  # if (is.null(crs) == FALSE) {
+  #   if (is.null(spatraster) == FALSE) {
+  #     spatraster <- terra::project(spatraster, crs)
+  #   }
+  # }
+  #统一spatvector和spatraster投影
+  if (is.null(spatvector) == FALSE) {
+    spatvector <- terra::project(spatvector, terra::crs(spatraster))}
   #读取内置世界地图矢量数据
-  #word_vect <- terra::vect("C:/Users/why/Documents/ArcGIS/中国地图/世界地图/世界国家.shp")
-  word_vect <- terra::vect(paste0(system.file(package = "TBlabENM"), "/extdata/land/continent.shp"))
+  if (is.null(landcolor) == FALSE) {
+    #word_vect <- terra::vect("C:/Users/why/Documents/ArcGIS/中国地图/世界地图/世界国家.shp")
+    word_vect <- terra::vect(paste0(system.file(package = "TBlabENM"), "/extdata/land/continent.shp")) %>%
+      terra::project(terra::crs(spatraster))
+  }
+
   ##裁剪世界地图至研究区域
   if (is.null(landcolor)) {
     word_vect_crop <- NULL
   } else {
-    word_vect_crop <- terra::crop(word_vect, terra::ext(spatvector)) |>
+    word_vect_crop <- terra::crop(word_vect, terra::ext(spatvector)*expand) |>
       terra::aggregate()
   }
   #裁剪地图至指定区域
   if (is.null(zones) == FALSE) {
     spatraster <- terra::crop(spatraster, zones, mask = TRUE)
   }
+
+
   #没有栅格的情况
   if (is.null(spatraster)) {
     p1 <- ggplot2::ggplot() +
@@ -212,6 +236,7 @@ ENMplots <- function(spatraster = NULL,
     p2 <- p1 + p_color +
       ggplot2::theme(
         panel.background = ggplot2::element_rect(color = 'black', fill = watercolor),
+        panel.border = ggplot2::element_rect(color = "black", size = 1, fill = NA),
         panel.grid.major = ggplot2::element_line(
           linewidth = 0.25,
           linetype = 'dashed',
@@ -248,6 +273,7 @@ ENMplots <- function(spatraster = NULL,
       p2 <- p1 + p_color +
         ggplot2::theme(
           panel.background = ggplot2::element_rect(color = 'black', fill = watercolor),
+          panel.border = ggplot2::element_rect(color = "black", size = 1, fill = NA),
           panel.grid.major = ggplot2::element_line(
             linewidth = 0.25,
             linetype = 'dashed',
@@ -291,6 +317,7 @@ ENMplots <- function(spatraster = NULL,
     p2 <- p1 + p_color +
       ggplot2::theme(
         panel.background = ggplot2::element_rect(color = 'black', fill = watercolor),
+        panel.border = ggplot2::element_rect(color = "black", size = 1, fill = NA),
         panel.grid.major = ggplot2::element_line(
           linewidth = 0.25,
           linetype = 'dashed',
