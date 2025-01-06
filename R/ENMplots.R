@@ -12,6 +12,7 @@
 #' @param watercolor 缺失值的颜色, 通常代表水体颜色.
 #' @param arrange 包含3个元素的列表, 分别为nrow, ncol, dir. 当spatraster为多层时, 将使用分面绘制每层栅格, nrow和ncol 设置一张图片上分图的行列数, dir设置分图的排列方向, dir = "v"则按水平方向排列, dir = "h"则按垂直方向排列. 如果层数大于nrow* ncol, 则会生成多张图片, 直到绘制完所有层.
 #' @param categories 逻辑值. 将spatraster视为类别型还是连续型栅格.
+#' @param croptoraster 逻辑值. 是否将spatvector裁剪至spatraster范围.
 #' @param maxcell positive integer. Maximum number of cells to use for the plot.
 #' @param expand 数值向量, 大于等于1, 长度为1或4. 按比例扩展绘图范围. 当长度为4时分别对应左右下上.
 #' @param outdir 图片保存路径.
@@ -123,6 +124,7 @@ ENMplots <- function(spatraster = NULL,
                      maxcell = 5e+05,
                      categories = F,
                      crs = NULL,
+                     croptoraster = T,
                      annotation_north_arrow = T,
                      annotation_scale = T,
                      arrange = list(nrow = 2, ncol = 2, dir = "v"),
@@ -205,6 +207,9 @@ ENMplots <- function(spatraster = NULL,
   #统一spatvector和spatraster投影
   if (is.null(spatvector) == FALSE) {
     spatvector <- terra::project(spatvector, terra::crs(spatraster))}
+  if (croptoraster == T) {
+    spatvector <- terra::crop(spatvector, spatraster)
+  }
   #读取内置世界地图矢量数据
   if (is.null(landcolor) == FALSE) {
     #word_vect <- terra::vect("C:/Users/why/Documents/ArcGIS/中国地图/世界地图/世界国家.shp")
@@ -221,9 +226,9 @@ ENMplots <- function(spatraster = NULL,
   }
   #裁剪地图至指定区域
   if (is.null(zones) == FALSE) {
+    zones <- terra::resample(zones, spatraster)
     spatraster <- terra::crop(spatraster, zones, mask = TRUE)
   }
-
 
   #没有栅格的情况
   if (is.null(spatraster)) {

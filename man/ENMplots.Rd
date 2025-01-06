@@ -15,6 +15,7 @@ ENMplots(
   maxcell = 5e+05,
   categories = F,
   crs = NULL,
+  croptoraster = T,
   annotation_north_arrow = T,
   annotation_scale = T,
   arrange = list(nrow = 2, ncol = 2, dir = "v"),
@@ -45,6 +46,8 @@ ENMplots(
 \item{categories}{逻辑值. 将spatraster视为类别型还是连续型栅格.}
 
 \item{crs}{The coordinate reference system (CRS) into which all data should be projected before plotting. If not specified, will use the CRS defined in the first sf layer of the plot.}
+
+\item{croptoraster}{逻辑值. 是否将spatvector裁剪至spatraster范围.}
 
 \item{arrange}{包含3个元素的列表, 分别为nrow, ncol, dir. 当spatraster为多层时, 将使用分面绘制每层栅格, nrow和ncol 设置一张图片上分图的行列数, dir设置分图的排列方向, dir = "v"则按水平方向排列, dir = "h"则按垂直方向排列. 如果层数大于nrow* ncol, 则会生成多张图片, 直到绘制完所有层.}
 
