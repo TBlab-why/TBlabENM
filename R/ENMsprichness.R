@@ -37,7 +37,7 @@ ENMsprichness <- function(d, x = NULL, booleandir, key = NULL,
   start_time <- Sys.time()
   #参数检验
   if (is.character(d)) {d <- as.data.frame(d)}
-  names(d) <- "species"
+  names(d)[1] <- "species"
   x <- unique(x)
   if (max(x) > nrow(d)) {
     stop("x provides an invalid species number.")

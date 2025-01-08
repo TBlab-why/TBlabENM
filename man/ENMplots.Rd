@@ -100,9 +100,10 @@ ENMplots(spatraster = tavg_aus_Jan,
          crs = "epsg:4544")
 ##仅绘制区域地图
 ###区域地图需要提前准备一个与spatraster具有相同地理参考的栅格数据. 如果只想展示研究区的一部分结果可能很有用, 例如某个省.
-zone <- terra::crop(tavg_aus_Jan, terra::ext(tavg_aus_Jan) + c(-27,-5,0,-30))
+zone <- terra::crop(tavg_aus_Jan, terra::ext(tavg_aus_Jan) + c(-27,-5,-10,-30))
 ENMplots(spatraster = tavg_aus_Jan,
          spatvector = aus_map,
+         croptoraster = F,
          zones = zone)
 ###指定croptoraster = T将绘图范围裁剪至zone
 ENMplots(spatraster = tavg_aus_Jan,
