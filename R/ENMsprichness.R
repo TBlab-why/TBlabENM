@@ -38,14 +38,14 @@ ENMsprichness <- function(d, x = NULL, booleandir, key = NULL,
   #参数检验
   if (is.character(d)) {d <- as.data.frame(d)}
   names(d)[1] <- "species"
+  if (is.null(x)) {x <- 1:nrow(d)}
   x <- unique(x)
   if (max(x) > nrow(d)) {
     stop("x provides an invalid species number.")
   }
+  if (length(x) == 1) {stop("It has to be more than 2 species, otherwise it doesn't make sense.")}
   if (file.exists(booleandir) == FALSE){
     stop(paste0("Dir '", booleandir, "' not exists."))}
-  if (is.null(x)) {x <- 1:nrow(d)}
-  if (length(x) == 1) {stop("It has to be more than 2 species, otherwise it doesn't make sense.")}
   if (length(bioindex) != 1) {stop("length bioindex must be 1.")}
   if (bioindex %in% c("sr", "we", "cwe") == FALSE) {
       stop("bioindex must be 'sr', 'we' or 'cwe'.")
@@ -93,14 +93,17 @@ ENMsprichness <- function(d, x = NULL, booleandir, key = NULL,
     }
 
     ra <- sum(terra::rast(raster))
-    terra::writeRaster(ra, paste0(outdir, "/biodiversity/sr/",bb[b %in% y], ".tif"), overwrite = overwrite)
+    terra::writeRaster(ra, paste0(outdir, "/biodiversity/sr/", bb[b %in% y], ".tif"), overwrite = overwrite)
   }
 #计算we
 
   we <- function(z){
-    dir.create(paste0(outdir, "/TBlabENMtemp3/", bb[b %in% z], "/"), showWarnings = FALSE, recursive = TRUE)
+    #临时文件夹
+    random_num <- sample(1:100000, 1)
+    dir.create(paste0(outdir, "/TBlabENMtemp", random_num, "/", bb[b %in% z], "/"),
+               showWarnings = FALSE, recursive = TRUE)
     if (is.null(key) == FALSE) {
-    rasterlist = rasterlist[[z,2]]
+    rasterlist = rasterlist[[z, 2]]
     names(rasterlist) <- "path"
     rasterlist <- rasterlist$path }
     raster <- c()
@@ -118,13 +121,13 @@ ENMsprichness <- function(d, x = NULL, booleandir, key = NULL,
        x*(1/(terra::freq(x)[2,3]))
      })) %>%
       mutate(map2(.x = we, .y = path, .f = function(x,y){
-        terra::writeRaster(x, paste0(outdir, "/TBlabENMtemp3/",  bb[b %in% z], "/", y, ".tif"), overwrite = overwrite)
+        terra::writeRaster(x, paste0(outdir, "/TBlabENMtemp",random_num, "/",  bb[b %in% z], "/", y, ".tif"), overwrite = overwrite)
       }))
 
-    raster <- list.files(paste0(outdir, "/TBlabENMtemp3/",  bb[b %in% z], "/"), full.names = TRUE)
+    raster <- list.files(paste0(outdir, "/TBlabENMtemp",random_num, "/",  bb[b %in% z], "/"), full.names = TRUE)
     ra <- sum(terra::rast(raster))
     terra::writeRaster(ra, paste0(outdir, "/biodiversity/we/",  bb[b %in% z],".tif"), overwrite = overwrite)
-    unlink(paste0(outdir, "/TBlabENMtemp3"), recursive = TRUE)
+    unlink(paste0(outdir, "/TBlabENMtemp",random_num), recursive = TRUE)
   }
 
 

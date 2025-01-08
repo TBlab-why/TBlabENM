@@ -2,14 +2,12 @@
 #' @title The suitable area was reclassified and the area was calculated
 #' @description 批量对栅格重分类并计算面积. 主要用于将连续型的适宜性栅格重分类为类别型的适生区栅格并计各类算面积.
 #' @details
-#' rcl:rcl参数提供了栅格数据重分类的依据，如果提供的是列表，重分类后各类的值分别为0,1,2...,
-#' 该顺序代表的适生区类型与列表中的顺序一致，例如当rcl = list("非适生区" = c(0,0.2), "低适生区" = c(0.2,0.4),
-#' "中适生区" = c(0.4,0.6), "高适生区" = c(0.6,0.1))时，重分类后值为0代表非适生区，值为1代表低适生区...,值为
-#' 3代表高适生区.当列表中的顺序不是从小到大的顺序时，对应重分类后的值所对应的适生区类型也随之改变。
-#'     当为数值型或字符型时，则进行二元划分，重分类后的值为0和1，0代表非适生区，1代表适生区.当为数值型
-#' 时，对所有栅格都使用该值,常用于经验阈值，例如0.5.当为字符型时，使用d参数提供的数据框中与之
-#' 对应的列的值作为划分依据,常用于固定阈值的情况，如MTSS阈值.
+#' **rcl**: rcl参数提供了栅格重分类的区间. 可为列表, 数值型或字符型.
+#' * 列表: 重分类后各类的值分别为0,1,2..., 该顺序代表的适生区类型与列表中的顺序一致, 例如当rcl = list("非适生区" = c(0,0.2), "低适生区" = c(0.2,0.4), "中适生区" = c(0.4,0.6), "高适生区" = c(0.6,0.1))时, 重分类后值为0代表非适生区, 值为1代表低适生区..., 值为3代表高适生区. 当列表中的顺序不是从小到大的顺序时, 对应重分类后的值所对应的适生区类型也随之改变.
 #'
+#' 数值型或字符型: 进行二元划分, 重分类后的值为0和1, 0代表非适生区, 1代表适生区.
+#' * 数值型: 对所有栅格都使用该值, 常用于经验阈值, 例如0.5.
+#' * 字符型: 使用d参数提供的数据框中与之对应的列的值作为划分依据, 常用于固定阈值的情况, 如MTSS阈值.
 #'
 #' @param d 字符向量或数据框. 当为字符向量时为物种名. 当为数据框时第一列为物种名, 如果参数rcl为字符型, 则数据框必须包含与rcl相同的列, 表示划分适生区和非适生区的阈值. 物种名必须与参数resultdir的子文件夹名称保持一致.
 #' @param x 选择要重分类的物种序号, 与d中的物种顺序一致. 默认选择所有物种.
@@ -23,24 +21,24 @@
 #' @param ncpu 并行时cpu个数.
 #' @param rcl 列表, 数值型或字符型, 设置重分类的区间. 当为列表时, 分别按顺序指定非适生区和适生区(例如低适生区、中适生区、高适生区等)和对应的值. 数值型和字符型是列表的特例, 即二元划分: 只分为适生区和非适生区. 当为数值型, 所有小于该值的都视为非适生区, 重分类后值为0, 所有大于该值的都视为适生区, 重分类后值为1. 当为字符型时, 则在d参数提供的数据框中要有相同名称的列, 指定以哪列的值进行二元重分类. 详见detail.
 #'
-#' @return 包含每个物种不同时期各类适生区面积的数据框（单位KM²）以及生成每个栅格重分类后的tif文件
+#' @return 列表. reclass_ra_path为重分类后的栅格文件存储路径; area为重分类后的面积(单位KM²).
 #' @export
 #'
 #' @examples
-#' ENMclassify(d = read.csv("F:/eblf/TBlabENM/spdata.csv"),
-#'            x = c(3,5,7,9),
-#'            resultdir = "F:/eblf/TBlabENM/result",
-#'            crs = "epsg:4326",
-#'            prefix = NULL,
-#'            suffix = "tif",
-#'            rcl = list("非适生区" = c(0,0.2),
-#'                       "低适生区" = c(0.2,0.4),
-#'                       "中适生区" = c(0.4,0.6),
-#'                       "高适生区" = c(0.6,1)),
-#'            overwrite = T,
-#'            outdir = "F:/4",
-#'            parallel = T,
-#'            ncpu = 2)
+#' reclass <- ENMclassify(d = read.csv("F:/eblf/TBlabENM/spdata.csv"),
+#'                        x = c(3,5,7,9),
+#'                        resultdir = "F:/eblf/TBlabENM/result",
+#'                        crs = "epsg:4326",
+#'                        prefix = NULL,
+#'                        suffix = "tif",
+#'                        rcl = list("非适生区" = c(0,0.2),
+#'                                   "低适生区" = c(0.2,0.4),
+#'                                   "中适生区" = c(0.4,0.6),
+#'                                   "高适生区" = c(0.6,1)),
+#'                        overwrite = T,
+#'                        outdir = "F:/4",
+#'                        parallel = T,
+#'                        ncpu = 2)
 
 ENMclassify <- function(d, x = NULL, resultdir, crs,
                         prefix = NULL, suffix, rcl,
@@ -49,11 +47,17 @@ ENMclassify <- function(d, x = NULL, resultdir, crs,
   #参数检验
   if (is.character(d)) {d <- as.data.frame(d)}
   names(d)[1] <- "species"
+
+  if (is.null(x)) {x <- 1:nrow(d)}
   x <- unique(x)
   if (max(x) > nrow(d)) {
     stop("x provides an invalid species number.")
   }
 
+  #读取模拟结果列表(只读文件夹)（以物种为单位）
+  if (file.exists(resultdir) == FALSE) {
+    stop("Resultdir not find.")}
+  if (is.null(outdir)) {outdir = "."}
 
   #根据threshold的类型分析
   threshold <- rcl
@@ -80,12 +84,6 @@ ENMclassify <- function(d, x = NULL, resultdir, crs,
     }
   }
 
-
-  #读取模拟结果列表(只读文件夹)（以物种为单位）
-  if (file.exists(resultdir) == FALSE) {
-    stop("Resultdir not find.")}
-  if (is.null(outdir)) {outdir = "."}
-  if (is.null(x)) {x <- 1:nrow(d)}
   spdata <- d
   #临时文件夹
   random_num <- sample(1:100000, 1)
@@ -94,6 +92,21 @@ ENMclassify <- function(d, x = NULL, resultdir, crs,
   dir.create(paste0(outdir, "/reclass"), recursive = T, showWarnings = FALSE)
 
   #################################################函数
+  ##输出路径
+  ra_dfpa <- list.files(paste0(resultdir, "/", spdata[x,1]),
+                      full.names = TRUE, recursive = TRUE,
+                      pattern = paste0("^", prefix, ".*", suffix, "$")) %>%
+    as.data.frame() %>%
+    dplyr::mutate(name = purrr::map(.x = ., .f = function(x){
+      stringr::str_split_i(x, resultdir, 2) %>%
+        stringr::str_split_i("/", 2)
+    })) %>%
+    dplyr::mutate(path = purrr::map_chr(.x = ., .f = function(x){
+      a <- stringr::str_split_1(x, "/")
+      paste0(a[length(a) - 1], ".tif")
+    }))
+  ra_df_path <- paste0(outdir, "/reclass/", ra_dfpa$name, "_", ra_dfpa$path)
+
   #fun1用于创建包含下面要用到的数据的数据框
   fun1 <- function(x){
     spname <- spdata[x,1]
@@ -134,6 +147,7 @@ ENMclassify <- function(d, x = NULL, resultdir, crs,
                            paste0(outdir, "/reclass/", spname, "_", y ), overwrite = overwrite)
       })) #保存重分类的栅格
 
+
     #新建数据框保存单个物种的结果
     data <- data.frame(matrix(NA, nrow = 0, ncol = ncol(radf[,6][[1]])))
     names(data) <- names(radf[,6][[1]])
@@ -148,13 +162,11 @@ ENMclassify <- function(d, x = NULL, resultdir, crs,
       dplyr::relocate(species)
     utils::write.csv(data, paste0(outdir, "/TBlabENMtemp", random_num, "/", spname,".csv"),
                      row.names = FALSE)
-
+    ##return(ra_df_path)
   }
 
   #并行
-
-
-  if(parallel == TRUE){
+  if (parallel == TRUE) {
     ncpu = ncpu
     # 开启集成
     snowfall::sfInit(parallel = TRUE, cpus = ncpu)
@@ -208,5 +220,10 @@ ENMclassify <- function(d, x = NULL, resultdir, crs,
   ## 第三个位置关闭进度条
   if (exists("pb")) {close(pb)}
   print(end_time - star_time)
-  return(v)
+
+  #原始数据, 重分类数据, 面积表, 存储路径
+  s3 <- list(reclass_ra_path = ra_df_path, area = v)
+  return(s3)
 }
+
+
