@@ -1,20 +1,16 @@
-
 #' @title Occurrence Data Check
-#' @description 检查物种发生数据是否存在缺失值以及是否在指定的海拔范围内。
+#' @description 检查物种发生数据在环境变量上是否存在缺失值以及是否在指定的海拔范围内.
 #'
-#' @param evdir 环境变量路径。格式为 .asc 或者 .tif。
-#' @param elevation 海拔范围，单位m。字符型向量。
-#' @param elrange 数值型向量。允许的海拔误差，单位m。默认500m。
-#' @param spdir 要模拟的物种文件的路径，包括文件名（.csv）。
-#' @param deal_NA 字符型,当发生点所在的栅格像元为缺失值时的处理方法.可选择"mv","rm","none".
-#' 当为"mv"时,对物种坐标进行微调,移动至最近的非NA值像元上，当为"rm"时,直接删除该点,当为"none"时,
-#' 不做任何处理.
-#' @param width 数值型,指定缓冲区的宽度,当deal_NA选择"mv"时,在给定宽度的缓冲区内如果栅格都为缺失值则
-#' 直接删除该点.单位通常为m.该值应大于像元的宽度，否则没有意义.
-#' @param outdir 当deal_NA选择"mv"或"rm"时,处理后的数据的保存路径.
-#' @param evselectev 字符型；用于检查数据的变量，第一个要为海拔变量。一种类型的变量选择一个即可。
+#' @param evdir 字符型. 环境变量所在文件夹的路径. 环境变量的格式为asc或者tif.
+#' @param elevation 数值型向量. 海拔范围, 单位m.
+#' @param elrange 数值型向量. 允许的海拔误差, 单位m. 默认500m.
+#' @param spdir 要模拟的物种文件的路径, 包括文件名（.csv）.
+#' @param deal_NA 字符型. 当发生点所在的栅格像元为缺失值时的处理方法. 可选择"mv", "rm", "none". 当为"mv"时, 对物种坐标进行微调, 移动至最近的非NA值像元上, 当为"rm"时, 直接删除该点, 当为"none"时, 不做任何处理.
+#' @param width 数值型. 指定缓冲区的宽度, 当deal_NA选择"mv"时, 在给定宽度的缓冲区内如果栅格都为缺失值则直接删除该点. 单位通常为m. 该值应大于像元的宽度, 否则没有意义.
+#' @param outdir 当deal_NA选择"mv"或"rm"时, 处理后的数据的保存路径.
+#' @param evselectev 字符型向量. 用于检查数据的变量名, 第一个要为海拔变量. 一种类型的变量选择一个即可.
 #'
-#' @return 返回可能存在问题的数据，建议对这些数据进行检查。
+#' @return 返回可能存在问题的数据, 建议对这些数据进行检查.
 #' @export
 #'
 #' @importFrom stringr str_which
@@ -22,12 +18,13 @@
 #' @importFrom purrr map map2 map2_dbl
 #' @importFrom utils read.csv
 #' @importFrom utils write.csv
-#' @author 吴海洋 和 田斌
+#' @author 吴海洋
 #'
 #' @examples
-#' ENMspcheck(spdir = "./xx.csv",
+#' occurence <- system.file("/ex/bradypus.csv", package="predicts")
+#' ENMspcheck(spdir = occurence,
 #'            evdir = paste0(system.file(package="TBlabENM"), "/extdata/present"),
-#'            #用于检查的变量，一种类型的变量选择一个即可
+#'            #用于检查的变量, 一种类型的变量选择一个即可
 #'            evselectev = c("elev30", "bio01", "SU_CODE", "uvb1"),
 #'            #海拔范围从植物志查询
 #'            elevation = c(1000,1200),
@@ -36,6 +33,14 @@
 ENMspcheck <- function(spdir, evdir, evselectev, elevation,
                        elrange = 500, deal_NA = "none", width,
                        outdir) {
+  #参数检查
+  if (file.exists(evdir) == FALSE) {
+    stop("Evdir not find.")}
+  if (file.exists(spdir) == FALSE) {
+    stop("Spdir not find.")}
+  if (length(deal_NA) > 1 | !deal_NA %in% c("mv", "rm", "none")) {
+    stop("Parameter deal_NA must be either 'mv', 'rm' or 'none'.")
+  }
 
   #获取物种名 对路径拆分并取倒数第一个字符串
     spname1 <- stringr::str_split_1(spdir, "/")[length(stringr::str_split_1(spdir, "/"))]
@@ -44,10 +49,12 @@ ENMspcheck <- function(spdir, evdir, evselectev, elevation,
   #读取栅格数据列表
 
     biolist <- list.files(evdir, pattern = "(tif|asc)$", full.names = TRUE)
-    #选择要检查的变量，并stack
+    #选择要检查的变量, 并stack
     evselectevdir <- c()
-    for (i in seq_along(evselectev)) {
+    for (i in seq_along(evselectev)) {#i=1
       evselectevdir1 <- biolist[stringr::str_which(biolist, paste0(evselectev[i],"\\."))]
+      if (length(evselectevdir1) == 0) {
+        stop(paste0("Env " , evselectev[i], " not found in ", evdir))}
       evselectevdir <- c(evselectevdir, evselectevdir1)
     }
     biostack_t <- terra::rast(evselectevdir)
@@ -68,7 +75,7 @@ ENMspcheck <- function(spdir, evdir, evselectev, elevation,
                   & occdata_t[[1]] >= (min(elevation) - elrange), F, T)
   occ_e[which(is.na(occ_e))] <- F
 
-  #sum(occ_e)==0和length(row_na)==0说明数据都符合要求，否则发出警告
+  #sum(occ_e)==0和length(row_na)==0说明数据都符合要求, 否则发出警告
   if (sum(occ_e) == 0 & length(row_na) == 0) {
     cat("The data set passes the altitude range and ENM envionment variables check.")
   } else {
@@ -89,7 +96,7 @@ ENMspcheck <- function(spdir, evdir, evselectev, elevation,
   cellsite_xy <- cellsite_ext[(length(cellsite_ext) - 1):length(cellsite_ext)]
   if (is.nan(cellsite_xy[1,1])) {de_n <- c(de_n, n)
   next}
-  #将栅格裁剪至有问题的点周围，这里设置为1°应该可以满足大部分需求
+  #将栅格裁剪至有问题的点周围, 这里设置为1°应该可以满足大部分需求
   ex <- terra::ext(cellsite_xy$x-1, cellsite_xy$x+1, cellsite_xy$y-1, cellsite_xy$y+1)
   biostack_t1 <- terra::crop(biostack_t, ex)
   #以其中一个栅格为模版创建空栅格并对site赋值
@@ -105,7 +112,7 @@ ENMspcheck <- function(spdir, evdir, evselectev, elevation,
     mutate(value = map(.x = ., .f = function(x){
       biostack_t1[x]})) %>%  #提取栅格值
     mutate(sum = map(.x = value, .f = function(x){
-      sum(x)})) %>%     #求和，当值为NA时说明至少在一个图层中有缺失，下面移除这些缺失的栅格
+      sum(x)})) %>%     #求和, 当值为NA时说明至少在一个图层中有缺失, 下面移除这些缺失的栅格
     filter(!grepl('NA', sum))
 
     if (nrow(df) > 0) {
@@ -128,7 +135,7 @@ ENMspcheck <- function(spdir, evdir, evselectev, elevation,
     }
 
   }
-  if (length(de_n)>0) { occ1 <- occ1[-de_n, ]}
+  if (length(de_n) > 0) { occ1 <- occ1[-de_n, ]}
   if (exists("outdir")) {
     write.csv(occ1, paste0(outdir, "/", sp_name, "_check.csv"), row.names = FALSE)}
   }

@@ -8,7 +8,7 @@ ENMplots(
   spatraster = NULL,
   spatvector = NULL,
   zones = NULL,
-  expand = 1.05,
+  expand = 1,
   rastercolors = NULL,
   landcolor = "white",
   watercolor = "#BEE8FF",

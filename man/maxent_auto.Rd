@@ -30,7 +30,7 @@ maxent_auto(
 \arguments{
 \item{spdir}{要模拟的一或多个物种文件的路径，包括文件名（.csv）。}
 
-\item{evdir}{环境变量路径,格式为.asc}
+\item{evdir}{环境变量路径, 格式为asc}
 
 \item{myenv}{指定的一组环境变量，当提供此参数时，将不会再根据相关性进行变量筛选}
 

@@ -22,7 +22,7 @@ maxent_single(
 \arguments{
 \item{x}{要模拟的物种文件的路径，包括文件名（.csv）。}
 
-\item{evdir}{环境变量路径,格式为.asc}
+\item{evdir}{环境变量路径, 格式为asc.}
 
 \item{evlist}{用于建模的环境变量，是环境变量路径下所有变量的子集。用下标表示，
 数字代表要选用的变量，默认使用所有变量。}

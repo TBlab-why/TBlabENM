@@ -37,50 +37,54 @@ ENMunityenv <- function(radir, ref, proname = NULL, factors = NULL, method = "bi
 
   #创建栅格列表
   if(is.null(proname)){
-    ralist <- list.files(radir, full.names = TRUE, pattern = ".asc$|.tif$")} else {
+    ralist <- list.files(radir, full.names = TRUE, pattern = ".asc$|.tif$|.TIF$|.ASC$")} else {
       ralist <- c()
       for (i in seq_along(proname)) {
           ralist1 <- list.files(paste0(radir, "/", proname[i]),
-                               full.names = T,  pattern = ".asc$|.tif$")
+                               full.names = T,  pattern = ".asc$|.tif$|.TIF$|.ASC$")
           ralist <- c(ralist, ralist1)
     }}
    #构建栅格列表数据框
     radf <- as.data.frame(ralist) %>%
       mutate(name = map_chr(.x = ralist, .f = function(x){
         a <- stringr::str_split_1(x, "/")[length(stringr::str_split_1(x, "/"))]
-        a <- stringr::str_split_1(a, ".tif|.asc")[1]
+        a <- stringr::str_split_1(a, ".asc$|.tif$|.TIF$|.ASC$")[1]
       })) %>%
       mutate(method = map_chr(.x = name, .f = function(x){
-        if(x %in% factors){method <- "near"} else {method <- method}
+        if (x %in% factors) {method <- "near"} else {method <- method}
       })) %>%
       mutate(factor = map_int(.x = name, .f = function(x){
-        if(x %in% factors){factor <- 1} else {method <- 0}
+        if (x %in% factors) {factor <- 1} else {method <- 0}
       })) %>%
       mutate(proname = map_chr(.x = ralist, .f = function(x){
-        if(is.null(proname)){
+        if (is.null(proname)) {
           a <- NA
         }else{a <- stringr::str_split_1(x, "/")[length(stringr::str_split_1(x, "/"))-1]}
 
       }))
 
     #检查要处理的变量是否含有factors
-    if(is.null(factors)==FALSE){
-      if(sum(radf$factor)==0){
-        stop("The specified categorical variable was not found.Please check parameter factors!")}}
+    if (is.null(factors) == FALSE){
+      if (sum(radf$factor) == 0){
+        stop("The specified categorical variable was not found. Please check parameter factors!/n")}}
 
 
     fun1 <- function(x){
       ra <- terra::rast(x)
-      if (terra::crs(ref, proj = TRUE) == terra::crs(ra, proj = TRUE)) {
-        ra_r <- terra::crop(ra, ref, mask = T) %>% terra::mask(ref)
+      if (terra::crs(ref, proj = TRUE) == terra::crs(ra, proj = TRUE)) { #投影相同的情况
+        if (class(ref) == "SpatRaster") {
+          ra_r <- terra::crop(ra, ref, mask = T) %>% terra::mask(ref)} else {
+            ra_r <- terra::crop(ra, ref)
+          }
         if (terra::ext(ra_r) != terra::ext(ref)) {
-          ra_r <- terra::resample(ra_r, ref, "near")
+          if (class(ref) == "SpatRaster") {
+            ra_r <- terra::resample(ra_r, ref, "near") }
                                                     }
-         } else{
+         } else{ #投影不同的情况
 
           if (class(ref) == "SpatRaster") {
             ra <- terra::project(ra, ref, method = radf$method[which(x == radf[1])]) } else {
-            ra <- terra::project(ra, terra::crs(ref), method = radf$method[[which(x==radf[1])]], res = res) }
+            ra <- terra::project(ra, terra::crs(ref), method = radf$method[[which(x == radf[1])]], res = res) }
 
           ra_r <- terra::crop(ra, ref, mask = T) %>% terra::mask(ref)
           if (terra::ext(ra_r) != terra::ext(ref)) {
@@ -100,14 +104,14 @@ ENMunityenv <- function(radir, ref, proname = NULL, factors = NULL, method = "bi
                                         radf$name[which(x==radf[1])], ".", format),
                                          NAflag = -9999, overwrite = overwrite) }
     }
-  if(parallel == TRUE){
+  if (parallel == TRUE) {
     snowfall::sfInit(parallel = TRUE, cpus = ncpu)
    # snowfall::sfExport("star_time")
     snowfall::sfLibrary(purrr)
     k <- snowfall::sfLapply(radf$ralist, fun1)
     snowfall::sfStop()  # 关闭集群
 
-  }else{
+  } else {
 
     for (i in 1:nrow(radf)) {
       fun1(radf[i,1])

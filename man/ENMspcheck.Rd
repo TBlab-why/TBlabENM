@@ -16,35 +16,33 @@ ENMspcheck(
 )
 }
 \arguments{
-\item{spdir}{要模拟的物种文件的路径，包括文件名（.csv）。}
+\item{spdir}{要模拟的物种文件的路径, 包括文件名（.csv）.}
 
-\item{evdir}{环境变量路径。格式为 .asc 或者 .tif。}
+\item{evdir}{字符型. 环境变量所在文件夹的路径. 环境变量的格式为asc或者tif.}
 
-\item{evselectev}{字符型；用于检查数据的变量，第一个要为海拔变量。一种类型的变量选择一个即可。}
+\item{evselectev}{字符型向量. 用于检查数据的变量名, 第一个要为海拔变量. 一种类型的变量选择一个即可.}
 
-\item{elevation}{海拔范围，单位m。字符型向量。}
+\item{elevation}{数值型向量. 海拔范围, 单位m.}
 
-\item{elrange}{数值型向量。允许的海拔误差，单位m。默认500m。}
+\item{elrange}{数值型向量. 允许的海拔误差, 单位m. 默认500m.}
 
-\item{deal_NA}{字符型,当发生点所在的栅格像元为缺失值时的处理方法.可选择"mv","rm","none".
-当为"mv"时,对物种坐标进行微调,移动至最近的非NA值像元上，当为"rm"时,直接删除该点,当为"none"时,
-不做任何处理.}
+\item{deal_NA}{字符型. 当发生点所在的栅格像元为缺失值时的处理方法. 可选择"mv", "rm", "none". 当为"mv"时, 对物种坐标进行微调, 移动至最近的非NA值像元上, 当为"rm"时, 直接删除该点, 当为"none"时, 不做任何处理.}
 
-\item{width}{数值型,指定缓冲区的宽度,当deal_NA选择"mv"时,在给定宽度的缓冲区内如果栅格都为缺失值则
-直接删除该点.单位通常为m.该值应大于像元的宽度，否则没有意义.}
+\item{width}{数值型. 指定缓冲区的宽度, 当deal_NA选择"mv"时, 在给定宽度的缓冲区内如果栅格都为缺失值则直接删除该点. 单位通常为m. 该值应大于像元的宽度, 否则没有意义.}
 
-\item{outdir}{当deal_NA选择"mv"或"rm"时,处理后的数据的保存路径.}
+\item{outdir}{当deal_NA选择"mv"或"rm"时, 处理后的数据的保存路径.}
 }
 \value{
-返回可能存在问题的数据，建议对这些数据进行检查。
+返回可能存在问题的数据, 建议对这些数据进行检查.
 }
 \description{
-检查物种发生数据是否存在缺失值以及是否在指定的海拔范围内。
+检查物种发生数据在环境变量上是否存在缺失值以及是否在指定的海拔范围内.
 }
 \examples{
-ENMspcheck(spdir = "./xx.csv",
+occurence <- system.file("/ex/bradypus.csv", package="predicts")
+ENMspcheck(spdir = occurence,
            evdir = paste0(system.file(package="TBlabENM"), "/extdata/present"),
-           #用于检查的变量，一种类型的变量选择一个即可
+           #用于检查的变量, 一种类型的变量选择一个即可
            evselectev = c("elev30", "bio01", "SU_CODE", "uvb1"),
            #海拔范围从植物志查询
            elevation = c(1000,1200),
@@ -52,5 +50,5 @@ ENMspcheck(spdir = "./xx.csv",
            deal_NA = "none")
 }
 \author{
-吴海洋 和 田斌
+吴海洋
 }

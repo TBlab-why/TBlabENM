@@ -123,7 +123,7 @@
 ENMplots <- function(spatraster = NULL,
                      spatvector = NULL,
                      zones = NULL,
-                     expand = 1.05,
+                     expand = 1,
                      rastercolors = NULL,
                      landcolor = "white",
                      watercolor = "#BEE8FF",
@@ -154,6 +154,12 @@ ENMplots <- function(spatraster = NULL,
   }
   if (missing(width)) {width = NA}
   if (missing(height)) {height = NA}
+
+  if (is.null(spatraster) | is.null(spatvector)) {
+    croptoraster = F
+    warning("'spatraster = NULL' or 'spatvector = NULL', ignore 'croptoraster'")
+  }
+
   #分类/数值型栅格
   if (categories == TRUE & is.null(spatraster) == FALSE) { #分类栅格
     for (i in 1:terra::nlyr(spatraster)) {
@@ -242,8 +248,16 @@ ENMplots <- function(spatraster = NULL,
   if (is.null(landcolor)) {
     word_vect_crop <- NULL
   } else {
-    word_vect_crop <- terra::crop(word_vect, terra::ext(spatvector)*expand) |>
-      terra::aggregate()
+    if (is.null(spatvector) == FALSE) {
+      word_vect_crop <- terra::crop(word_vect, terra::ext(spatvector)*expand) |>
+        terra::aggregate()
+    } else {
+
+      if (is.null(spatraster) == FALSE)
+      word_vect_crop <- terra::crop(word_vect, terra::ext(spatraster)*expand) |>
+        terra::aggregate()
+    }
+
   }
   #没有栅格的情况
   if (is.null(spatraster)) {
