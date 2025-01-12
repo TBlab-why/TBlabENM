@@ -710,6 +710,12 @@ maxent_parameter <- function(x,
             nn <- c(nn, nn1)
           }
           rownames(ev_cb) <- nn
+          #d当第一次全变量模拟只保留1个变量时直接退出循环
+          if (length(ev_cb) < 2) {
+            bio_name <- rownames(ev_cb)
+            return(bio_name)
+          }
+
           #将ev_cb按照变量类型拆开
           factors <- rownames(ev_cb)[rownames(ev_cb) %in% factors] #更新factors
           if (length(factors) == 0) {
@@ -792,6 +798,12 @@ maxent_parameter <- function(x,
             nn <- c(nn, nn1)
           }
           rownames(ev_cb) <- nn
+
+          #d当第一次全变量模拟只保留1个变量时直接退出循环
+          if (length(ev_cb) < 2) {
+            bio_name <- rownames(ev_cb)
+            return(bio_name)
+          }
 
           factors <- rownames(ev_cb)[rownames(ev_cb) %in% factors] #更新factors
           if (length(factors) == 0) {
@@ -940,6 +952,13 @@ maxent_parameter <- function(x,
           nn <- c(nn, nn1)
         }
         rownames(ev_cb) <- nn
+
+        #d当第一次全变量模拟只保留1个变量时直接退出循环
+        if (length(ev_cb) < 2) {
+          bio_name <- rownames(ev_cb)
+          return(bio_name)
+        }
+
         #correlation1按照ev_cb提取
         correlation1 <- correlation1[rownames(ev_cb), rownames(ev_cb)]
         bio_name <- corse_method(
@@ -1324,7 +1343,7 @@ fit <- try(  #报错调试
     }
 
     #判断保留的变量有几个，只有一个则无法调优
-    df1 <- dplyr::filter(df, num > 1)
+    df1 <- dplyr::filter(df, num > 3) #至少保留两个变量
     if (nrow(df1) == 0) {
       #删除缓存文件
       unlink(paste0(outdir, "/TBlabENMtemp", random_num) , recursive = T)
