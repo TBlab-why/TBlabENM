@@ -1365,7 +1365,7 @@ fit <- try(  #报错调试
     }
 
     gz <- purrr::pmap(
-      df,
+      df1,
       .f = function(fc, rm, occdata, bgdata, ...) {
         e <- ENMeval::ENMevaluate(
           occs = occdata,
@@ -1402,11 +1402,18 @@ fit <- try(  #报错调试
 
     #评估的一系列参数
     gz1 <- as.data.frame(data.table::rbindlist(gz))
+    gz1$fc <- as.character(gz1$fc)
+    gz1$rm <- as.numeric(as.character(gz1$rm))
+    gz1$tune.args <- as.character(gz1$tune.args)
     #合并df和gz1
-    cs <- cbind(df[1:3], gz1[c(1:16, 19)])
-    cs <- cs[-(4:5)]
+    cs <- merge(df[1:3], gz1[c(1:16, 19)], all.x = TRUE, all.y = TRUE)
     cs <- dplyr::arrange(cs, AICc, auc.diff.avg, or.mtp.avg)
-    cs1 <- cs
+    #保存结果
+    cat(paste0(outdir, "/maxent/", sp_name, "/tuneparameter.csv"))
+    utils::write.csv(cs,
+                     paste0(outdir, "/maxent/", sp_name, "/tuneparameter.csv"),
+                     row.names = FALSE)
+    cs <- dplyr::filter(cs, !is.na(auc.train))
     #选择最佳模型auc.train, cbi.train, auc.diff.avg, auc.val.avg, cbi.val.avg, or.10p.avg, or.mtp.avg, AICc
     #单一指标法，顺序指标法，最大指标法。#opt1为最佳模型
     for (i in opt) { #i = opt[1]
@@ -1428,16 +1435,10 @@ fit <- try(  #报错调试
       warning("'", paste0(opt), "'", " is NA in one or more parameter combinations, use 'auc.val.avg' instead.")
     }
 
-    #保存结果
-    #删除缓存文件
-    #unlink(paste0(outdir, "/TBlabENMtemp", random_num) , recursive = T)
-    cat(paste0(outdir, "/maxent/", sp_name, "/tuneparameter.csv"))
-    utils::write.csv(cs1,
-                     paste0(outdir, "/maxent/", sp_name, "/tuneparameter.csv"),
-                     row.names = FALSE)
+
 
     #绘制模型调优图
-    p_tun(cs1, opt)
+    p_tun(cs, opt)
 
     #最佳模型的参数df_best
     df_best <- dplyr::filter(df, fc == opt1$fc, rm == opt1$rm)
