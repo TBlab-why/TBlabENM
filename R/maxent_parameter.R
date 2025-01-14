@@ -702,7 +702,10 @@ maxent_parameter <- function(x,
 
           ##排除贡献小于0.5的变量
           ev_cb <- ev_cb[ev_cb > 0.5, , drop = FALSE]
-
+          if (nrow(ev_cb) == 0) {
+            bio_name <- ""
+            return(bio_name)
+          }
           #修改ev_cb的变量名
           nn <- c()
           for (i in 1:nrow(ev_cb)) {
@@ -790,7 +793,10 @@ maxent_parameter <- function(x,
 
           ##排除贡献小于0.5的变量
           ev_cb <- ev_cb[ev_cb > 0.5, , drop = FALSE]
-
+          if (nrow(ev_cb) == 0) {
+            bio_name <- ""
+            return(bio_name)
+          }
           #修改ev_cb的变量名
           nn <- c()
           for (i in 1:nrow(ev_cb)) {
@@ -944,7 +950,10 @@ maxent_parameter <- function(x,
 
         ##排除贡献小于0.5的变量
         ev_cb <- ev_cb[ev_cb > 0.5, , drop = FALSE]
-
+        if (nrow(ev_cb) == 0) {
+          bio_name <- ""
+          return(bio_name)
+        }
         #修改ev_cb的变量名
         nn <- c()
         for (i in 1:nrow(ev_cb)) {
@@ -1291,6 +1300,7 @@ fit <- try(  #报错调试
       dplyr::mutate(occdata = purrr::map(
         .x = env,
         .f = function(x) {
+          if (x == "") {return(0)}
           #获取变量下标
           xb <- c()
           xb2 <- stringr::str_split_1(x, ",")
@@ -1308,6 +1318,7 @@ fit <- try(  #报错调试
       dplyr::mutate(bgdata = purrr::map(
         .x = env,
         .f = function(x) {
+          if (x == "") {return(0)}
           #获取变量下标
           xb <- c()
           xb2 <- stringr::str_split_1(x, ",")
@@ -1315,17 +1326,16 @@ fit <- try(  #报错调试
             xb1 <- which(stringr::str_detect(biolist, paste0(xb2, ".asc")[i]) == T)
             if (length(xb1) == 0) {
               xb1 <- which(stringr::str_detect(biolist, paste0(xb2, ".tif")[i]) == T)}
-            xb <- c(xb, xb1)
-          }
+            xb <- c(xb, xb1)}
           bgdata <- cbind(mybgfile, mybg[xb2]) #选择变量后添加xy坐标
-        }
-      )) |> #计算变量个数
-      mutate(num = purrr::map_dbl(
+        })) |> #计算变量个数
+      dplyr::mutate(num = purrr::map_dbl(
         .x = occdata,
         .f = function(x) {
+          if (sum(x) == 0) {return(0)}
           ncol(x)
-        }
-      ))
+        }))
+
     #将分类变量转为因子型
     for (i in 1:nrow(df)) {
       dff4 <- df[[i,4]]
