@@ -2,6 +2,7 @@
 
 export(ENMclassify)
 export(ENMplots)
+export(ENMreclass_area)
 export(ENMrefuges)
 export(ENMspcheck)
 export(ENMsprichness)
