@@ -1087,6 +1087,13 @@ maxent_parameter <- function(x,
       }
 
     occdata <- terra::extract(biostack, occ, ID = FALSE)
+    #判断有无缺失值，有的话就删掉
+    row_na <- which(rowSums(is.na(occdata)) != 0)
+    if (length(row_na) > 0) {
+      occ <- occ[-row_na, ]
+      occdata <- occdata[-row_na, ]
+      cat(paste0("The ", length(row_na), " points with missing values are deleted.\n"))
+    }
     n_na <- nrow(occdata) - nrow(occ)
     #提取背景值并计算变量相关性
     ##随机生成10000个点
@@ -1417,6 +1424,7 @@ fit <- try(  #报错调试
     gz1$tune.args <- as.character(gz1$tune.args)
     #合并df和gz1
     cs <- merge(df[1:3], gz1[c(1:16, 19)], all.x = TRUE, all.y = TRUE)
+    cs2 <- cs
     cs <- dplyr::arrange(cs, AICc, auc.diff.avg, or.mtp.avg)
     #保存结果
     cat(paste0(outdir, "/maxent/", sp_name, "/tuneparameter.csv"))
@@ -1444,11 +1452,8 @@ fit <- try(  #报错调试
       opt <- append(opt, "auc.val.avg")
       warning("'", paste0(opt), "'", " is NA in one or more parameter combinations, use 'auc.val.avg' instead.")
     }
-
-
-
     #绘制模型调优图
-    p_tun(cs, opt)
+    p_tun(cs2, opt)
 
     #最佳模型的参数df_best
     df_best <- dplyr::filter(df, fc == opt1$fc, rm == opt1$rm)

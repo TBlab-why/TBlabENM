@@ -74,7 +74,7 @@ ENMreclass_area <- function(reclassdir, crs,
   end_time <- Sys.time()  ## 记录程序结束时间
   print(end_time - star_time)
   #原始数据, 重分类数据, 面积表, 存储路径
-  s3 <- list(reclass_area_path = paste0(outdir, "/","reclass_area.csv"), area = v)
+  s3 <- list(reclass_area_path = paste0(outdir, "/","reclass_area.csv"), area = data)
   return(s3)
 }
 
