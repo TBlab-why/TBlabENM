@@ -2,10 +2,10 @@
 % Please edit documentation in R/ENMrefuges.R
 \name{ENMrefuges}
 \alias{ENMrefuges}
-\title{Individual Species Refuge}
+\title{Species Refuge Richness}
 \usage{
 ENMrefuges(
-  parameters,
+  d,
   x = NULL,
   booleandir,
   key = NULL,
@@ -16,13 +16,13 @@ ENMrefuges(
 )
 }
 \arguments{
-\item{parameters}{数据框，第一列为物种名(要与resultdir下的名称保持一致)}
+\item{d}{数据框或字符向量, 提供要计算的物种名称. 为数据框时, 第一列为物种名. (物种名称要与booleandir下的表示物种存在/不存在栅格文件名保持一致)}
 
-\item{x}{数值向量,表示物种序号,与parameters中的物种序号一致。}
+\item{x}{数值向量, 表示要纳入分析的物种序号, 与d中的物种序号一致. 默认使用全部物种.}
 
-\item{booleandir}{适生区和非适生区结果文件路径。}
+\item{booleandir}{物种的存在/不存在栅格文件所在路径. 文件名要包含d中指定的物种.}
 
-\item{key}{要提取的关键词，一般对应投影时期}
+\item{key}{列表, 用于提取booleandir中对应的栅格进行分析. 例如分别计算不同时期的物种丰富度.}
 
 \item{overwrite}{logical. If TRUE, filename is overwritten}
 
@@ -30,17 +30,16 @@ ENMrefuges(
 
 \item{parallel}{是否并行}
 
-\item{ncpu}{并行时cpu个数
-本文件夹，请自己指定。}
+\item{ncpu}{并行时cpu个数}
 }
 \value{
 返回表示避难所区域的Boolean图
 }
 \description{
-根据适生区/非适生区栅格计算物种的避难所。
+根据适生区/非适生区栅格计算一组物种的避难所丰富度.
 }
 \examples{
-ENMrefuges(parameters = read.csv("F:/eblf/TBlabENM/spdata.csv"),
+ENMrefuges(d = read.csv("F:/eblf/TBlabENM/spdata.csv"),
            x = c(3,5,7,9),
            booleandir = "F:/eblf/TBlabENM/BooleanmapT_MTSStr",
            key = list("future"= c("Present", "2050RCP8.5", "2070RCP8.5"),
