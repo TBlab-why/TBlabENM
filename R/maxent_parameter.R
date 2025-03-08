@@ -714,7 +714,7 @@ maxent_parameter <- function(x,
           }
           rownames(ev_cb) <- nn
           #d当第一次全变量模拟只保留1个变量时直接退出循环
-          if (length(ev_cb) < 2) {
+          if (nrow(ev_cb) < 2) {
             bio_name <- rownames(ev_cb)
             return(bio_name)
           }
@@ -806,7 +806,7 @@ maxent_parameter <- function(x,
           rownames(ev_cb) <- nn
 
           #d当第一次全变量模拟只保留1个变量时直接退出循环
-          if (length(ev_cb) < 2) {
+          if (nrow(ev_cb) < 2) {
             bio_name <- rownames(ev_cb)
             return(bio_name)
           }
@@ -963,7 +963,7 @@ maxent_parameter <- function(x,
         rownames(ev_cb) <- nn
 
         #d当第一次全变量模拟只保留1个变量时直接退出循环
-        if (length(ev_cb) < 2) {
+        if (nrow(ev_cb) < 2) {
           bio_name <- rownames(ev_cb)
           return(bio_name)
         }

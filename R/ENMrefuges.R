@@ -99,5 +99,5 @@ ENMrefuges <- function(d, x = NULL, booleandir, key = NULL,
 
   }
   end_time <- Sys.time()
-  print(end_time-start_time)
+  print(end_time - start_time)
 }
