@@ -23,7 +23,7 @@
 #'
 #' @examples
 #' ENMunityenv(radir = "F:/example/env",
-#'             refdir = rast("F:/var2/eblf_proj/present/tif/bio1.tif"),
+#'             refdir = "F:/var2/eblf_proj/present/tif/bio1.tif",
 #'             proname = c("present", "acc2030ssp126","acc2030ssp245"),
 #'             outdir = "F:/example/env",
 #'             overwrite = T,
