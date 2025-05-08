@@ -1,2 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<metadata xml:lang="zh"><Esri><CreaDate>20241022</CreaDate><CreaTime>16181400</CreaTime><ArcGISFormat>1.0</ArcGISFormat><SyncOnce>TRUE</SyncOnce><DataProperties><lineage><Process ToolSource="e:\arcgis10.6\desktop10.6\ArcToolbox\Toolboxes\Conversion Tools.tbx\RasterToASCII" Date="20241022" Time="161814">RasterToASCII D:\Desktop\ENMdata\testvar\tif\dr.tif D:\Desktop\ENMdata\testvar\asc\dr.ASC</Process></lineage></DataProperties></Esri></metadata>

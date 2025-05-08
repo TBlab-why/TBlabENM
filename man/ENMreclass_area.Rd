@@ -14,7 +14,7 @@ ENMreclass_area(
 )
 }
 \arguments{
-\item{reclassdir}{重分类栅格所在路径}
+\item{reclassdir}{重分类栅格所在文件夹路径, 不包括物种名.}
 
 \item{crs}{给缺乏投影的栅格定义投影. 例如"epsg:4326". 栅格的投影应与环境变量保持一致, 错误的投影会得到错误的结果.}
 

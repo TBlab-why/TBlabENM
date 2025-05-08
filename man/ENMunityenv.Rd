@@ -6,7 +6,7 @@
 \usage{
 ENMunityenv(
   radir,
-  ref,
+  refdir,
   proname = NULL,
   factors = NULL,
   method = "bilinear",
@@ -21,10 +21,10 @@ ENMunityenv(
 \arguments{
 \item{radir}{要处理的环境变量所在的路径}
 
-\item{ref}{SpatRaster或SpatVector,作为参考研究区，如果是SpatRaster裁剪后的变量范围和分辨率与
-SpatRaster一致,如果是SpatVector,裁剪后的变量范围与SpatVector一致，分辨率由res参数指定。}
+\item{refdir}{研究区范围的文件路径，如果是栅格(tif/asc)裁剪后的变量范围和分辨率与
+栅格一致,如果是矢量(shp),裁剪后的变量范围与矢量一致，分辨率由res参数指定。}
 
-\item{proname}{投影时期的名字，必须是radir下的子文件夹的名字}
+\item{proname}{投影时期的名字，如果提供必须是radir下的子文件夹的名字}
 
 \item{factors}{分类变量名，要与radir下的变量名称一致}
 
@@ -50,7 +50,7 @@ SpatRaster一致,如果是SpatVector,裁剪后的变量范围与SpatVector一致
 }
 \examples{
 ENMunityenv(radir = "F:/example/env",
-            ref = rast("F:/var2/eblf_proj/present/tif/bio1.tif"),
+            refdir = rast("F:/var2/eblf_proj/present/tif/bio1.tif"),
             proname = c("present", "acc2030ssp126","acc2030ssp245"),
             outdir = "F:/example/env",
             overwrite = T,

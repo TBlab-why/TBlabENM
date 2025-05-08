@@ -4,9 +4,9 @@
 #' 将不同来源的环境变量进行格式转换、重新投影到指定的研究区.
 #'
 #' @param radir 要处理的环境变量所在的路径
-#' @param ref SpatRaster或SpatVector,作为参考研究区，如果是SpatRaster裁剪后的变量范围和分辨率与
-#'     SpatRaster一致,如果是SpatVector,裁剪后的变量范围与SpatVector一致，分辨率由res参数指定。
-#' @param proname 投影时期的名字，必须是radir下的子文件夹的名字
+#' @param refdir 研究区范围的文件路径，如果是栅格(tif/asc)裁剪后的变量范围和分辨率与
+#'     栅格一致,如果是矢量(shp),裁剪后的变量范围与矢量一致，分辨率由res参数指定。
+#' @param proname 投影时期的名字，如果提供必须是radir下的子文件夹的名字
 #' @param factors 分类变量名，要与radir下的变量名称一致
 #' @param method 连续变量的重采样方法，对于分类变量内部设置为near，可选bilinear,cubic,near等
 #' @param format 输出变量格式
@@ -23,14 +23,14 @@
 #'
 #' @examples
 #' ENMunityenv(radir = "F:/example/env",
-#'             ref = rast("F:/var2/eblf_proj/present/tif/bio1.tif"),
+#'             refdir = rast("F:/var2/eblf_proj/present/tif/bio1.tif"),
 #'             proname = c("present", "acc2030ssp126","acc2030ssp245"),
 #'             outdir = "F:/example/env",
 #'             overwrite = T,
 #'             parallel = T,
 #'             ncpu = 2)
 #'
-ENMunityenv <- function(radir, ref, proname = NULL, factors = NULL, method = "bilinear", res,
+ENMunityenv <- function(radir, refdir, proname = NULL, factors = NULL, method = "bilinear", res,
                  format = "tif", outdir = NULL, overwrite = F, parallel = F, ncpu = 2){
   dir.create(paste0(outdir, "/env/"), recursive = TRUE, showWarnings = FALSE)
   if(is.null(outdir)){outdir <- "."}
@@ -46,17 +46,17 @@ ENMunityenv <- function(radir, ref, proname = NULL, factors = NULL, method = "bi
     }}
    #构建栅格列表数据框
     radf <- as.data.frame(ralist) %>%
-      mutate(name = map_chr(.x = ralist, .f = function(x){
+      dplyr::mutate(name = map_chr(.x = ralist, .f = function(x){
         a <- stringr::str_split_1(x, "/")[length(stringr::str_split_1(x, "/"))]
         a <- stringr::str_split_1(a, ".asc$|.tif$|.TIF$|.ASC$")[1]
       })) %>%
-      mutate(method = map_chr(.x = name, .f = function(x){
+      dplyr::mutate(method = map_chr(.x = name, .f = function(x){
         if (x %in% factors) {method <- "near"} else {method <- method}
       })) %>%
-      mutate(factor = map_int(.x = name, .f = function(x){
+      dplyr::mutate(factor = map_int(.x = name, .f = function(x){
         if (x %in% factors) {factor <- 1} else {method <- 0}
       })) %>%
-      mutate(proname = map_chr(.x = ralist, .f = function(x){
+      dplyr::mutate(proname = map_chr(.x = ralist, .f = function(x){
         if (is.null(proname)) {
           a <- NA
         }else{a <- stringr::str_split_1(x, "/")[length(stringr::str_split_1(x, "/"))-1]}
@@ -70,6 +70,7 @@ ENMunityenv <- function(radir, ref, proname = NULL, factors = NULL, method = "bi
 
 
     fun1 <- function(x){
+      ref <- terra::rast(refdir)
       ra <- terra::rast(x)
       if (terra::crs(ref, proj = TRUE) == terra::crs(ra, proj = TRUE)) { #投影相同的情况
         if (class(ref) == "SpatRaster") {
@@ -108,7 +109,7 @@ ENMunityenv <- function(radir, ref, proname = NULL, factors = NULL, method = "bi
     snowfall::sfInit(parallel = TRUE, cpus = ncpu)
    # snowfall::sfExport("star_time")
     snowfall::sfLibrary(purrr)
-    k <- snowfall::sfLapply(radf$ralist, fun1)
+    snowfall::sfLapply(radf$ralist, fun1)
     snowfall::sfStop()  # 关闭集群
 
   } else {

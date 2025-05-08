@@ -1,7 +1,7 @@
 
 #' @title Calculate the area of the reclassified raster
 #' @description 计算重分类栅格面积.
-#' @param reclassdir 重分类栅格所在路径
+#' @param reclassdir 重分类栅格所在文件夹路径, 不包括物种名.
 #' @param crs 给缺乏投影的栅格定义投影. 例如"epsg:4326". 栅格的投影应与环境变量保持一致, 错误的投影会得到错误的结果.
 #' @param prefix 字符型. 要重分类的栅格文件名的前缀, 用于筛选栅格.
 #' @param suffix 字符型. 要重分类的栅格文件名的后缀, 用于筛选栅格.

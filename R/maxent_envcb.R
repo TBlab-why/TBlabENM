@@ -155,7 +155,8 @@ maxent_envcb <- function(parameters,
     names_to = "Contribution",
     #转置后原本的列名会变成观测生成新列，指定这列的列名(列名包含了分类信息)
     values_to = "Variate"
-  )  #转置后原本的各列的值会合并成一个新列，指定这列的列名
+  ) %>% #转置后原本的各列的值会合并成一个新列，指定这列的列名
+    dplyr::filter(!is.na(Variate))
 
   #统计每个变量出现次数，按照次数指定因子水平
   times <- table(data1$Variate)
