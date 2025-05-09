@@ -1,0 +1,25 @@
+<urlset xmlns = 'http://www.sitemaps.org/schemas/sitemap/0.9'>
+<url><loc>/404.html</loc></url>
+<url><loc>/CODE_OF_CONDUCT.html</loc></url>
+<url><loc>/LICENSE.html</loc></url>
+<url><loc>/authors.html</loc></url>
+<url><loc>/index.html</loc></url>
+<url><loc>/news/index.html</loc></url>
+<url><loc>/reference/ENMcentroid.html</loc></url>
+<url><loc>/reference/ENMclassify.html</loc></url>
+<url><loc>/reference/ENMplots.html</loc></url>
+<url><loc>/reference/ENMreclass_area.html</loc></url>
+<url><loc>/reference/ENMrefuges.html</loc></url>
+<url><loc>/reference/ENMspcheck.html</loc></url>
+<url><loc>/reference/ENMsprichness.html</loc></url>
+<url><loc>/reference/ENMspthin.html</loc></url>
+<url><loc>/reference/ENMunityenv.html</loc></url>
+<url><loc>/reference/index.html</loc></url>
+<url><loc>/reference/maxent_args.html</loc></url>
+<url><loc>/reference/maxent_auto.html</loc></url>
+<url><loc>/reference/maxent_envcb.html</loc></url>
+<url><loc>/reference/maxent_parameter.html</loc></url>
+<url><loc>/reference/maxent_single.html</loc></url>
+<url><loc>/reference/maxent_spdata.html</loc></url>
+</urlset>
+
