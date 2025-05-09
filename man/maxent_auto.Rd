@@ -89,21 +89,23 @@ p_ncpu参数
 则所有部分都使用5个cpu.
 }
 \examples{
-maxent_auto(sp = system.file("extdata", "species/Phoebe sheareri.csv", package = "TBlabENM"),
-evdir = system.file("extdata", "envar/asc", package = "TBlabENM"),
-myenv = NULL,
-evlist = 1:7,
-factors = c("dr", "fao90"),
-nbg = 10000,
-bgwidth = 500000,
-args = maxent_args(),
-fc = c("lph", "q", "lq"),
-rm = 1:2,
-r = 0.7,
-vif = T,
-vifth = 5,
-opt = "auc.val.avg",
-null_model = TRUE,
-outdir = NULL)
+maxent_auto(
+  sp = system.file("extdata", "species/Phoebe sheareri.csv", package = "TBlabENM"),
+  evdir = system.file("extdata", "envar/asc", package = "TBlabENM"),
+  myenv = NULL,
+  evlist = 1:7,
+  factors = c("dr", "fao90"),
+  nbg = 10000,
+  bgwidth = 500000,
+  args = maxent_args(),
+  fc = c("lph", "q", "lq"),
+  rm = 1:2,
+  r = 0.7,
+  vif = T,
+  vifth = 5,
+  opt = "auc.val.avg",
+  null_model = TRUE,
+  outdir = NULL
+)
 
 }

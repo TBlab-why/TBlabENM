@@ -19,10 +19,11 @@ maxent_spdata(resultdir = "./TBlabENM/result", proname = "present")
 物种丰富度、避难所等分析的输入文件。注意：重新运行该命令会覆盖上一次的结果。
 }
 \examples{
-#设置工作路径
+# 设置工作路径
 setwd("D:/Desktop")
-#读取参数结果
-maxent_spdata(resultdir="./TBlabENM/result",
-          proname = "present"
- )
+# 读取参数结果
+maxent_spdata(
+  resultdir = "./TBlabENM/result",
+  proname = "present"
+)
 }

@@ -39,15 +39,17 @@ ENMspcheck(
 检查物种发生数据在环境变量上是否存在缺失值以及是否在指定的海拔范围内.
 }
 \examples{
-occurence <- system.file("/ex/bradypus.csv", package="predicts")
-ENMspcheck(spdir = occurence,
-           evdir = paste0(system.file(package="TBlabENM"), "/extdata/present"),
-           #用于检查的变量, 一种类型的变量选择一个即可
-           evselectev = c("elev30", "bio01", "SU_CODE", "uvb1"),
-           #海拔范围从植物志查询
-           elevation = c(1000,1200),
-           elrange = 500,
-           deal_NA = "none")
+occurence <- system.file("/ex/bradypus.csv", package = "predicts")
+ENMspcheck(
+  spdir = occurence,
+  evdir = paste0(system.file(package = "TBlabENM"), "/extdata/present"),
+  # 用于检查的变量, 一种类型的变量选择一个即可
+  evselectev = c("elev30", "bio01", "SU_CODE", "uvb1"),
+  # 海拔范围从植物志查询
+  elevation = c(1000, 1200),
+  elrange = 500,
+  deal_NA = "none"
+)
 }
 \author{
 吴海洋

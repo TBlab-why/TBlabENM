@@ -5,6 +5,9 @@
 
 <!-- badges: start -->
 
+[![R-CMD-check](https://github.com/TBlab-why/TBlabENM/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/TBlab-why/TBlabENM/actions/workflows/R-CMD-check.yaml)
+[![Codecov test
+coverage](https://codecov.io/gh/TBlab-why/TBlabENM/graph/badge.svg)](https://app.codecov.io/gh/TBlab-why/TBlabENM)
 <!-- badges: end -->
 
 TBlabENM用于自动化批量完成生态位建模及后续分析。该包主要针对MaxEnt模型进行编写，能够多物种、多线程自动完成环境变量选择、模型参数优化、模型拟合与评价、适生区投影等一系列工作。此外，同样也能够对前期数据进行处理、后期模型结果分析，极大地提高了工作效率。
@@ -21,3 +24,8 @@ You can install the development version of TBlabENM from
 # install.packages("devtools")
 devtools::install_github("TBlab-why/TBlabENM")
 ```
+
+Please note that the TBlabENM project is released with a [Contributor
+Code of
+Conduct](https://contributor-covenant.org/version/2/1/CODE_OF_CONDUCT.html).
+By contributing to this project, you agree to abide by its terms.

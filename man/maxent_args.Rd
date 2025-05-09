@@ -55,12 +55,14 @@ maxent_args(
 建模函数连用.
 }
 \examples{
-#使用默认参数(TBlab)
+# 使用默认参数(TBlab)
 args <- maxent_args()
 args
-#自定义参数。
-args <- maxent_args(replicates = 5,
-                    betamultiplier = 2)
+# 自定义参数。
+args <- maxent_args(
+  replicates = 5,
+  betamultiplier = 2
+)
 args
 }
 \author{

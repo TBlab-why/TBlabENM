@@ -30,13 +30,15 @@ ENMspthin(spdir, spec.col, long.col, lat.col, thin.par, outdir = NULL)
 生成一个连接文件(compare开头),指明了与原始数据相比哪些记录被保留了下来.
 }
 \examples{
-#读取物种路径列表
+# 读取物种路径列表
 dir <- system.file("extdata", "species", package = "TBlabENM")
 splist <- list.files(dir, pattern = ".csv$", full.names = T)
-ENMspthin(spdir = splist,
-          spec.col = species,
-          long.col = longitude,
-          lat.col = latitude,
-          thin.par = 10,
-          outdir = NULL)
+ENMspthin(
+  spdir = splist,
+  spec.col = species,
+  long.col = longitude,
+  lat.col = latitude,
+  thin.par = 10,
+  outdir = NULL
+)
 }

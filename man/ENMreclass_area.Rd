@@ -34,11 +34,11 @@ ENMreclass_area(
 }
 \examples{
 ENMreclass_area(
-reclassdir = "/ifs1/User/wuhaiyang/sdm/reclass25部分",
-crs = "epsg:4326",
-prefix = "wz0001",
-suffix = "tif",
-outdir = "/ifs1/User/wuhaiyang/sdm"
+  reclassdir = "/ifs1/User/wuhaiyang/sdm/reclass25部分",
+  crs = "epsg:4326",
+  prefix = "wz0001",
+  suffix = "tif",
+  outdir = "/ifs1/User/wuhaiyang/sdm"
 )
 
 }

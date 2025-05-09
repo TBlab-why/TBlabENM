@@ -49,12 +49,14 @@ ENMunityenv(
 将不同来源的环境变量进行格式转换、重新投影到指定的研究区.
 }
 \examples{
-ENMunityenv(radir = "F:/example/env",
-            refdir = rast("F:/var2/eblf_proj/present/tif/bio1.tif"),
-            proname = c("present", "acc2030ssp126","acc2030ssp245"),
-            outdir = "F:/example/env",
-            overwrite = T,
-            parallel = T,
-            ncpu = 2)
+ENMunityenv(
+  radir = "F:/example/env",
+  refdir = "F:/var2/eblf_proj/present/tif/bio1.tif",
+  proname = c("present", "acc2030ssp126", "acc2030ssp245"),
+  outdir = "F:/example/env",
+  overwrite = T,
+  parallel = T,
+  ncpu = 2
+)
 
 }

@@ -39,13 +39,17 @@ ENMrefuges(
 根据适生区/非适生区栅格计算一组物种的避难所丰富度.
 }
 \examples{
-ENMrefuges(d = read.csv("F:/eblf/TBlabENM/spdata.csv"),
-           x = c(3,5,7,9),
-           booleandir = "F:/eblf/TBlabENM/BooleanmapT_MTSStr",
-           key = list("future"= c("Present", "2050RCP8.5", "2070RCP8.5"),
-                      "past"= c("Present", "Mid-Holocene", "Last-Glacial-Maximum")),
-           overwrite = T,
-           outdir = "F:/4",
-           parallel = T,
-           ncpu = 2)
+ENMrefuges(
+  d = read.csv("F:/eblf/TBlabENM/spdata.csv"),
+  x = c(3, 5, 7, 9),
+  booleandir = "F:/eblf/TBlabENM/BooleanmapT_MTSStr",
+  key = list(
+    "future" = c("Present", "2050RCP8.5", "2070RCP8.5"),
+    "past" = c("Present", "Mid-Holocene", "Last-Glacial-Maximum")
+  ),
+  overwrite = T,
+  outdir = "F:/4",
+  parallel = T,
+  ncpu = 2
+)
 }

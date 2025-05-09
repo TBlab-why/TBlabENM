@@ -77,19 +77,21 @@ maxent_parameter(
 注意：当物种发生数据过少时，可能无法得出正确的AICc和cbi值，如果opt选择AICc或cbi，则使用auc.val.avg值进行代替。
 }
 \examples{
-maxent_parameter(x = system.file("extdata", "species/Phoebe sheareri.csv", package = "TBlabENM"),
-       evdir = system.file("extdata", "envar/asc", package = "TBlabENM"),
-       myenv = NULL,
-       evlist = 1:7,
-       factors = c("dr", "fao90"),
-       nbg = 1000,
-       bgwidth = 500000,
-       fc = c("LPH", "Q", "LQ"),
-       rm = 1:5,
-       r = 0.7,
-       vif = T,
-       vifth = 5,
-       opt = "auc.val.avg",
-       parallel = F,
-       ncpu = 2)
+maxent_parameter(
+  x = system.file("extdata", "species/Phoebe sheareri.csv", package = "TBlabENM"),
+  evdir = system.file("extdata", "envar/asc", package = "TBlabENM"),
+  myenv = NULL,
+  evlist = 1:7,
+  factors = c("dr", "fao90"),
+  nbg = 1000,
+  bgwidth = 500000,
+  fc = c("LPH", "Q", "LQ"),
+  rm = 1:5,
+  r = 0.7,
+  vif = T,
+  vifth = 5,
+  opt = "auc.val.avg",
+  parallel = F,
+  ncpu = 2
+)
 }

@@ -42,15 +42,19 @@ ENMsprichness(
 叠加不同物种的存在/不存在栅格，计算物种丰富度.
 }
 \examples{
-ENMsprichness(d = read.csv("F:/eblf/TBlabENM/spdata.csv"),
-              x = c(3,5,7,9),
-              booleandir = "F:/eblf/TBlabENM/BooleanmapT_MTSStr",
-              key = list("2050RCP8.5"= "2050RCP8.5",
-                         "2070RCP8.5"= "2070RCP8.5",
-                         "Present"= "Present"),
-              bioindex = "cwe",
-              overwrite = T,
-              outdir = "F:/4",
-              parallel = T,
-              ncpu = 2)
+ENMsprichness(
+  d = read.csv("F:/eblf/TBlabENM/spdata.csv"),
+  x = c(3, 5, 7, 9),
+  booleandir = "F:/eblf/TBlabENM/BooleanmapT_MTSStr",
+  key = list(
+    "2050RCP8.5" = "2050RCP8.5",
+    "2070RCP8.5" = "2070RCP8.5",
+    "Present" = "Present"
+  ),
+  bioindex = "cwe",
+  overwrite = T,
+  outdir = "F:/4",
+  parallel = T,
+  ncpu = 2
+)
 }

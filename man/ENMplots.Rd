@@ -68,75 +68,93 @@ ggplot2对象
 \examples{
 
 # 单层栅格绘图
-##下载澳大利亚行政边界数据
+## 下载澳大利亚行政边界数据
 aus_map <- geodata::gadm(country = "AUS", level = 1, path = tempdir())
-##下载全球12个月的平均温度栅格数据
+## 下载全球12个月的平均温度栅格数据
 tavg <- geodata::worldclim_global("tavg", res = 10, path = tempdir(), version = "2.1")
-##裁剪至澳大利亚范围
+## 裁剪至澳大利亚范围
 tavg_aus <- terra::crop(tavg, aus_map, mask = T)
-##提取1月的数据
+## 提取1月的数据
 tavg_aus_Jan <- tavg_aus[[1]]
-##绘图
-ENMplots(spatraster = tavg_aus_Jan,
-         spatvector = aus_map)
-##更改陆地的颜色和水体的颜色
-###如果不需要陆地和水体颜色可以将颜色设置为"transparent", 透明色.
-ENMplots(spatraster = tavg_aus_Jan,
-         spatvector = aus_map,
-         landcolor = "grey60",
-         watercolor = "#BEE8FF")
-##自定义温度栅格的颜色
-ENMplots(spatraster = tavg_aus_Jan,
-         spatvector = aus_map,
-         rastercolors = c("yellow", "green"))
-##移除指北针和比例尺
-ENMplots(spatraster = tavg_aus_Jan,
-         spatvector = aus_map,
-         annotation_north_arrow = F,
-         annotation_scale = F)
-##更改投影坐标系
-ENMplots(spatraster = tavg_aus_Jan,
-         spatvector = aus_map,
-         crs = "epsg:4544")
-##仅绘制区域地图
-###区域地图需要提前准备一个与spatraster具有相同地理参考的栅格数据. 如果只想展示研究区的一部分结果可能很有用, 例如某个省.
-zone <- terra::crop(tavg_aus_Jan, terra::ext(tavg_aus_Jan) + c(-27,-5,-10,-30))
-ENMplots(spatraster = tavg_aus_Jan,
-         spatvector = aus_map,
-         croptoraster = F,
-         zones = zone)
-###指定croptoraster = T将绘图范围裁剪至zone
-ENMplots(spatraster = tavg_aus_Jan,
-         spatvector = aus_map,
-         croptoraster = T,
-         zones = zone)
-##保存图片
-###可以在函数中使用参数保存图片, 请在filename中指定图片格式. 支持的格式同ggplot2::ggsave().
-ENMplots(spatraster = tavg_aus_Jan,
-         spatvector = aus_map,
-         outdir = "your path",
-         filename = "plot.jpg",
-         width = 10,
-         height = 10)
+## 绘图
+ENMplots(
+  spatraster = tavg_aus_Jan,
+  spatvector = aus_map
+)
+## 更改陆地的颜色和水体的颜色
+### 如果不需要陆地和水体颜色可以将颜色设置为"transparent", 透明色.
+ENMplots(
+  spatraster = tavg_aus_Jan,
+  spatvector = aus_map,
+  landcolor = "grey60",
+  watercolor = "#BEE8FF"
+)
+## 自定义温度栅格的颜色
+ENMplots(
+  spatraster = tavg_aus_Jan,
+  spatvector = aus_map,
+  rastercolors = c("yellow", "green")
+)
+## 移除指北针和比例尺
+ENMplots(
+  spatraster = tavg_aus_Jan,
+  spatvector = aus_map,
+  annotation_north_arrow = F,
+  annotation_scale = F
+)
+## 更改投影坐标系
+ENMplots(
+  spatraster = tavg_aus_Jan,
+  spatvector = aus_map,
+  crs = "epsg:4544"
+)
+## 仅绘制区域地图
+### 区域地图需要提前准备一个与spatraster具有相同地理参考的栅格数据. 如果只想展示研究区的一部分结果可能很有用, 例如某个省.
+zone <- terra::crop(tavg_aus_Jan, terra::ext(tavg_aus_Jan) + c(-27, -5, -10, -30))
+ENMplots(
+  spatraster = tavg_aus_Jan,
+  spatvector = aus_map,
+  croptoraster = F,
+  zones = zone
+)
+### 指定croptoraster = T将绘图范围裁剪至zone
+ENMplots(
+  spatraster = tavg_aus_Jan,
+  spatvector = aus_map,
+  croptoraster = T,
+  zones = zone
+)
+## 保存图片
+### 可以在函数中使用参数保存图片, 请在filename中指定图片格式. 支持的格式同ggplot2::ggsave().
+ENMplots(
+  spatraster = tavg_aus_Jan,
+  spatvector = aus_map,
+  outdir = "your path",
+  filename = "plot.jpg",
+  width = 10,
+  height = 10
+)
 
-##添加其他ggplot对象
+## 添加其他ggplot对象
 ### ENMplots()返回的是ggplot对象，可以与其他ggplot扩展结合，拥有更大的灵活性
-###使用tidyverse包的调色盘并更换主题
+### 使用tidyverse包的调色盘并更换主题
 ENMplots(spatraster = tavg_aus_Jan, spatvector = aus_map) +
   tidyterra::scale_fill_whitebox_c(
     palette = "high_relief",
     labels = scales::label_number(suffix = "º"),
     n.breaks = 12,
     guide = guide_legend(reverse = TRUE)
-  )  +
+  ) +
   theme_bw()
-###如果添加了额外的ggplot对象，则需要使用ggplot2::ggsave()在外部保存图片.
+### 如果添加了额外的ggplot对象，则需要使用ggplot2::ggsave()在外部保存图片.
 
-##此外还可以绘制简单的样本分布点
-###随机选择100个点当做样本分布点
+## 此外还可以绘制简单的样本分布点
+### 随机选择100个点当做样本分布点
 point <- terra::spatSample(tavg_aus_Jan, 100, xy = T, na.rm = T)
-ENMplots(spatraster = NULL,  #如果不需要温度栅格就设置为NULL
-         spatvector = aus_map) +
+ENMplots(
+  spatraster = NULL, # 如果不需要温度栅格就设置为NULL
+  spatvector = aus_map
+) +
   ggplot2::geom_point(data = point, aes(x = x, y = y))
 ##单层分类栅格绘图
 ##将澳大利亚1月的平均温重分类为高中低(3, 2, 1)三个类别

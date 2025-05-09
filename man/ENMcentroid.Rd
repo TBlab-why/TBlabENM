@@ -33,11 +33,13 @@ ENMcentroid(
 计算适生区栅格的质心. 栅格应为二元栅格, 即1代表适生区, 0代表非适生区.
 }
 \examples{
-df <- ENMcentroid(radir = "F:/sdm/maxent/32/1/p",
-            proname = F,
-            format = "tif",
-            parallel = T,
-            ncpu = 2)
+df <- ENMcentroid(
+  radir = "F:/sdm/maxent/32/1/p",
+  proname = F,
+  format = "tif",
+  parallel = T,
+  ncpu = 2
+)
 df
 
 }

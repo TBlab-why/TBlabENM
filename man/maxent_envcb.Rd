@@ -35,10 +35,12 @@ maxent_envcb(
 绘制堆叠条形统计图。
 }
 \examples{
-maxent_envcb(parameters = read.csv("F:/4/TBlabENM/maxent/parameters.csv"),
-             x = 1:10,
-             resultdir = "F:/4/TBlabENM/maxent",
-             wordsize = 1,
-             device = "jpeg",
-             outdir = "F:/4")
+maxent_envcb(
+  parameters = read.csv("F:/4/TBlabENM/maxent/parameters.csv"),
+  x = 1:10,
+  resultdir = "F:/4/TBlabENM/maxent",
+  wordsize = 1,
+  device = "jpeg",
+  outdir = "F:/4"
+)
 }

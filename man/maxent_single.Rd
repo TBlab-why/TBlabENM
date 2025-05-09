@@ -67,9 +67,11 @@ maxent_single(
   nbg = 1000,
   bgwidth = 500000,
   args = maxent_args(),
-  prodir = list(present = system.file("extdata", "envar/asc", package = "TBlabENM"),
-              present1 = system.file("extdata", "envar/asc", package = "TBlabENM")
+  prodir = list(
+    present = system.file("extdata", "envar/asc", package = "TBlabENM"),
+    present1 = system.file("extdata", "envar/asc", package = "TBlabENM")
   ),
   parallel = T,
-  ncpu =2)
+  ncpu = 2
+)
 }

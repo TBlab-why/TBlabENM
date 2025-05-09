@@ -60,18 +60,22 @@ ENMclassify(
 }
 }
 \examples{
-reclass <- ENMclassify(d = read.csv("F:/eblf/TBlabENM/spdata.csv"),
-                       x = c(3,5,7,9),
-                       resultdir = "F:/eblf/TBlabENM/result",
-                       crs = "epsg:4326",
-                       prefix = NULL,
-                       suffix = "tif",
-                       rcl = list("非适生区" = c(0,0.2),
-                                  "低适生区" = c(0.2,0.4),
-                                  "中适生区" = c(0.4,0.6),
-                                  "高适生区" = c(0.6,1)),
-                       overwrite = T,
-                       outdir = "F:/4",
-                       parallel = T,
-                       ncpu = 2)
+reclass <- ENMclassify(
+  d = read.csv("F:/eblf/TBlabENM/spdata.csv"),
+  x = c(3, 5, 7, 9),
+  resultdir = "F:/eblf/TBlabENM/result",
+  crs = "epsg:4326",
+  prefix = NULL,
+  suffix = "tif",
+  rcl = list(
+    "非适生区" = c(0, 0.2),
+    "低适生区" = c(0.2, 0.4),
+    "中适生区" = c(0.4, 0.6),
+    "高适生区" = c(0.6, 1)
+  ),
+  overwrite = T,
+  outdir = "F:/4",
+  parallel = T,
+  ncpu = 2
+)
 }
