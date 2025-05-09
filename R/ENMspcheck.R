@@ -21,61 +21,66 @@
 #' @author 吴海洋
 #'
 #' @examples
-#' occurence <- system.file("/ex/bradypus.csv", package="predicts")
-#' ENMspcheck(spdir = occurence,
-#'            evdir = paste0(system.file(package="TBlabENM"), "/extdata/present"),
-#'            #用于检查的变量, 一种类型的变量选择一个即可
-#'            evselectev = c("elev30", "bio01", "SU_CODE", "uvb1"),
-#'            #海拔范围从植物志查询
-#'            elevation = c(1000,1200),
-#'            elrange = 500,
-#'            deal_NA = "none")
+#' occurence <- system.file("/ex/bradypus.csv", package = "predicts")
+#' ENMspcheck(
+#'   spdir = occurence,
+#'   evdir = paste0(system.file(package = "TBlabENM"), "/extdata/present"),
+#'   # 用于检查的变量, 一种类型的变量选择一个即可
+#'   evselectev = c("elev30", "bio01", "SU_CODE", "uvb1"),
+#'   # 海拔范围从植物志查询
+#'   elevation = c(1000, 1200),
+#'   elrange = 500,
+#'   deal_NA = "none"
+#' )
 ENMspcheck <- function(spdir, evdir, evselectev, elevation,
                        elrange = 500, deal_NA = "none", width,
                        outdir) {
-  #参数检查
+  # 参数检查
   if (file.exists(evdir) == FALSE) {
-    stop("Evdir not find.")}
+    stop("Evdir not find.")
+  }
   if (file.exists(spdir) == FALSE) {
-    stop("Spdir not find.")}
+    stop("Spdir not find.")
+  }
   if (length(deal_NA) > 1 | !deal_NA %in% c("mv", "rm", "none")) {
     stop("Parameter deal_NA must be either 'mv', 'rm' or 'none'.")
   }
 
-  #获取物种名 对路径拆分并取倒数第一个字符串
-    spname1 <- stringr::str_split_1(spdir, "/")[length(stringr::str_split_1(spdir, "/"))]
-    sp_name <- stringr::str_split_1(spname1, ".csv$")[1]
+  # 获取物种名 对路径拆分并取倒数第一个字符串
+  spname1 <- stringr::str_split_1(spdir, "/")[length(stringr::str_split_1(spdir, "/"))]
+  sp_name <- stringr::str_split_1(spname1, ".csv$")[1]
 
-  #读取栅格数据列表
+  # 读取栅格数据列表
 
-    biolist <- list.files(evdir, pattern = "(tif|asc)$", full.names = TRUE)
-    #选择要检查的变量, 并stack
-    evselectevdir <- c()
-    for (i in seq_along(evselectev)) {#i=1
-      evselectevdir1 <- biolist[stringr::str_which(biolist, paste0(evselectev[i],"\\."))]
-      if (length(evselectevdir1) == 0) {
-        stop(paste0("Env " , evselectev[i], " not found in ", evdir))}
-      evselectevdir <- c(evselectevdir, evselectevdir1)
+  biolist <- list.files(evdir, pattern = "(tif|asc)$", full.names = TRUE)
+  # 选择要检查的变量, 并stack
+  evselectevdir <- c()
+  for (i in seq_along(evselectev)) { # i=1
+    evselectevdir1 <- biolist[stringr::str_which(biolist, paste0(evselectev[i], "\\."))]
+    if (length(evselectevdir1) == 0) {
+      stop(paste0("Env ", evselectev[i], " not found in ", evdir))
     }
-    biostack_t <- terra::rast(evselectevdir)
-  #读取物种坐标数据并提取出经纬度列
-    occ1 <- utils::read.csv(spdir)
-    occ <- occ1[c(2,3)]
-    names(occ) <- c("x", "y")
+    evselectevdir <- c(evselectevdir, evselectevdir1)
+  }
+  biostack_t <- terra::rast(evselectevdir)
+  # 读取物种坐标数据并提取出经纬度列
+  occ1 <- utils::read.csv(spdir)
+  occ <- occ1[c(2, 3)]
+  names(occ) <- c("x", "y")
 
-  #提取每个坐标点对应的环境值并转为数据框
+  # 提取每个坐标点对应的环境值并转为数据框
   occdata_t <- as.data.frame(terra::extract(biostack_t, occ, ID = FALSE))
-  #检查缺失值所在行
+  # 检查缺失值所在行
   row_na <- which(rowSums(is.na(occdata_t)) != 0)
-  #合并occ和occdata_t
+  # 合并occ和occdata_t
   occdata <- cbind(occ1[1:3], occdata_t)
-  #判断坐标点是否在海拔范围之内,这里的F为符合要求的数据
+  # 判断坐标点是否在海拔范围之内,这里的F为符合要求的数据
 
-  occ_e <- ifelse(occdata_t[[1]] <= (max(elevation) + elrange)
-                  & occdata_t[[1]] >= (min(elevation) - elrange), F, T)
+  occ_e <- ifelse(occdata_t[[1]] <= (max(elevation) + elrange) &
+    occdata_t[[1]] >= (min(elevation) - elrange), F, T)
   occ_e[which(is.na(occ_e))] <- F
 
-  #sum(occ_e)==0和length(row_na)==0说明数据都符合要求, 否则发出警告
+  # sum(occ_e)==0和length(row_na)==0说明数据都符合要求, 否则发出警告
   if (sum(occ_e) == 0 & length(row_na) == 0) {
     cat("The data set passes the altitude range and ENM envionment variables check.")
   } else {
@@ -83,74 +88,85 @@ ENMspcheck <- function(spdir, evdir, evselectev, elevation,
   }
 
 
-#相应处理
+  # 相应处理
   if (deal_NA == "mv" & length(row_na) > 0) {
     de_n <- c()
-  #提取含有缺失值的点所在栅格的中心坐标
-  point_err <- occ[row_na, ] #有缺失值的点
-  cell_extract <- terra::extract(biostack_t, point_err[1:2], xy = T, ID = FALSE)
-  for (i in seq_along(row_na)) {
-  point <- occ[row_na[i], ]
-  n <- as.numeric(rownames(point)) #有缺失值的点的行号
-  cellsite_ext <- cell_extract[i,]
-  cellsite_xy <- cellsite_ext[(length(cellsite_ext) - 1):length(cellsite_ext)]
-  if (is.nan(cellsite_xy[1,1])) {de_n <- c(de_n, n)
-  next}
-  #将栅格裁剪至有问题的点周围, 这里设置为1°应该可以满足大部分需求
-  ex <- terra::ext(cellsite_xy$x-1, cellsite_xy$x+1, cellsite_xy$y-1, cellsite_xy$y+1)
-  biostack_t1 <- terra::crop(biostack_t, ex)
-  #以其中一个栅格为模版创建空栅格并对site赋值
-  new_ra <- terra::rast(ncols = ncol(biostack_t1), nrows  = nrow(biostack_t1),
-                     crs = terra::crs(biostack_t1), extent = terra::ext(biostack_t1))
-  new_ra[terra::cellFromXY(new_ra, cellsite_xy)] <- 1
-  #构建缓冲区
-  new_ra_buffer <- terra::buffer(new_ra, width = width)
+    # 提取含有缺失值的点所在栅格的中心坐标
+    point_err <- occ[row_na, ] # 有缺失值的点
+    cell_extract <- terra::extract(biostack_t, point_err[1:2], xy = T, ID = FALSE)
+    for (i in seq_along(row_na)) {
+      point <- occ[row_na[i], ]
+      n <- as.numeric(rownames(point)) # 有缺失值的点的行号
+      cellsite_ext <- cell_extract[i, ]
+      cellsite_xy <- cellsite_ext[(length(cellsite_ext) - 1):length(cellsite_ext)]
+      if (is.nan(cellsite_xy[1, 1])) {
+        de_n <- c(de_n, n)
+        next
+      }
+      # 将栅格裁剪至有问题的点周围, 这里设置为1°应该可以满足大部分需求
+      ex <- terra::ext(cellsite_xy$x - 1, cellsite_xy$x + 1, cellsite_xy$y - 1, cellsite_xy$y + 1)
+      biostack_t1 <- terra::crop(biostack_t, ex)
+      # 以其中一个栅格为模版创建空栅格并对site赋值
+      new_ra <- terra::rast(
+        ncols = ncol(biostack_t1), nrows = nrow(biostack_t1),
+        crs = terra::crs(biostack_t1), extent = terra::ext(biostack_t1)
+      )
+      new_ra[terra::cellFromXY(new_ra, cellsite_xy)] <- 1
+      # 构建缓冲区
+      new_ra_buffer <- terra::buffer(new_ra, width = width)
 
-  #计算缓冲区的每个栅格与point之间的距离
-  df <- which(new_ra_buffer[] == TRUE) %>%  #提取缓冲区内每个栅格的索引
-    as.data.frame() %>%
-    mutate(value = map(.x = ., .f = function(x){
-      biostack_t1[x]})) %>%  #提取栅格值
-    mutate(sum = map(.x = value, .f = function(x){
-      sum(x)})) %>%     #求和, 当值为NA时说明至少在一个图层中有缺失, 下面移除这些缺失的栅格
-    filter(!grepl('NA', sum))
+      # 计算缓冲区的每个栅格与point之间的距离
+      df <- which(new_ra_buffer[] == TRUE) %>% # 提取缓冲区内每个栅格的索引
+        as.data.frame() %>%
+        mutate(value = map(.x = ., .f = function(x) {
+          biostack_t1[x]
+        })) %>% # 提取栅格值
+        mutate(sum = map(.x = value, .f = function(x) {
+          sum(x)
+        })) %>% # 求和, 当值为NA时说明至少在一个图层中有缺失, 下面移除这些缺失的栅格
+        filter(!grepl("NA", sum))
 
-    if (nrow(df) > 0) {
-      df <- df %>%
-      mutate(xy = map(.x = ., .f = function(x){
-        as.data.frame(terra::xyFromCell(new_ra_buffer, x))
-        })) %>%  #获取栅格中心坐标
-      mutate(point = map(.x = ., .f = function(x){
-        point
-      })) %>%
-      mutate(distant = map2_dbl(.x = xy, .y = point, .f = function(x, y){
-         stats::dist(rbind(x,y))
-      })) %>%
-      dplyr::arrange(distant)}
-  #将原数据替换为距离最近的栅格的中心坐标
-    if (nrow(df) > 0) {
-    occ1[n, 2:3] <- df$xy[[1]]
-    } else {
-      de_n <- c(de_n, n)
+      if (nrow(df) > 0) {
+        df <- df %>%
+          mutate(xy = map(.x = ., .f = function(x) {
+            as.data.frame(terra::xyFromCell(new_ra_buffer, x))
+          })) %>% # 获取栅格中心坐标
+          mutate(point = map(.x = ., .f = function(x) {
+            point
+          })) %>%
+          mutate(distant = map2_dbl(.x = xy, .y = point, .f = function(x, y) {
+            stats::dist(rbind(x, y))
+          })) %>%
+          dplyr::arrange(distant)
+      }
+      # 将原数据替换为距离最近的栅格的中心坐标
+      if (nrow(df) > 0) {
+        occ1[n, 2:3] <- df$xy[[1]]
+      } else {
+        de_n <- c(de_n, n)
+      }
     }
-
-  }
-  if (length(de_n) > 0) { occ1 <- occ1[-de_n, ]}
-  if (exists("outdir")) {
-    write.csv(occ1, paste0(outdir, "/", sp_name, "_check.csv"), row.names = FALSE)}
+    if (length(de_n) > 0) {
+      occ1 <- occ1[-de_n, ]
+    }
+    if (exists("outdir")) {
+      write.csv(occ1, paste0(outdir, "/", sp_name, "_check.csv"), row.names = FALSE)
+    }
   }
   if (deal_NA == "rm" & length(row_na) > 0) {
     occ1 <- occ1[-n, ]
     if (exists("outdir")) {
-      write.csv(occ1, paste0(outdir, "/", sp_name, "_check.csv"), row.names = FALSE)}
+      write.csv(occ1, paste0(outdir, "/", sp_name, "_check.csv"), row.names = FALSE)
     }
-#对有问题的3种情况进行相应的输出
-if (sum(occ_e) != 0 & length(row_na) == 0) {return(occdata[occ_e,])}
-if (sum(occ_e) == 0 & length(row_na) != 0) {return(occdata[row_na,])}
-if (sum(occ_e) != 0 & length(row_na) != 0) {return(rbind(occdata[occ_e,], occdata[row_na,]))
-
+  }
+  # 对有问题的3种情况进行相应的输出
+  if (sum(occ_e) != 0 & length(row_na) == 0) {
+    return(occdata[occ_e, ])
+  }
+  if (sum(occ_e) == 0 & length(row_na) != 0) {
+    return(occdata[row_na, ])
+  }
+  if (sum(occ_e) != 0 & length(row_na) != 0) {
+    return(rbind(occdata[occ_e, ], occdata[row_na, ]))
+  }
 }
-
-}
-
-

@@ -1,4 +1,3 @@
-
 #' Draw pictures for ENM results
 #' @description
 #' 主要用于绘制适生区的图, 例如maxent生成的连续型适宜性栅格, 重分类后的分类适宜性栅格等. 预设一套背景模版, 可以在该模版上替换不同的栅格和矢量绘制常用的地图. 也可以结合ggplot2及其扩展绘制更个性化的地图.
@@ -27,75 +26,93 @@
 #' @examples
 #'
 #' # 单层栅格绘图
-#' ##下载澳大利亚行政边界数据
+#' ## 下载澳大利亚行政边界数据
 #' aus_map <- geodata::gadm(country = "AUS", level = 1, path = tempdir())
-#' ##下载全球12个月的平均温度栅格数据
+#' ## 下载全球12个月的平均温度栅格数据
 #' tavg <- geodata::worldclim_global("tavg", res = 10, path = tempdir(), version = "2.1")
-#' ##裁剪至澳大利亚范围
+#' ## 裁剪至澳大利亚范围
 #' tavg_aus <- terra::crop(tavg, aus_map, mask = T)
-#' ##提取1月的数据
+#' ## 提取1月的数据
 #' tavg_aus_Jan <- tavg_aus[[1]]
-#' ##绘图
-#' ENMplots(spatraster = tavg_aus_Jan,
-#'          spatvector = aus_map)
-#' ##更改陆地的颜色和水体的颜色
-#' ###如果不需要陆地和水体颜色可以将颜色设置为"transparent", 透明色.
-#' ENMplots(spatraster = tavg_aus_Jan,
-#'          spatvector = aus_map,
-#'          landcolor = "grey60",
-#'          watercolor = "#BEE8FF")
-#' ##自定义温度栅格的颜色
-#' ENMplots(spatraster = tavg_aus_Jan,
-#'          spatvector = aus_map,
-#'          rastercolors = c("yellow", "green"))
-#' ##移除指北针和比例尺
-#' ENMplots(spatraster = tavg_aus_Jan,
-#'          spatvector = aus_map,
-#'          annotation_north_arrow = F,
-#'          annotation_scale = F)
-#' ##更改投影坐标系
-#' ENMplots(spatraster = tavg_aus_Jan,
-#'          spatvector = aus_map,
-#'          crs = "epsg:4544")
-#' ##仅绘制区域地图
-#' ###区域地图需要提前准备一个与spatraster具有相同地理参考的栅格数据. 如果只想展示研究区的一部分结果可能很有用, 例如某个省.
-#' zone <- terra::crop(tavg_aus_Jan, terra::ext(tavg_aus_Jan) + c(-27,-5,-10,-30))
-#' ENMplots(spatraster = tavg_aus_Jan,
-#'          spatvector = aus_map,
-#'          croptoraster = F,
-#'          zones = zone)
-#' ###指定croptoraster = T将绘图范围裁剪至zone
-#' ENMplots(spatraster = tavg_aus_Jan,
-#'          spatvector = aus_map,
-#'          croptoraster = T,
-#'          zones = zone)
-#' ##保存图片
-#' ###可以在函数中使用参数保存图片, 请在filename中指定图片格式. 支持的格式同ggplot2::ggsave().
-#' ENMplots(spatraster = tavg_aus_Jan,
-#'          spatvector = aus_map,
-#'          outdir = "your path",
-#'          filename = "plot.jpg",
-#'          width = 10,
-#'          height = 10)
+#' ## 绘图
+#' ENMplots(
+#'   spatraster = tavg_aus_Jan,
+#'   spatvector = aus_map
+#' )
+#' ## 更改陆地的颜色和水体的颜色
+#' ### 如果不需要陆地和水体颜色可以将颜色设置为"transparent", 透明色.
+#' ENMplots(
+#'   spatraster = tavg_aus_Jan,
+#'   spatvector = aus_map,
+#'   landcolor = "grey60",
+#'   watercolor = "#BEE8FF"
+#' )
+#' ## 自定义温度栅格的颜色
+#' ENMplots(
+#'   spatraster = tavg_aus_Jan,
+#'   spatvector = aus_map,
+#'   rastercolors = c("yellow", "green")
+#' )
+#' ## 移除指北针和比例尺
+#' ENMplots(
+#'   spatraster = tavg_aus_Jan,
+#'   spatvector = aus_map,
+#'   annotation_north_arrow = F,
+#'   annotation_scale = F
+#' )
+#' ## 更改投影坐标系
+#' ENMplots(
+#'   spatraster = tavg_aus_Jan,
+#'   spatvector = aus_map,
+#'   crs = "epsg:4544"
+#' )
+#' ## 仅绘制区域地图
+#' ### 区域地图需要提前准备一个与spatraster具有相同地理参考的栅格数据. 如果只想展示研究区的一部分结果可能很有用, 例如某个省.
+#' zone <- terra::crop(tavg_aus_Jan, terra::ext(tavg_aus_Jan) + c(-27, -5, -10, -30))
+#' ENMplots(
+#'   spatraster = tavg_aus_Jan,
+#'   spatvector = aus_map,
+#'   croptoraster = F,
+#'   zones = zone
+#' )
+#' ### 指定croptoraster = T将绘图范围裁剪至zone
+#' ENMplots(
+#'   spatraster = tavg_aus_Jan,
+#'   spatvector = aus_map,
+#'   croptoraster = T,
+#'   zones = zone
+#' )
+#' ## 保存图片
+#' ### 可以在函数中使用参数保存图片, 请在filename中指定图片格式. 支持的格式同ggplot2::ggsave().
+#' ENMplots(
+#'   spatraster = tavg_aus_Jan,
+#'   spatvector = aus_map,
+#'   outdir = "your path",
+#'   filename = "plot.jpg",
+#'   width = 10,
+#'   height = 10
+#' )
 #'
-#' ##添加其他ggplot对象
+#' ## 添加其他ggplot对象
 #' ### ENMplots()返回的是ggplot对象，可以与其他ggplot扩展结合，拥有更大的灵活性
-#' ###使用tidyverse包的调色盘并更换主题
+#' ### 使用tidyverse包的调色盘并更换主题
 #' ENMplots(spatraster = tavg_aus_Jan, spatvector = aus_map) +
 #'   tidyterra::scale_fill_whitebox_c(
 #'     palette = "high_relief",
 #'     labels = scales::label_number(suffix = "º"),
 #'     n.breaks = 12,
 #'     guide = guide_legend(reverse = TRUE)
-#'   )  +
+#'   ) +
 #'   theme_bw()
-#' ###如果添加了额外的ggplot对象，则需要使用ggplot2::ggsave()在外部保存图片.
+#' ### 如果添加了额外的ggplot对象，则需要使用ggplot2::ggsave()在外部保存图片.
 #'
-#' ##此外还可以绘制简单的样本分布点
-#' ###随机选择100个点当做样本分布点
+#' ## 此外还可以绘制简单的样本分布点
+#' ### 随机选择100个点当做样本分布点
 #' point <- terra::spatSample(tavg_aus_Jan, 100, xy = T, na.rm = T)
-#' ENMplots(spatraster = NULL,  #如果不需要温度栅格就设置为NULL
-#'          spatvector = aus_map) +
+#' ENMplots(
+#'   spatraster = NULL, # 如果不需要温度栅格就设置为NULL
+#'   spatvector = aus_map
+#' ) +
 #'   ggplot2::geom_point(data = point, aes(x = x, y = y))
 
 #' ##单层分类栅格绘图
@@ -138,12 +155,15 @@ ENMplots <- function(spatraster = NULL,
                      height,
                      device = "jpg",
                      filename,
-                     outdir
-                     ) {
-  #参数检查
-  if (sum(length(expand) == c(1, 4)) == 0) {stop("The length of expand must be 1 or 4.")}
+                     outdir) {
+  # 参数检查
+  if (sum(length(expand) == c(1, 4)) == 0) {
+    stop("The length of expand must be 1 or 4.")
+  }
   for (i in length(expand)) {
-    if (expand[i] < 1) {stop("Expand must be greater than or equal to 1.")}
+    if (expand[i] < 1) {
+      stop("Expand must be greater than or equal to 1.")
+    }
   }
 
   if (is.null(names(arrange))) {
@@ -152,42 +172,45 @@ ENMplots <- function(spatraster = NULL,
   if ("" %in% names(arrange)) {
     names(arrange)[which(names(arrange) %in% "")] <- c("nrow", "ncol", "dir")[which(names(arrange) %in% "")]
   }
-  if (missing(width)) {width = NA}
-  if (missing(height)) {height = NA}
+  if (missing(width)) {
+    width <- NA
+  }
+  if (missing(height)) {
+    height <- NA
+  }
 
   if (is.null(spatraster) | is.null(spatvector)) {
-    croptoraster = F
+    croptoraster <- F
     warning("'spatraster = NULL' or 'spatvector = NULL', ignore 'croptoraster'")
   }
 
-  #分类/数值型栅格
-  if (categories == TRUE & is.null(spatraster) == FALSE) { #分类栅格
+  # 分类/数值型栅格
+  if (categories == TRUE & is.null(spatraster) == FALSE) { # 分类栅格
     for (i in 1:terra::nlyr(spatraster)) {
       if (terra::is.factor(spatraster[[i]]) == FALSE) {
         spatraster <- terra::as.factor(spatraster)
       }
-  }
+    }
 
-    ##设置颜色
+    ## 设置颜色
     if (is.null(rastercolors)) {
       p_color <- tidyterra::scale_fill_whitebox_d(
         palette = "muted",
         guide = ggplot2::guide_legend(reverse = TRUE)
       )
     } else {
-      p_color <- #自定义离散颜色
+      p_color <- # 自定义离散颜色
         ggplot2::scale_fill_manual(values = rastercolors, na.value = "transparent")
     }
-
-  } else { #数值栅格
+  } else { # 数值栅格
     if (is.null(spatraster) == FALSE) {
-    for (i in 1:terra::nlyr(spatraster)) {
-      if (terra::is.factor(spatraster[[i]])) {
-        spatraster <- terra::as.numeric(spatraster)
+      for (i in 1:terra::nlyr(spatraster)) {
+        if (terra::is.factor(spatraster[[i]])) {
+          spatraster <- terra::as.numeric(spatraster)
+        }
       }
     }
-    }
-    #设置颜色
+    # 设置颜色
     if (is.null(rastercolors)) {
       p_color <- tidyterra::scale_fill_whitebox_c(
         palette = "muted",
@@ -195,85 +218,88 @@ ENMplots <- function(spatraster = NULL,
         guide = ggplot2::guide_legend(reverse = TRUE)
       )
     } else {
-      p_color <- #自定义离散颜色
+      p_color <- # 自定义离散颜色
         ggplot2::scale_fill_gradientn(colors = rastercolors, na.value = "transparent")
     }
   }
 
-  #添加指北针和比例尺
-  if (annotation_north_arrow == FALSE) {zbz <- NULL} else {
+  # 添加指北针和比例尺
+  if (annotation_north_arrow == FALSE) {
+    zbz <- NULL
+  } else {
     zbz <- ggspatial::annotation_north_arrow(
-      location = "tl",  # 指北针位置
-      style = ggspatial::north_arrow_fancy_orienteering,  # 更改为 minimal 样式
-      which_north = "true",  # 使用真实北方向
-      pad_x = ggplot2::unit(0.5, "cm"),  # 调整指北针的水平边距
-      pad_y = ggplot2::unit(0.5, "cm")   # 调整指北针的垂直边距
+      location = "tl", # 指北针位置
+      style = ggspatial::north_arrow_fancy_orienteering, # 更改为 minimal 样式
+      which_north = "true", # 使用真实北方向
+      pad_x = ggplot2::unit(0.5, "cm"), # 调整指北针的水平边距
+      pad_y = ggplot2::unit(0.5, "cm") # 调整指北针的垂直边距
     )
   }
-  if (annotation_scale == FALSE) {blc <- NULL} else {
-  blc <- ggspatial::annotation_scale(
-    location = "bl",  # 比例尺位置
-    style = "ticks"
+  if (annotation_scale == FALSE) {
+    blc <- NULL
+  } else {
+    blc <- ggspatial::annotation_scale(
+      location = "bl", # 比例尺位置
+      style = "ticks"
     )
   }
-  #裁剪地图至指定区域
+  # 裁剪地图至指定区域
   if (is.null(zones) == FALSE & is.null(spatraster) == FALSE) {
-    #zones <- terra::align(terra::ext(zones), spatraster)
+    # zones <- terra::align(terra::ext(zones), spatraster)
     spatraster <- terra::crop(spatraster, zones, mask = TRUE)
   }
 
-  #转换投影到指定的crs
+  # 转换投影到指定的crs
   # if (is.null(crs) == FALSE) {
   #   if (is.null(spatraster) == FALSE) {
   #     spatraster <- terra::project(spatraster, crs)
   #   }
   # }
-  #统一spatvector和spatraster投影
+  # 统一spatvector和spatraster投影
   if (is.null(spatvector) == FALSE & is.null(spatraster) == FALSE) {
-    spatvector <- terra::project(spatvector, terra::crs(spatraster))}
-  #矢量裁剪至栅格范围
+    spatvector <- terra::project(spatvector, terra::crs(spatraster))
+  }
+  # 矢量裁剪至栅格范围
   if (croptoraster == T & is.null(spatraster) == FALSE) {
     spatvector <- terra::crop(spatvector, terra::ext(spatraster), ext = TRUE)
   }
-  #读取内置世界地图矢量数据
+  # 读取内置世界地图矢量数据
   if (is.null(landcolor) == FALSE) {
-    #word_vect <- terra::vect("C:/Users/why/Documents/ArcGIS/中国地图/世界地图/世界国家.shp")
+    # word_vect <- terra::vect("C:/Users/why/Documents/ArcGIS/中国地图/世界地图/世界国家.shp")
     word_vect <- terra::vect(paste0(system.file(package = "TBlabENM"), "/extdata/land/continent.shp"))
     if (is.null(spatraster) == FALSE) {
       terra::project(word_vect, terra::crs(spatraster))
     }
-
   }
-  ##裁剪世界地图至研究区域
+  ## 裁剪世界地图至研究区域
   if (is.null(landcolor)) {
     word_vect_crop <- NULL
   } else {
     if (is.null(spatvector) == FALSE) {
-      word_vect_crop <- terra::crop(word_vect, terra::ext(spatvector)*expand) |>
+      word_vect_crop <- terra::crop(word_vect, terra::ext(spatvector) * expand) |>
         terra::aggregate()
     } else {
-
-      if (is.null(spatraster) == FALSE)
-      word_vect_crop <- terra::crop(word_vect, terra::ext(spatraster)*expand) |>
-        terra::aggregate()
+      if (is.null(spatraster) == FALSE) {
+        word_vect_crop <- terra::crop(word_vect, terra::ext(spatraster) * expand) |>
+          terra::aggregate()
+      }
     }
-
   }
-  #没有栅格的情况
+  # 没有栅格的情况
   if (is.null(spatraster)) {
     p1 <- ggplot2::ggplot() +
-          tidyterra::geom_spatvector(data = word_vect_crop, fill = landcolor) +
-          tidyterra::geom_spatvector(data = spatvector, fill = NA) +
-          ggplot2::scale_y_continuous(expand = c(0, 0)) +
-          ggplot2::scale_x_continuous(expand = c(0, 0))
+      tidyterra::geom_spatvector(data = word_vect_crop, fill = landcolor) +
+      tidyterra::geom_spatvector(data = spatvector, fill = NA) +
+      ggplot2::scale_y_continuous(expand = c(0, 0)) +
+      ggplot2::scale_x_continuous(expand = c(0, 0))
 
     p2 <- p1 + p_color +
       ggplot2::theme(
-        panel.background = ggplot2::element_rect(color = 'black', fill = watercolor),
+        panel.background = ggplot2::element_rect(color = "black", fill = watercolor),
         panel.border = ggplot2::element_rect(color = "black", size = 1, fill = NA),
         panel.grid.major = ggplot2::element_line(
           linewidth = 0.25,
-          linetype = 'dashed',
+          linetype = "dashed",
           colour = "gray40"
         )
       ) +
@@ -292,25 +318,26 @@ ENMplots <- function(spatraster = NULL,
         limitsize = TRUE,
         bg = NULL,
         create.dir = TRUE
-      )}
+      )
+    }
     return(p2)
-  }  else {
-    #仅有一个栅格的情况
+  } else {
+    # 仅有一个栅格的情况
     if (terra::nlyr(spatraster) == 1) {
-        p1 <- ggplot2::ggplot() +
-          tidyterra::geom_spatvector(data = word_vect_crop, fill = landcolor) +
-          tidyterra::geom_spatraster(data = spatraster, maxcell = maxcell) +
-          tidyterra::geom_spatvector(data = spatvector, fill = NA) +
-          ggplot2::scale_y_continuous(expand = c(0, 0)) +
-          ggplot2::scale_x_continuous(expand = c(0, 0))
+      p1 <- ggplot2::ggplot() +
+        tidyterra::geom_spatvector(data = word_vect_crop, fill = landcolor) +
+        tidyterra::geom_spatraster(data = spatraster, maxcell = maxcell) +
+        tidyterra::geom_spatvector(data = spatvector, fill = NA) +
+        ggplot2::scale_y_continuous(expand = c(0, 0)) +
+        ggplot2::scale_x_continuous(expand = c(0, 0))
 
       p2 <- p1 + p_color +
         ggplot2::theme(
-          panel.background = ggplot2::element_rect(color = 'black', fill = watercolor),
+          panel.background = ggplot2::element_rect(color = "black", fill = watercolor),
           panel.border = ggplot2::element_rect(color = "black", size = 1, fill = NA),
           panel.grid.major = ggplot2::element_line(
             linewidth = 0.25,
-            linetype = 'dashed',
+            linetype = "dashed",
             colour = "gray40"
           )
         ) +
@@ -329,53 +356,56 @@ ENMplots <- function(spatraster = NULL,
           limitsize = TRUE,
           bg = NULL,
           create.dir = TRUE
-        )}
+        )
+      }
       return(p2)
     }
   }
-  #有多个栅格的情况
-  page <- arrange$ncol*arrange$nrow
+  # 有多个栅格的情况
+  page <- arrange$ncol * arrange$nrow
   if (terra::nlyr(spatraster) > 1) {
-    #对每页的图进行循环 i = 2
-    for (i in 1:ceiling(terra::nlyr(spatraster)/page)) {
-      spatraster_i <- spatraster[[(i * page - page + 1):(i*page)]]
+    # 对每页的图进行循环 i = 2
+    for (i in 1:ceiling(terra::nlyr(spatraster) / page)) {
+      spatraster_i <- spatraster[[(i * page - page + 1):(i * page)]]
       p1 <- ggplot2::ggplot() +
         tidyterra::geom_spatvector(data = word_vect_crop, fill = landcolor) +
         tidyterra::geom_spatraster(data = spatraster_i, maxcell = maxcell) +
         tidyterra::geom_spatvector(data = spatvector, fill = NA) +
-        ggplot2::facet_wrap(~ lyr, ncol = arrange$ncol, nrow = arrange$nrow,
-                            dir = arrange$dir) +
+        ggplot2::facet_wrap(~lyr,
+          ncol = arrange$ncol, nrow = arrange$nrow,
+          dir = arrange$dir
+        ) +
         ggplot2::scale_y_continuous(expand = c(0, 0)) +
         ggplot2::scale_x_continuous(expand = c(0, 0))
 
-    p2 <- p1 + p_color +
-      ggplot2::theme(
-        panel.background = ggplot2::element_rect(color = 'black', fill = watercolor),
-        panel.border = ggplot2::element_rect(color = "black", size = 1, fill = NA),
-        panel.grid.major = ggplot2::element_line(
-          linewidth = 0.25,
-          linetype = 'dashed',
-          colour = "gray40"
-        )
-      ) + zbz + blc
+      p2 <- p1 + p_color +
+        ggplot2::theme(
+          panel.background = ggplot2::element_rect(color = "black", fill = watercolor),
+          panel.border = ggplot2::element_rect(color = "black", size = 1, fill = NA),
+          panel.grid.major = ggplot2::element_line(
+            linewidth = 0.25,
+            linetype = "dashed",
+            colour = "gray40"
+          )
+        ) + zbz + blc
 
       ggplot2::coord_sf(crs = crs)
-    if (missing(outdir) == FALSE) {
-      ggplot2::ggsave(
-        filename = paste0("plots_", i, ".", device),
-        plot = p2,
-        path = outdir,
-        scale = 1,
-        width = width,
-        height = height,
-        units = c("cm"),
-        dpi = 300,
-        limitsize = TRUE,
-        bg = NULL,
-        create.dir = TRUE
-      )}
+      if (missing(outdir) == FALSE) {
+        ggplot2::ggsave(
+          filename = paste0("plots_", i, ".", device),
+          plot = p2,
+          path = outdir,
+          scale = 1,
+          width = width,
+          height = height,
+          units = c("cm"),
+          dpi = 300,
+          limitsize = TRUE,
+          bg = NULL,
+          create.dir = TRUE
+        )
+      }
     }
     return(p2)
   }
-
 }

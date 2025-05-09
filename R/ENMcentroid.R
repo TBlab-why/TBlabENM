@@ -14,60 +14,66 @@
 #' @export
 #'
 #' @examples
-#' df <- ENMcentroid(radir = "F:/sdm/maxent/32/1/p",
-#'             proname = F,
-#'             format = "tif",
-#'             parallel = T,
-#'             ncpu = 2)
+#' df <- ENMcentroid(
+#'   radir = "F:/sdm/maxent/32/1/p",
+#'   proname = F,
+#'   format = "tif",
+#'   parallel = T,
+#'   ncpu = 2
+#' )
 #' df
 #'
-ENMcentroid <- function(radir, proname = F, format = "tif", outdir = NULL,  parallel = F, ncpu = 2){
-
-  #读取栅格数据
+ENMcentroid <- function(radir, proname = F, format = "tif", outdir = NULL, parallel = F, ncpu = 2) {
+  # 读取栅格数据
   ralist <- list.files(radir, pattern = paste0(format, "$"), full.names = TRUE)
-  if (length(ralist) == 0) {stop("No grid file is found./n")}
+  if (length(ralist) == 0) {
+    stop("No grid file is found./n")
+  }
 
   if (proname == FALSE) {
     radf <- tibble::as_tibble(ralist) %>%
-      dplyr::mutate(spname = purrr::map_chr(.x = value, .f = function(x){
+      dplyr::mutate(spname = purrr::map_chr(.x = value, .f = function(x) {
         stringr::str_split_1(basename(x), paste0(".", format))[1]
       }))
   } else {
     radf <- tibble::as_tibble(ralist) %>%
-      dplyr::mutate(spname = purrr::map_chr(.x = value, .f = function(x){
+      dplyr::mutate(spname = purrr::map_chr(.x = value, .f = function(x) {
         stringr::str_split_1(basename(x), paste0(".", format))[1]
       })) %>%
       dplyr::mutate(proname = basename(dirname(ralist)))
   }
 
-  #重心（质心）计算公式
+  # 重心（质心）计算公式
   centroid <- function(x, format) {
-    #读取单个栅格数据
+    # 读取单个栅格数据
     ra <- terra::rast(x)
     names(ra) <- stringr::str_split_1(basename(x), paste0(".", format))[1]
-    #将栅格转为数据框
+    # 将栅格转为数据框
     df <- terra::as.data.frame(ra, xy = T)
     names(df) <- c("x", "y", "value")
     gi <- df$value
     xi <- df$x
     yi <- df$y
-    x  <-  sum(gi*xi, na.rm = TRUE)/sum(gi, na.rm = TRUE)
-    y  <-  sum(gi*yi, na.rm = TRUE)/sum(gi, na.rm = TRUE)
-    xy  <-  tibble::tibble(x, y)
+    x <- sum(gi * xi, na.rm = TRUE) / sum(gi, na.rm = TRUE)
+    y <- sum(gi * yi, na.rm = TRUE) / sum(gi, na.rm = TRUE)
+    xy <- tibble::tibble(x, y)
     xy$spname <- names(ra)
     return(xy)
-    }
+  }
 
   if (parallel == TRUE) {
     snowfall::sfInit(parallel = TRUE, cpus = ncpu)
     snowfall::sfLibrary(purrr)
-    results <- tryCatch({
-      snowfall::sfLapply(ralist, centroid, format = format)
-    }, error = function(e) {
-      message("Error in parallel processing: ", e$message)
-      snowfall::sfStop()
-      stop(e)
-    })
+    results <- tryCatch(
+      {
+        snowfall::sfLapply(ralist, centroid, format = format)
+      },
+      error = function(e) {
+        message("Error in parallel processing: ", e$message)
+        snowfall::sfStop()
+        stop(e)
+      }
+    )
     # 合并所有线程返回的数据框
     final_df <- dplyr::bind_rows(results)
     snowfall::sfStop()
@@ -78,16 +84,14 @@ ENMcentroid <- function(radir, proname = F, format = "tif", outdir = NULL,  para
       final_df <- rbind(final_df, df1)
     }
   }
-  #final_df与radf合并
+  # final_df与radf合并
   final_df <- dplyr::left_join(radf, final_df)
   final_df <- final_df[2:length(final_df)]
-  #保存结果
+  # 保存结果
   if (is.null(outdir)) {
     return(final_df)
   } else {
     write.csv(final_df, outdir, row.names = FALSE)
     return(final_df)
   }
-
 }
-

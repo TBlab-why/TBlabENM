@@ -1,4 +1,3 @@
-
 #' @title Statistical Variables According to Contribution Size and Plot
 #' @description 本函数根据环境变量对模型的贡献大小进行排序，并统计对模型贡献最大的前三个变量的个数
 #' 绘制堆叠条形统计图。
@@ -22,36 +21,38 @@
 #' @importFrom stats aggregate
 #'
 #' @examples
-#' maxent_envcb(parameters = read.csv("F:/4/TBlabENM/maxent/parameters.csv"),
-#'              x = 1:10,
-#'              resultdir = "F:/4/TBlabENM/maxent",
-#'              wordsize = 1,
-#'              device = "jpeg",
-#'              outdir = "F:/4")
+#' maxent_envcb(
+#'   parameters = read.csv("F:/4/TBlabENM/maxent/parameters.csv"),
+#'   x = 1:10,
+#'   resultdir = "F:/4/TBlabENM/maxent",
+#'   wordsize = 1,
+#'   device = "jpeg",
+#'   outdir = "F:/4"
+#' )
 maxent_envcb <- function(parameters,
                          x = NULL,
                          resultdir,
                          wordsize = 1,
                          device = "jpeg",
                          outdir = NULL) {
-  #检查输入变量
+  # 检查输入变量
   if (is.null(x)) {
     x <- 1:nrow(parameters)
   }
   if (file.exists(resultdir) == FALSE) {
     stop("Resultdir not find.")
   }
-  #检查x值是否正确
+  # 检查x值是否正确
   if (max(x) > nrow(parameters)) {
     stop("x exceeds the total number of species")
   }
   if (is.null(outdir)) {
-    outdir = "."
+    outdir <- "."
   }
-  #选择要统计作图的物种
+  # 选择要统计作图的物种
   spdata <- parameters[x, 1:3]
   names(spdata) <- c("species", "number", "env")
-  #新建空数据框保存结果
+  # 新建空数据框保存结果
   maxselectev <- data.frame(matrix(ncol = 5, nrow = length(x)))
   names(maxselectev) <- c(
     "species",
@@ -74,7 +75,7 @@ maxent_envcb <- function(parameters,
         list.files(
           paste0(resultdir, "/", x),
           full.names = TRUE,
-          pattern = "maxentResults.csv$" ,
+          pattern = "maxentResults.csv$",
           recursive = TRUE
         )[1]
       }
@@ -85,7 +86,7 @@ maxent_envcb <- function(parameters,
         read.csv(x)
       }
     )) %>%
-    #提取变量重要性
+    # 提取变量重要性
     mutate(ev_cb = map2(
       .x = par,
       .y = nenv,
@@ -129,17 +130,18 @@ maxent_envcb <- function(parameters,
   maxselectev$`Variable contribution size1` <- ss$v2
   maxselectev$`Variable contribution size2` <- ss$v3
 
-  #保存本地
+  # 保存本地
   dir.create(paste0(outdir, "/Variable_contribution"),
-             showWarnings = FALSE)
+    showWarnings = FALSE
+  )
   utils::write.csv(
     maxselectev[1:3],
     row.names = FALSE,
     paste0(outdir, "/Variable_contribution/Variable.csv")
   )
 
-  ####变量贡献条形统计图之按贡献最大的前三个变量排序
-  #取出前三重要变量
+  #### 变量贡献条形统计图之按贡献最大的前三个变量排序
+  # 取出前三重要变量
   maxselectev1 <- data.frame(matrix(ncol = 3, nrow = nrow(maxselectev)))
   names(maxselectev1) <- c("First", "Second", "Thirdly")
   for (i in 1:nrow(maxselectev)) {
@@ -149,28 +151,30 @@ maxent_envcb <- function(parameters,
   ##
   data1 <- tidyr::pivot_longer(
     maxselectev1,
-    #需要转置的数据
+    # 需要转置的数据
     c(First, Second, Thirdly),
-    #需要转置的列，这里是除了X列其他都转置
+    # 需要转置的列，这里是除了X列其他都转置
     names_to = "Contribution",
-    #转置后原本的列名会变成观测生成新列，指定这列的列名(列名包含了分类信息)
+    # 转置后原本的列名会变成观测生成新列，指定这列的列名(列名包含了分类信息)
     values_to = "Variate"
-  ) %>% #转置后原本的各列的值会合并成一个新列，指定这列的列名
+  ) %>% # 转置后原本的各列的值会合并成一个新列，指定这列的列名
     dplyr::filter(!is.na(Variate))
 
-  #统计每个变量出现次数，按照次数指定因子水平
+  # 统计每个变量出现次数，按照次数指定因子水平
   times <- table(data1$Variate)
 
-  data1$Variate <- factor(data1$Variate, levels =  rev(names(times[order(times)])))
+  data1$Variate <- factor(data1$Variate, levels = rev(names(times[order(times)])))
   p <- ggplot2::ggplot(data1) +
-    geom_bar(aes(Variate, fill = Contribution), #反转条形的堆积顺序
-             position = position_stack(reverse = TRUE)) +
-    #反转图例顺序
+    geom_bar(aes(Variate, fill = Contribution), # 反转条形的堆积顺序
+      position = position_stack(reverse = TRUE)
+    ) +
+    # 反转图例顺序
     guides(fill = guide_legend(
       reverse = TRUE,
       title.theme = element_text(family = "serif", size = wordsize * 15)
     )) +
-    theme_bw() + ylab("Frequency") +
+    theme_bw() +
+    ylab("Frequency") +
     theme(
       axis.text.x = element_text(
         angle = 90,
@@ -180,9 +184,9 @@ maxent_envcb <- function(parameters,
       ),
       axis.text = element_text(family = "serif", size = wordsize * 15),
       axis.title = element_text(family = "serif", size = wordsize *
-                                  20),
+        20),
       legend.text = element_text(family = "serif", size = wordsize *
-                                   12)
+        12)
     ) +
     ggsci::scale_fill_npg()
 
@@ -198,7 +202,7 @@ maxent_envcb <- function(parameters,
 
 
 
-  ####变量贡献条形统计图之按变量总贡献排序
+  #### 变量贡献条形统计图之按变量总贡献排序
   #
   maxselectev2 <- sort(unlist(stringr::str_split(maxselectev[, 5], ",")))
   maxselectev3 <- unlist(stringr::str_split(maxselectev2, " "))
@@ -227,7 +231,8 @@ maxent_envcb <- function(parameters,
       `Percent contribution`,
       fill = Variate
     )) +
-    scale_y_continuous(labels = scales::percent) + xlab("Variate") +
+    scale_y_continuous(labels = scales::percent) +
+    xlab("Variate") +
     theme_bw() +
     theme(
       legend.position = "none",
@@ -239,7 +244,7 @@ maxent_envcb <- function(parameters,
       ),
       axis.text = element_text(family = "serif", size = wordsize * 15),
       axis.title = element_text(family = "serif", size = wordsize *
-                                  20)
+        20)
     )
 
   ggplot2::ggsave(

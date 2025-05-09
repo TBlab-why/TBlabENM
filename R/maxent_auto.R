@@ -1,4 +1,3 @@
-
 #' Maxent Automation:From occurrence to maps of suitable areas
 #' @description
 #' 本函数自动执行MaxEnt模型，当设置好参数后，首先进行相关参数的选择，包括环境变量、
@@ -40,22 +39,24 @@
 #' @export
 #'
 #' @examples
-#' maxent_auto(sp = system.file("extdata", "species/Phoebe sheareri.csv", package = "TBlabENM"),
-#' evdir = system.file("extdata", "envar/asc", package = "TBlabENM"),
-#' myenv = NULL,
-#' evlist = 1:7,
-#' factors = c("dr", "fao90"),
-#' nbg = 10000,
-#' bgwidth = 500000,
-#' args = maxent_args(),
-#' fc = c("lph", "q", "lq"),
-#' rm = 1:2,
-#' r = 0.7,
-#' vif = T,
-#' vifth = 5,
-#' opt = "auc.val.avg",
-#' null_model = TRUE,
-#' outdir = NULL)
+#' maxent_auto(
+#'   sp = system.file("extdata", "species/Phoebe sheareri.csv", package = "TBlabENM"),
+#'   evdir = system.file("extdata", "envar/asc", package = "TBlabENM"),
+#'   myenv = NULL,
+#'   evlist = 1:7,
+#'   factors = c("dr", "fao90"),
+#'   nbg = 10000,
+#'   bgwidth = 500000,
+#'   args = maxent_args(),
+#'   fc = c("lph", "q", "lq"),
+#'   rm = 1:2,
+#'   r = 0.7,
+#'   vif = T,
+#'   vifth = 5,
+#'   opt = "auc.val.avg",
+#'   null_model = TRUE,
+#'   outdir = NULL
+#' )
 #'
 maxent_auto <- function(spdir,
                         evdir,
@@ -77,55 +78,54 @@ maxent_auto <- function(spdir,
                         prodir = NULL,
                         outdir = NULL,
                         p_ncpu = FALSE) {
-  #参数检验p_ncpu=c(F)
+  # 参数检验p_ncpu=c(F)
   if (!is.logical(p_ncpu) & !is.numeric(p_ncpu)) {
     stop("'p_ncpu'", " must be logical or numeric.")
   }
   if (!length(p_ncpu) == 1 & !length(p_ncpu) == 3) {
     stop("The length of 'p_ncpu' must be 1 or 3.")
   }
-################
+  ################
   if (length(p_ncpu) == 1) {
     if (p_ncpu == FALSE) {
-      parallel1 = FALSE
-      parallel2 = FALSE
-      parallel3 = FALSE
-      ncpu1 = p_ncpu
-      ncpu2 = p_ncpu
-      ncpu3 = p_ncpu
+      parallel1 <- FALSE
+      parallel2 <- FALSE
+      parallel3 <- FALSE
+      ncpu1 <- p_ncpu
+      ncpu2 <- p_ncpu
+      ncpu3 <- p_ncpu
     } else {
-      parallel1 = TRUE
-      parallel2 = TRUE
-      parallel3 = TRUE
-      ncpu1 = p_ncpu
-      ncpu2 = p_ncpu
-      ncpu3 = p_ncpu
+      parallel1 <- TRUE
+      parallel2 <- TRUE
+      parallel3 <- TRUE
+      ncpu1 <- p_ncpu
+      ncpu2 <- p_ncpu
+      ncpu3 <- p_ncpu
     }
   } else {
     if (p_ncpu[1] > 0) {
-      parallel1 = TRUE
-      ncpu1 = p_ncpu[1]
+      parallel1 <- TRUE
+      ncpu1 <- p_ncpu[1]
     } else {
-      parallel1 = FALSE
-      ncpu1 = p_ncpu[1]
+      parallel1 <- FALSE
+      ncpu1 <- p_ncpu[1]
     }
 
     if (p_ncpu[2] > 0) {
-      parallel2 = TRUE
-      ncpu2 = p_ncpu[2]
+      parallel2 <- TRUE
+      ncpu2 <- p_ncpu[2]
     } else {
-      parallel2 = FALSE
-      ncpu2 = p_ncpu[2]
+      parallel2 <- FALSE
+      ncpu2 <- p_ncpu[2]
     }
 
     if (p_ncpu[3] > 0) {
-      parallel3 = TRUE
-      ncpu3 = p_ncpu[3]
+      parallel3 <- TRUE
+      ncpu3 <- p_ncpu[3]
     } else {
-      parallel3 = FALSE
-      ncpu3 = p_ncpu[3]
+      parallel3 <- FALSE
+      ncpu3 <- p_ncpu[3]
     }
-
   }
 
   fun3 <- function(x) {
@@ -153,8 +153,8 @@ maxent_auto <- function(spdir,
     )
     cat("***************The following parameters are used to build the final model***************\n")
     print(pa)
-    #模拟
-    ##设置args参数
+    # 模拟
+    ## 设置args参数
     args[3] <- "linear=FALSE"
     args[4] <- "quadratic=FALSE"
     args[5] <- "product=FALSE"
@@ -191,14 +191,14 @@ maxent_auto <- function(spdir,
       evlist <- c(evlist, evlist1)
     }
 
-    #模拟
+    # 模拟
     cat("*****************modelling*****************\n")
     if (is.null(outdir)) {
       outdir1 <- "."
     } else {
       outdir1 <- outdir
     }
-    #获取物种名 对路径拆分并取倒数第一个字符串
+    # 获取物种名 对路径拆分并取倒数第一个字符串
     spname1 <- stringr::str_split_1(x, "/")[length(stringr::str_split_1(x, "/"))]
     sp_name <- stringr::str_split_1(spname1, ".csv$")[1]
     if (is.null(mybgfile) == FALSE) {
@@ -221,7 +221,6 @@ maxent_auto <- function(spdir,
       parallel = parallel3,
       ncpu = ncpu3
     )
-
   }
   maxent_args <- function(replicates = 10,
                           betamultiplier = 1,
@@ -238,8 +237,8 @@ maxent_auto <- function(spdir,
                           outputformat = "logistic") {
     c(
       paste0("replicates=", replicates),
-      paste0("betamultiplier=", betamultiplier) ,
-      #重复次数和正则化乘数
+      paste0("betamultiplier=", betamultiplier),
+      # 重复次数和正则化乘数
       paste0("linear=", l),
       # 5种特征函数
       paste0("quadratic=", q),
@@ -247,18 +246,18 @@ maxent_auto <- function(spdir,
       paste0("threshold=", t),
       paste0("hinge=", h),
       paste0("replicatetype=", replicatetype),
-      #重复类型
+      # 重复类型
       paste0("responsecurves=", responsecurves),
-      #响应曲线
+      # 响应曲线
       paste0("jackknife=", jackknife),
-      #折刀分析
+      # 折刀分析
       paste0("pictures=", pictures),
       paste0("outputgrids=", outputgrids),
-      paste0("outputformat=", outputformat) #输出文件格式
+      paste0("outputformat=", outputformat) # 输出文件格式
     )
   }
   #####################################################
-  #新建文件夹
+  # 新建文件夹
   if (is.null(outdir) == FALSE) {
     dir.create(outdir, showWarnings = FALSE)
   }
@@ -275,16 +274,15 @@ maxent_auto <- function(spdir,
     # snowfall::sfLibrary(TBlabENM)
     snowfall::sfExport("spdir")
     snowfall::sfLapply(spdir, fun3)
-    snowfall::sfStop()  # 关闭集群
-
-  } else{
+    snowfall::sfStop() # 关闭集群
+  } else {
     ## 第一个位置：新建起始进度条
     pb <- utils::txtProgressBar(style = 3)
-    #新建向量保存失败的模型
+    # 新建向量保存失败的模型
     failed_species <- c()
     for (x in spdir) {
       fit <- try(fun3(x))
-      if ('try-error' %in% class(fit)) {
+      if ("try-error" %in% class(fit)) {
         failed <- paste0(x, " was failed!")
         failed_species <- c(failed_species, failed)
         next
@@ -296,7 +294,7 @@ maxent_auto <- function(spdir,
     #   fun3(x)
     #
     # }
-    ##第二个位置：实时显示进度
+    ## 第二个位置：实时显示进度
     utils::setTxtProgressBar(pb, which(x == spdir) / length(spdir))
 
     ## 第三个位置关闭进度条
@@ -307,7 +305,7 @@ maxent_auto <- function(spdir,
       }
     }
   }
-  #读取结果文件返回相关参数
+  # 读取结果文件返回相关参数
   df <- data.frame(matrix(NA, 0, 10))
   names(df) <- c(
     "species",
@@ -321,7 +319,7 @@ maxent_auto <- function(spdir,
     "MTSStrain",
     "MTSStest"
   )
-  #提取物种名
+  # 提取物种名
   nm <- c()
   for (i in spdir) {
     spname1 <- stringr::str_split_1(i, "/")[length(stringr::str_split_1(i, "/"))]
@@ -337,10 +335,11 @@ maxent_auto <- function(spdir,
   }
 
   utils::write.csv(df,
-                   paste0(outdir, "/maxent/allsp_parameters.csv"),
-                   row.names = FALSE)
+    paste0(outdir, "/maxent/allsp_parameters.csv"),
+    row.names = FALSE
+  )
 
-  end_time <- Sys.time()  ## 记录程序结束时间
+  end_time <- Sys.time() ## 记录程序结束时间
   print(end_time - star_time)
   cat("****************completion*****************\n")
   return(df)

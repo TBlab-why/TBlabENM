@@ -1,4 +1,3 @@
-
 #' @title Perform the MaxEnt model for a single species
 #' @description 本函数为单个物种构建MaxEnt模型.
 #' @details
@@ -37,12 +36,13 @@
 #'   nbg = 1000,
 #'   bgwidth = 500000,
 #'   args = maxent_args(),
-#'   prodir = list(present = system.file("extdata", "envar/asc", package = "TBlabENM"),
-#'               present1 = system.file("extdata", "envar/asc", package = "TBlabENM")
+#'   prodir = list(
+#'     present = system.file("extdata", "envar/asc", package = "TBlabENM"),
+#'     present1 = system.file("extdata", "envar/asc", package = "TBlabENM")
 #'   ),
 #'   parallel = T,
-#'   ncpu =2)
-
+#'   ncpu = 2
+#' )
 maxent_single <- function(x,
                           evdir,
                           evlist = NULL,
@@ -56,47 +56,48 @@ maxent_single <- function(x,
                           parallel = F,
                           ncpu = 2) {
   star_time <- Sys.time() ## 记录程序开始时间
-  #检查prodir参数是否包含名字，否则报错
+  # 检查prodir参数是否包含名字，否则报错
   if (is.null(prodir) == FALSE) {
     if (is.null(names(prodir))) {
       stop("The projection path does not have a valid name, please check parameter prodir")
     }
   }
-  #获取物种名 对路径拆分并取倒数第一个字符串
+  # 获取物种名 对路径拆分并取倒数第一个字符串
   spname1 <- stringr::str_split_1(x, "/")[length(stringr::str_split_1(x, "/"))]
   sp_name <- stringr::str_split_1(spname1, ".csv$")[1]
   cat(paste("Buildding MaxEnt models for", sp_name, "\n"))
 
-  #读取环境变量
+  # 读取环境变量
   biolist <- list.files(evdir, pattern = ".asc$|.tif$", full.names = TRUE)
   if (is.null(evlist) == FALSE) {
     biolist <- biolist[evlist]
   }
   biostack <- terra::rast(biolist)
 
-  #读取、提取存在点的环境值并转化为数据框，生成存在环境数据
-  occ <- utils::read.csv(x) #读取物种坐标数据
+  # 读取、提取存在点的环境值并转化为数据框，生成存在环境数据
+  occ <- utils::read.csv(x) # 读取物种坐标数据
   occ <- occ[c(2, 3)]
   names(occ) <- c("x", "y")
 
   if (is.null(bgwidth) == FALSE & is.null(mybgfile)) {
-    #将发生点转为sf对象
-    occs.sf <- sf::st_as_sf(occ, coords = c("x","y"), crs = terra::crs(biostack))
-    #转为等面积投影
+    # 将发生点转为sf对象
+    occs.sf <- sf::st_as_sf(occ, coords = c("x", "y"), crs = terra::crs(biostack))
+    # 转为等面积投影
     eckertIV <- "+proj=eck4 +lon_0=0 +x_0=0 +y_0=0 +datum=WGS84 +units=m +no_defs"
     occs.sf <- sf::st_transform(occs.sf, crs = eckertIV)
-    #创建缓冲区
+    # 创建缓冲区
     occs.buf <- sf::st_buffer(occs.sf, dist = bgwidth) |>
       sf::st_union() |>
       sf::st_sf() |>
-      sf::st_transform(crs = terra::crs(biostack)) #再转为经纬度投影
-    #将环境变量裁剪至缓冲区
+      sf::st_transform(crs = terra::crs(biostack)) # 再转为经纬度投影
+    # 将环境变量裁剪至缓冲区
     biostack <- terra::crop(biostack, occs.buf)
-    biostack <- terra::mask(biostack, occs.buf)}
+    biostack <- terra::mask(biostack, occs.buf)
+  }
 
   occdata <- terra::extract(biostack, occ, ID = FALSE)
 
-  #读取、提取背景点的环境值并转化为数据框，生成环境背景数据
+  # 读取、提取背景点的环境值并转化为数据框，生成环境背景数据
   if (is.null(mybgfile)) {
     mybg0 <- terra::spatSample(biostack, nbg, na.rm = T, xy = T)
     mybg <- mybg0[1:2]
@@ -107,19 +108,19 @@ maxent_single <- function(x,
     mybgdata <- terra::extract(biostack, mybg, ID = FALSE)
   }
 
-  #将背景点赋值为0
-  mybg$'p/b' <- rep(0, times = nrow(mybg))
+  # 将背景点赋值为0
+  mybg$"p/b" <- rep(0, times = nrow(mybg))
 
 
 
-  #将存在点赋值为1
-  occ$'p/b' <- rep(1, times = nrow(occ))
+  # 将存在点赋值为1
+  occ$"p/b" <- rep(1, times = nrow(occ))
 
-  ####全变量模拟####
-  #组合存在环境数据与环境背景数据构成环境变量数据框
+  #### 全变量模拟####
+  # 组合存在环境数据与环境背景数据构成环境变量数据框
   evdata <- dplyr::bind_rows(occdata, mybgdata)
-  #指定分类变量
-  #获取变量名
+  # 指定分类变量
+  # 获取变量名
   bio_name <- c()
   for (i in seq_along(biolist)) {
     bioname1 <- stringr::str_split_1(biolist[i], "/")[length(stringr::str_split_1(biolist[i], "/"))]
@@ -132,35 +133,39 @@ maxent_single <- function(x,
     evdata <- evdata |> dplyr::mutate_at(site, as.factor)
   }
 
-  #组合存在点和背景点构成坐标点数据框（包含0或1的）（要与上面的顺序一致）
+  # 组合存在点和背景点构成坐标点数据框（包含0或1的）（要与上面的顺序一致）
   xydata <- dplyr::bind_rows(occ, mybg)
   args2 <- args
-  #当坐标点少于25个时，将replicates=设置为坐标点数。
+  # 当坐标点少于25个时，将replicates=设置为坐标点数。
   if (nrow(occ) < 25) {
     args2[1] <- paste0("replicates=", nrow(occdata))
-    n_na <-  nrow(occ) - nrow(occdata)}
+    n_na <- nrow(occ) - nrow(occdata)
+  }
 
-   if (nrow(occ) >= 25) {
-  #   args2[1] <- "replicates=10"
-     n_na <-  nrow(occ) - nrow(occdata)}
+  if (nrow(occ) >= 25) {
+    #   args2[1] <- "replicates=10"
+    n_na <- nrow(occ) - nrow(occdata)
+  }
 
   if (n_na > 0) {
     warning(paste0(n_na, "occurs points has a missing value on the environment grid, removed by default."))
-    }
+  }
 
-  #模型模拟, xydata$`p/b`
+  # 模型模拟, xydata$`p/b`
   if (is.null(outdir)) {
     outdir <- "./maxent/"
-  } else{
+  } else {
     outdir <- paste0(outdir, "/maxent/")
   }
 
   if (is.null(prodir) == TRUE) {
-    me1 <- predicts::MaxEnt(evdata, xydata$`p/b` , #环境变量、坐标数据和背景点
-                         args2, paste0(outdir, sp_name))
-  }#输出路径
+    me1 <- predicts::MaxEnt(
+      evdata, xydata$`p/b`, # 环境变量、坐标数据和背景点
+      args2, paste0(outdir, sp_name)
+    )
+  } # 输出路径
 
-  ##当提供prodir时，对不同时期循环
+  ## 当提供prodir时，对不同时期循环
   if (is.null(prodir) == FALSE) {
     cat(paste("Perform the projection for", sp_name, "\n"))
 
@@ -170,23 +175,24 @@ maxent_single <- function(x,
       # 开启集成
       snowfall::sfInit(parallel = TRUE, cpus = ncpu)
 
-      #加载需要用到的变量或函数 因为下面函数fff中要用到prodir参数
+      # 加载需要用到的变量或函数 因为下面函数fff中要用到prodir参数
       snowfall::sfExport("prodir")
-      #构建函数fff
+      # 构建函数fff
       fff <- function(y) {
         predicts::MaxEnt(
           evdata,
-          xydata$`p/b` ,
-          #环境变量、坐标数据和背景点
+          xydata$`p/b`,
+          # 环境变量、坐标数据和背景点
           append(args2, paste0("projectionlayers=", prodir[[y]])),
-          #新建文件夹保存模拟结果
+          # 新建文件夹保存模拟结果
           path = paste0(outdir, sp_name, "/", names(prodir)[y])
         )
 
-        #将结果文件的asc格式转为tif格式以节约内存
+        # 将结果文件的asc格式转为tif格式以节约内存
         df <- list.files(
           paste0(outdir, sp_name, "/", names(prodir)[y]),
-          pattern = "asc$",full.names = TRUE) |>
+          pattern = "asc$", full.names = TRUE
+        ) |>
           as.data.frame()
         names(df) <- "file"
         df1 <- df |>
@@ -209,12 +215,11 @@ maxent_single <- function(x,
               terra::writeRaster(x, y, overwrite = TRUE)
             }
           ))
-
       }
       snowfall::sfLapply(seq_along(prodir), fff)
-      snowfall::sfStop()  # 关闭集群
+      snowfall::sfStop() # 关闭集群
 
-      #删除asc格式
+      # 删除asc格式
       gg <- file.remove(
         list.files(paste0(outdir, sp_name), full.names = TRUE) |>
           list.files(pattern = "asc$", full.names = TRUE)
@@ -222,24 +227,24 @@ maxent_single <- function(x,
 
       end_time <- Sys.time()
       print(end_time - star_time)
-
     } else {
       for (b in seq_along(prodir)) {
         args3 <- append(args2, paste0("projectionlayers=", prodir[[b]]))
         cat(paste0("Project into "), prodir[[b]])
-        #模型模拟, xydata$`p/b`
+        # 模型模拟, xydata$`p/b`
         me1 <- predicts::MaxEnt(evdata,
-                             xydata$`p/b` ,
-                             #环境变量、坐标数据和背景点
-                             args3,
-                             #新建文件夹保存模拟结果
-                             path = paste0(outdir, sp_name, "/", names(prodir)[b]))
-
+          xydata$`p/b`,
+          # 环境变量、坐标数据和背景点
+          args3,
+          # 新建文件夹保存模拟结果
+          path = paste0(outdir, sp_name, "/", names(prodir)[b])
+        )
       }
-      #将结果文件的asc格式转为tif格式以节约内存
+      # 将结果文件的asc格式转为tif格式以节约内存
       df <- list.files(
         paste0(outdir, sp_name, "/", names(prodir)[b]),
-        pattern = "asc$", full.names = TRUE) |>
+        pattern = "asc$", full.names = TRUE
+      ) |>
         as.data.frame()
       names(df) <- "file"
       df1 <- df |>
@@ -257,16 +262,16 @@ maxent_single <- function(x,
           }
         ))
 
-      #删除asc格式
+      # 删除asc格式
       # gg <- file.remove(list.files(paste0(outdir, sp_name), full.names = TRUE) |>
       #                     list.files(., pattern = "asc$", full.names = TRUE))
 
       end_time <- Sys.time()
       print(end_time - star_time)
     }
-  #
+    #
   }
-  #提取参数
+  # 提取参数
   df <- data.frame(matrix(NA, 1, 10))
   names(df) <- c(
     "species",

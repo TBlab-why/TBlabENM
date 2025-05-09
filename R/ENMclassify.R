@@ -1,4 +1,3 @@
-
 #' @title The suitable area was reclassified and the area was calculated
 #' @description 批量对栅格重分类并计算面积. 主要用于将连续型的适宜性栅格重分类为类别型的适生区栅格并计各类算面积.
 #' @details
@@ -25,154 +24,173 @@
 #' @export
 #'
 #' @examples
-#' reclass <- ENMclassify(d = read.csv("F:/eblf/TBlabENM/spdata.csv"),
-#'                        x = c(3,5,7,9),
-#'                        resultdir = "F:/eblf/TBlabENM/result",
-#'                        crs = "epsg:4326",
-#'                        prefix = NULL,
-#'                        suffix = "tif",
-#'                        rcl = list("非适生区" = c(0,0.2),
-#'                                   "低适生区" = c(0.2,0.4),
-#'                                   "中适生区" = c(0.4,0.6),
-#'                                   "高适生区" = c(0.6,1)),
-#'                        overwrite = T,
-#'                        outdir = "F:/4",
-#'                        parallel = T,
-#'                        ncpu = 2)
-
+#' reclass <- ENMclassify(
+#'   d = read.csv("F:/eblf/TBlabENM/spdata.csv"),
+#'   x = c(3, 5, 7, 9),
+#'   resultdir = "F:/eblf/TBlabENM/result",
+#'   crs = "epsg:4326",
+#'   prefix = NULL,
+#'   suffix = "tif",
+#'   rcl = list(
+#'     "非适生区" = c(0, 0.2),
+#'     "低适生区" = c(0.2, 0.4),
+#'     "中适生区" = c(0.4, 0.6),
+#'     "高适生区" = c(0.6, 1)
+#'   ),
+#'   overwrite = T,
+#'   outdir = "F:/4",
+#'   parallel = T,
+#'   ncpu = 2
+#' )
 ENMclassify <- function(d, x = NULL, resultdir, crs,
                         prefix = NULL, suffix, rcl,
                         overwrite = FALSE, outdir = NULL, parallel = F, ncpu = 2) {
   star_time <- Sys.time() ## 记录程序开始时间
-  #参数检验
-  if (is.character(d)) {d <- as.data.frame(d)}
+  # 参数检验
+  if (is.character(d)) {
+    d <- as.data.frame(d)
+  }
   names(d)[1] <- "species"
 
-  if (is.null(x)) {x <- 1:nrow(d)}
+  if (is.null(x)) {
+    x <- 1:nrow(d)
+  }
   x <- unique(x)
   if (max(x) > nrow(d)) {
     stop("x provides an invalid species number.")
   }
 
-  #读取模拟结果列表(只读文件夹)（以物种为单位）
+  # 读取模拟结果列表(只读文件夹)（以物种为单位）
   if (file.exists(resultdir) == FALSE) {
-    stop("Resultdir not find.")}
-  if (is.null(outdir)) {outdir = "."}
+    stop("Resultdir not find.")
+  }
+  if (is.null(outdir)) {
+    outdir <- "."
+  }
 
-  #根据threshold的类型分析
+  # 根据threshold的类型分析
   threshold <- rcl
   if (is.list(threshold)) {
     a <- c()
     for (i in 1:length(rcl)) {
       a1 <- c(rcl[[i]], i - 1)
-      a <- c(a,a1)}
-    d$reclass = list(matrix(a, ncol = 3, byrow = TRUE))
+      a <- c(a, a1)
+    }
+    d$reclass <- list(matrix(a, ncol = 3, byrow = TRUE))
   }
   # threshold = 0.2
   if (is.numeric(threshold)) {
     a <- c(0, threshold, 0, threshold, 1000, 1)
-    d$reclass = list(matrix(a, ncol = 3, byrow = TRUE))
+    d$reclass <- list(matrix(a, ncol = 3, byrow = TRUE))
   }
   # threshold = "T_MTSSte"
   if (is.character(threshold)) {
     d$reclass <- NA
     for (i in 1:nrow(d)) {
       a <- list(
-        matrix(c(0, d[i,threshold],0, d[i,threshold], 1000, 1),
-               ncol = 3, byrow = TRUE))
+        matrix(c(0, d[i, threshold], 0, d[i, threshold], 1000, 1),
+          ncol = 3, byrow = TRUE
+        )
+      )
       d$reclass[i] <- a
     }
   }
 
   spdata <- d
-  #临时文件夹
+  # 临时文件夹
   random_num <- sample(1:100000, 1)
   dir.create(paste0(outdir, "/TBlabENMtemp", random_num), recursive = T, showWarnings = FALSE)
-  #创建文件夹用于保存二值图
+  # 创建文件夹用于保存二值图
   dir.create(paste0(outdir, "/reclass"), recursive = T, showWarnings = FALSE)
 
-  #################################################函数
-  ##输出路径
-  ra_dfpa <- list.files(paste0(resultdir, "/", spdata[x,1]),
-                      full.names = TRUE, recursive = TRUE,
-                      pattern = paste0("^", prefix, ".*", suffix, "$")) %>%
+  ################################################# 函数
+  ## 输出路径
+  ra_dfpa <- list.files(paste0(resultdir, "/", spdata[x, 1]),
+    full.names = TRUE, recursive = TRUE,
+    pattern = paste0("^", prefix, ".*", suffix, "$")
+  ) %>%
     as.data.frame() %>%
-    dplyr::mutate(name = purrr::map(.x = ., .f = function(x){
+    dplyr::mutate(name = purrr::map(.x = ., .f = function(x) {
       stringr::str_split_i(x, resultdir, 2) %>%
         stringr::str_split_i("/", 2)
     })) %>%
-    dplyr::mutate(path = purrr::map_chr(.x = ., .f = function(x){
+    dplyr::mutate(path = purrr::map_chr(.x = ., .f = function(x) {
       a <- stringr::str_split_1(x, "/")
       paste0(a[length(a) - 1], ".tif")
     }))
   ra_df_path <- paste0(outdir, "/reclass/", ra_dfpa$name, "_", ra_dfpa$path)
 
-  #fun1用于创建包含下面要用到的数据的数据框
-  fun1 <- function(x){
-    spname <- spdata[x,1]
-    #读取栅格数据
-    ra_df <- list.files(paste0(resultdir, "/", spdata[x,1]),
-                        full.names = TRUE, recursive = TRUE,
-                        pattern = paste0("^", prefix, ".*", suffix, "$")) %>%
+  # fun1用于创建包含下面要用到的数据的数据框
+  fun1 <- function(x) {
+    spname <- spdata[x, 1]
+    # 读取栅格数据
+    ra_df <- list.files(paste0(resultdir, "/", spdata[x, 1]),
+      full.names = TRUE, recursive = TRUE,
+      pattern = paste0("^", prefix, ".*", suffix, "$")
+    ) %>%
       as.data.frame() %>%
       dplyr::mutate(reclass = spdata[x, "reclass"]) %>%
-      #生成保存文件名
-      dplyr::mutate(path = purrr::map_chr(.x = ., .f = function(x){
+      # 生成保存文件名
+      dplyr::mutate(path = purrr::map_chr(.x = ., .f = function(x) {
         a <- stringr::str_split_1(x, "/")
         paste0(a[length(a) - 1], ".tif")
       })) %>%
-      #投影名
-      dplyr::mutate(pro = purrr::map(.x = path, .f = function(x){
+      # 投影名
+      dplyr::mutate(pro = purrr::map(.x = path, .f = function(x) {
         str_split_1(x, ".tif")[1]
       }))
 
     ###############################
 
     radf <- ra_df %>%
-      dplyr::mutate(reclass = purrr::map2(.x = ., .y = reclass, .f = function(x,y){
-        terra::classify(terra::rast(x), y) #重分类
-
+      dplyr::mutate(reclass = purrr::map2(.x = ., .y = reclass, .f = function(x, y) {
+        terra::classify(terra::rast(x), y) # 重分类
       })) %>%
-      dplyr::mutate(area = purrr::map(.x = reclass, .f = function(x){
-        if (terra::crs(x) == "") {terra::crs(x) <- crs}
-        terra::expanse(x, unit = "km", byValue = TRUE, wide = TRUE) #计算唯一值对应的面积
-      })) %>% #计算面积
-      dplyr::mutate(area1 = purrr::map2(.x = area, .y = pro, .f = function(x,y){
-        x$pro = y
-        x$species = spname
+      dplyr::mutate(area = purrr::map(.x = reclass, .f = function(x) {
+        if (terra::crs(x) == "") {
+          terra::crs(x) <- crs
+        }
+        terra::expanse(x, unit = "km", byValue = TRUE, wide = TRUE) # 计算唯一值对应的面积
+      })) %>% # 计算面积
+      dplyr::mutate(area1 = purrr::map2(.x = area, .y = pro, .f = function(x, y) {
+        x$pro <- y
+        x$species <- spname
         x
-      })) %>% #将投影时期和物种名添加到物种面积表
-      dplyr::mutate(ss = purrr::map2(.x = reclass, .y = path, .f = function(x,y){
+      })) %>% # 将投影时期和物种名添加到物种面积表
+      dplyr::mutate(ss = purrr::map2(.x = reclass, .y = path, .f = function(x, y) {
         terra::writeRaster(x,
-                           paste0(outdir, "/reclass/", spname, "_", y ), overwrite = overwrite)
-      })) #保存重分类的栅格
+          paste0(outdir, "/reclass/", spname, "_", y),
+          overwrite = overwrite
+        )
+      })) # 保存重分类的栅格
 
 
-    #新建数据框保存单个物种的结果
-    data <- data.frame(matrix(NA, nrow = 0, ncol = ncol(radf[,6][[1]])))
-    names(data) <- names(radf[,6][[1]])
+    # 新建数据框保存单个物种的结果
+    data <- data.frame(matrix(NA, nrow = 0, ncol = ncol(radf[, 6][[1]])))
+    names(data) <- names(radf[, 6][[1]])
 
-    for (i in 1:length(radf[,6])) {
-      b1 <- radf[,6][[i]]
+    for (i in 1:length(radf[, 6])) {
+      b1 <- radf[, 6][[i]]
       data <- merge(data, b1, all = TRUE)
     }
 
     data <- data[-1] %>%
       dplyr::relocate(pro) %>%
       dplyr::relocate(species)
-    utils::write.csv(data, paste0(outdir, "/TBlabENMtemp", random_num, "/", spname,".csv"),
-                     row.names = FALSE)
-    ##return(ra_df_path)
+    utils::write.csv(data, paste0(outdir, "/TBlabENMtemp", random_num, "/", spname, ".csv"),
+      row.names = FALSE
+    )
+    ## return(ra_df_path)
   }
 
-  #并行
+  # 并行
   if (parallel == TRUE) {
-    ncpu = ncpu
+    ncpu <- ncpu
     # 开启集成
     snowfall::sfInit(parallel = TRUE, cpus = ncpu)
     # 注册每个环境变量
-    #snowfall::sfExportAll()
-    #加载需要用到的变量或函数 因为下面函数fff中要用到prodir参数
+    # snowfall::sfExportAll()
+    # 加载需要用到的变量或函数 因为下面函数fff中要用到prodir参数
     snowfall::sfExport("resultdir")
     snowfall::sfExport("d")
     snowfall::sfExport("x")
@@ -186,44 +204,45 @@ ENMclassify <- function(d, x = NULL, resultdir, crs,
     snowfall::sfLibrary(purrr)
 
     snowfall::sfLapply(x, fun1)
-    snowfall::sfStop()  # 关闭集群
+    snowfall::sfStop() # 关闭集群
   } else {
     ## 第一个位置：新建一个起始进度条
     pb <- utils::txtProgressBar(style = 3)
     ##
     for (i in x) {
       fun1(i)
-      ##第二个位置：实时显示进度
-      utils::setTxtProgressBar(pb, which(i == x)/length(x))
-      print(paste0(outdir, "/reclass/", spdata[i,1]))
+      ## 第二个位置：实时显示进度
+      utils::setTxtProgressBar(pb, which(i == x) / length(x))
+      print(paste0(outdir, "/reclass/", spdata[i, 1]))
     }
   }
 
-  #组合每个物种的面积
+  # 组合每个物种的面积
   splist <- list.files(paste0(outdir, "/TBlabENMtemp", random_num), full.names = TRUE)
   v <- utils::read.csv(splist[1])
-  v <- v[0,]
+  v <- v[0, ]
   for (i in 1:length(splist)) {
     a <- utils::read.csv(splist[i])
     v <- rbind(v, a)
   }
   if (is.list(threshold)) {
-    #names(v) <- c("species", "pro", names(rcl))
-    names(v) <- paste0(c("", "", names(rcl)), stringr::str_replace(names(v), "X", "_") )
-    } else{
+    # names(v) <- c("species", "pro", names(rcl))
+    names(v) <- paste0(c("", "", names(rcl)), stringr::str_replace(names(v), "X", "_"))
+  } else {
     names(v) <- c("species", "pro", "USA", "SA")
   }
   utils::write.csv(v, paste0(outdir, "/suitable_area.csv"),
-                   row.names = FALSE, fileEncoding = "GB18030")
+    row.names = FALSE, fileEncoding = "GB18030"
+  )
   unlink(paste0(outdir, "/TBlabENMtemp", random_num), recursive = TRUE)
-  end_time <- Sys.time()  ## 记录程序结束时间
+  end_time <- Sys.time() ## 记录程序结束时间
   ## 第三个位置关闭进度条
-  if (exists("pb")) {close(pb)}
+  if (exists("pb")) {
+    close(pb)
+  }
   print(end_time - star_time)
 
-  #原始数据, 重分类数据, 面积表, 存储路径
+  # 原始数据, 重分类数据, 面积表, 存储路径
   s3 <- list(reclass_ra_path = ra_df_path, area = v)
   return(s3)
 }
-
-

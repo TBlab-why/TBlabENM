@@ -1,4 +1,3 @@
-
 #' Select optimum parameters for the MaxEnt models
 #' @description
 #' 本函数为MaxEnt模型选择最适合的环境变量组合、正则化乘数和特征函数组合。
@@ -39,22 +38,23 @@
 #' @export
 #'
 #' @examples
-#' maxent_parameter(x = system.file("extdata", "species/Phoebe sheareri.csv", package = "TBlabENM"),
-#'        evdir = system.file("extdata", "envar/asc", package = "TBlabENM"),
-#'        myenv = NULL,
-#'        evlist = 1:7,
-#'        factors = c("dr", "fao90"),
-#'        nbg = 1000,
-#'        bgwidth = 500000,
-#'        fc = c("LPH", "Q", "LQ"),
-#'        rm = 1:5,
-#'        r = 0.7,
-#'        vif = T,
-#'        vifth = 5,
-#'        opt = "auc.val.avg",
-#'        parallel = F,
-#'        ncpu = 2)
-
+#' maxent_parameter(
+#'   x = system.file("extdata", "species/Phoebe sheareri.csv", package = "TBlabENM"),
+#'   evdir = system.file("extdata", "envar/asc", package = "TBlabENM"),
+#'   myenv = NULL,
+#'   evlist = 1:7,
+#'   factors = c("dr", "fao90"),
+#'   nbg = 1000,
+#'   bgwidth = 500000,
+#'   fc = c("LPH", "Q", "LQ"),
+#'   rm = 1:5,
+#'   r = 0.7,
+#'   vif = T,
+#'   vifth = 5,
+#'   opt = "auc.val.avg",
+#'   parallel = F,
+#'   ncpu = 2
+#' )
 maxent_parameter <- function(x,
                              evdir,
                              myenv = NULL,
@@ -74,23 +74,24 @@ maxent_parameter <- function(x,
                              outdir = NULL,
                              parallel = F,
                              ncpu = 2) {
-
-  #判断参数格式是否正确
+  # 判断参数格式是否正确
   if (is.null(opt) == FALSE) {
     for (i in 1:length(opt)) {
       if (!opt[i] %in% c("auc.train", "cbi.train", "auc.diff.avg", "auc.val.avg", "cbi.val.avg", "or.10p.avg", "or.mtp.avg", "AICc")) {
         stop("'opt' must be a subset of c('auc.train', 'cbi.train', 'auc.diff.avg', 'auc.val.avg', 'cbi.val.avg', 'or.10p.avg', 'or.mtp.avg', 'AICc') or NULL.")
       }
     }
-    }
+  }
   random_num <- sample(1:100000, 1)
-  #绘制模型调优结果的函数
+  # 绘制模型调优结果的函数
   p_tun <- function(cs1, opt) {
     data <-
       pivot_longer(
         cs1,
-        cols = c("auc.train", "cbi.train", "auc.diff.avg", "auc.val.avg",
-                 "cbi.val.avg", "or.10p.avg", "or.mtp.avg", "AICc"),
+        cols = c(
+          "auc.train", "cbi.train", "auc.diff.avg", "auc.val.avg",
+          "cbi.val.avg", "or.10p.avg", "or.mtp.avg", "AICc"
+        ),
         names_to = "name",
         values_to = "value"
       ) |>
@@ -114,11 +115,11 @@ maxent_parameter <- function(x,
         filename = "model_tun.jpg",
         plot = p,
         path = paste0(outdir, "/maxent/", sp_name),
-        width = 14 + (max(cs1$rm) - 4.5)*3,
-        height = 7*length(opt),
+        width = 14 + (max(cs1$rm) - 4.5) * 3,
+        height = 7 * length(opt),
         units = c("cm"),
         create.dir = TRUE,
-        #limitsize = FALSE
+        # limitsize = FALSE
       )
     } else {
       p <- ggplot(data, mapping = aes(
@@ -142,12 +143,12 @@ maxent_parameter <- function(x,
         height = 10,
         units = c("cm"),
         create.dir = TRUE,
-        #limitsize = FALSE
+        # limitsize = FALSE
       )
     }
   }
 
-  #修改ENMnulls函数
+  # 修改ENMnulls函数
   ENMnulls <- function(e,
                        mod.settings,
                        no.iter,
@@ -162,8 +163,7 @@ maxent_parameter <- function(x,
                        quiet = FALSE) {
     # assign evaluation type based on partition method
     if (is.null(user.eval.type)) {
-      eval.type <- switch(
-        e@partition.method,
+      eval.type <- switch(e@partition.method,
         randomkfold = "knonspatial",
         jackknife = "knonspatial",
         block = "kspatial",
@@ -172,16 +172,17 @@ maxent_parameter <- function(x,
         testing = "testing",
         none = "none"
       )
-    } else{
+    } else {
       eval.type <- user.eval.type
     }
 
     ## checks
     # model settings are all single entries
-    if (!all(sapply(mod.settings, length) == 1))
+    if (!all(sapply(mod.settings, length) == 1)) {
       stop("Please input a single set of model settings.")
+    }
     # model settings are correct for input algorithm and are entered in the right order --
-    #if not, put them in the right order, else indexing models later will fail because the model
+    # if not, put them in the right order, else indexing models later will fail because the model
     # name will be incorrect
     if (e@algorithm %in% c("maxent.jar", "maxnet")) {
       if (length(mod.settings) != 2) {
@@ -194,7 +195,7 @@ maxent_parameter <- function(x,
         if (!all(names(mod.settings) == c("fc", "rm"))) {
           mod.settings <- mod.settings[c("fc", "rm")]
         }
-      } else{
+      } else {
         stop(
           'Please input only "fc" (feature classes) and "rm" (regularization multipliers) for
            mod.settings for maxent.jar and maxnet models.'
@@ -254,10 +255,11 @@ maxent_parameter <- function(x,
     # specify empirical model statistics ####
     ############################## #
 
-    mod.tune.args  <- paste(names(mod.settings),
-                            mod.settings,
-                            collapse = "_",
-                            sep = ".")
+    mod.tune.args <- paste(names(mod.settings),
+      mod.settings,
+      collapse = "_",
+      sep = "."
+    )
     emp.mod <- e@models[[mod.tune.args]]
     emp.mod.res <- e@results |> dplyr::filter(tune.args == mod.tune.args)
 
@@ -265,14 +267,16 @@ maxent_parameter <- function(x,
     # build null models ####
     ############################## #
 
-    if (quiet == FALSE)
+    if (quiet == FALSE) {
       message(paste(
         "Building and evaluating null ENMs with",
         no.iter,
         "iterations..."
       ))
-    if (quiet == FALSE)
+    }
+    if (quiet == FALSE) {
       pb <- txtProgressBar(0, no.iter, style = 3)
+    }
 
     # set up parallel processing functionality
     if (parallel == TRUE) {
@@ -281,31 +285,37 @@ maxent_parameter <- function(x,
         numCores <- allCores
       }
       cl <- parallel::makeCluster(numCores, setup_strategy = "sequential")
-      if (quiet != TRUE)
-        progress <- function(n)
+      if (quiet != TRUE) {
+        progress <- function(n) {
           setTxtProgressBar(pb, n)
+        }
+      }
 
       if (parallelType == "doParallel") {
         doParallel::registerDoParallel(cl)
         opts <- NULL
       } else if (parallelType == "doSNOW") {
         doSNOW::registerDoSNOW(cl)
-        if (quiet != TRUE)
+        if (quiet != TRUE) {
           opts <- list(progress = progress)
-        else
+        } else {
           opts <- NULL
+        }
       }
       numCoresUsed <- foreach::getDoParWorkers()
-      if (quiet != TRUE)
+      if (quiet != TRUE) {
         message(paste0("\nOf ", allCores, " total cores using ", numCoresUsed, "..."))
-      if (quiet != TRUE)
+      }
+      if (quiet != TRUE) {
         message(paste0("Running in parallel using ", parallelType, "..."))
+      }
     }
 
-    if (length(e@clamp.directions) == 0)
+    if (length(e@clamp.directions) == 0) {
       clamp.directions.i <- NULL
-    else
+    } else {
       clamp.directions.i <- e@clamp.directions
+    }
 
     # define function to run null model for iteration i
     null_i <- function(i) {
@@ -338,24 +348,28 @@ maxent_parameter <- function(x,
       # bind rows together to make full null occurrence dataset
       null.occs.i.df <- dplyr::bind_rows(null.occs.ik)
       if (eval.type == "knonspatial") {
-        if (e@partition.method == "randomkfold")
+        if (e@partition.method == "randomkfold") {
           null.occs.i.df$grp <- get.randomkfold(null.occs.i.df,
-                                                e@bg,
-                                                kfolds = e@partition.settings$kfolds)$occs.grp
-        if (e@partition.method == "jackknife")
+            e@bg,
+            kfolds = e@partition.settings$kfolds
+          )$occs.grp
+        }
+        if (e@partition.method == "jackknife") {
           null.occs.i.df$grp <- get.jackknife(null.occs.i.df, e@bg)$occs.grp
+        }
       }
       null.occs.i.z <- null.occs.i.df |> dplyr::select(-grp)
       # shortcuts
       categoricals <- names(which(sapply(e@occs, is.factor)))
-      if (length(categoricals) == 0)
+      if (length(categoricals) == 0) {
         categoricals <- NULL
+      }
 
       if (eval.type %in% c("testing", "none")) {
         partitions <- eval.type
         user.grp <- NULL
         user.val.grps <- NULL
-      } else{
+      } else {
         # assign the null occurrence partitions as user partition settings, but
         # keep the empirical model background partitions
         user.grp <- list(occs.grp = null.occs.i.df$grp, bg.grp = e@bg.grp)
@@ -367,7 +381,7 @@ maxent_parameter <- function(x,
       # check if ecospat is installed, and if not, prevent CBI calculations
       if ((requireNamespace("ecospat", quietly = TRUE))) {
         e@other.settings$ecospat.use <- TRUE
-      } else{
+      } else {
         e@other.settings$ecospat.use <- FALSE
       }
 
@@ -388,31 +402,39 @@ maxent_parameter <- function(x,
         quiet = TRUE
       )
 
-      null.e.i <- tryCatch({
-        do.call(ENMevaluate, args.i)
-      }, error = function(cond) {
-        if (quiet != TRUE)
-          message(paste0("\n", cond, "\n"))
-        # Choose a return value in case of error
-        return(NULL)
-      })
+      null.e.i <- tryCatch(
+        {
+          do.call(ENMevaluate, args.i)
+        },
+        error = function(cond) {
+          if (quiet != TRUE) {
+            message(paste0("\n", cond, "\n"))
+          }
+          # Choose a return value in case of error
+          return(NULL)
+        }
+      )
 
       if (is.null(null.e.i)) {
         results.na <- e@results[1, ] |> dplyr::mutate(dplyr::across(auc.train:ncoef, ~
-                                                                       NA))
+          NA))
         mod.settings.i <- paste(names(mod.settings),
-                                mod.settings,
-                                collapse = "_",
-                                sep = ".")
+          mod.settings,
+          collapse = "_",
+          sep = "."
+        )
         if (nrow(e@results.partitions) > 0) {
-          results.partitions.na <- e@results.partitions |> dplyr::filter(tune.args == mod.settings.i) |> dplyr::mutate(dplyr::across(3:ncol(.), ~
-                                                                                                                                         NA)) |> dplyr::mutate(iter = i)
-        } else{
+          results.partitions.na <- e@results.partitions |>
+            dplyr::filter(tune.args == mod.settings.i) |>
+            dplyr::mutate(dplyr::across(3:ncol(.), ~
+              NA)) |>
+            dplyr::mutate(iter = i)
+        } else {
           results.partitions.na <- e@results.partitions
         }
 
         out <- list(results = results.na, results.partitions = results.partitions.na)
-      } else{
+      } else {
         out <- list(
           results = null.e.i@results,
           results.partitions = null.e.i@results.partitions |> dplyr::mutate(iter = i) |> dplyr::select(iter, dplyr::everything())
@@ -425,8 +447,10 @@ maxent_parameter <- function(x,
             newrow <- out$results.partitions[1, ]
             newrow[, 4:ncol(newrow)] <- NA
             for (ind in inds) {
-              out$results.partitions <- dplyr::bind_rows(out$results.partitions,
-                                                         newrow |> dplyr::mutate(fold = ind))
+              out$results.partitions <- dplyr::bind_rows(
+                out$results.partitions,
+                newrow |> dplyr::mutate(fold = ind)
+              )
             }
             out$results.partitions <- dplyr::arrange(out$results.partitions, fold)
           }
@@ -439,88 +463,114 @@ maxent_parameter <- function(x,
     if (parallel == TRUE) {
       outs <- foreach::foreach(
         i = 1:no.iter,
-        .export = 'e',
+        .export = "e",
         .options.snow = opts,
         .packages = c("dplyr", "ENMeval")
       ) %dopar% {
         null_i(i)
       }
-    } else{
+    } else {
       outs <- list()
       for (i in 1:no.iter) {
         outs[[i]] <- null_i(i)
-        if (quiet == FALSE)
+        if (quiet == FALSE) {
           setTxtProgressBar(pb, i)
+        }
       }
     }
 
-    if (quiet != TRUE)
+    if (quiet != TRUE) {
       close(pb)
-    if (parallel == TRUE)
+    }
+    if (parallel == TRUE) {
       parallel::stopCluster(cl)
+    }
 
     # assemble null evaluation statistics and take summaries
-    nulls.ls <- lapply(outs, function(x)
-      x$results)
-    nulls.grp.ls <- lapply(outs, function(x)
-      x$results.partitions)
+    nulls.ls <- lapply(outs, function(x) {
+      x$results
+    })
+    nulls.grp.ls <- lapply(outs, function(x) {
+      x$results.partitions
+    })
     nulls <- dplyr::bind_rows(nulls.ls) |> dplyr::select(!dplyr::contains("AIC"))
     nulls.grp <- dplyr::bind_rows(nulls.grp.ls)
     if (eval.type %in% c("testing", "none")) {
-      nulls.avgs <- nulls |> dplyr::select(dplyr::ends_with("train"),
-                                            dplyr::contains(eval.stats)) |> dplyr::summarize_all(mean, na.rm = TRUE)
-      nulls.sds <- nulls |> dplyr::select(dplyr::ends_with("train"),
-                                           dplyr::contains(eval.stats)) |> dplyr::summarise_all(sd, na.rm = TRUE)
+      nulls.avgs <- nulls |>
+        dplyr::select(
+          dplyr::ends_with("train"),
+          dplyr::contains(eval.stats)
+        ) |>
+        dplyr::summarize_all(mean, na.rm = TRUE)
+      nulls.sds <- nulls |>
+        dplyr::select(
+          dplyr::ends_with("train"),
+          dplyr::contains(eval.stats)
+        ) |>
+        dplyr::summarise_all(sd, na.rm = TRUE)
       # get empirical model evaluation statistics for comparison
-      emp.avgs <- emp.mod.res |> dplyr::select(dplyr::ends_with("train"),
-                                                dplyr::contains(eval.stats))
-    } else{
-      nulls.avgs <- nulls |> dplyr::select(dplyr::ends_with("train"), paste0(eval.stats, ".avg")) |> dplyr::summarize_all(mean, na.rm = TRUE)
-      nulls.sds <- nulls |> dplyr::select(dplyr::ends_with("train"), paste0(eval.stats, ".sd")) |> dplyr::summarise_all(sd, na.rm = TRUE)
+      emp.avgs <- emp.mod.res |> dplyr::select(
+        dplyr::ends_with("train"),
+        dplyr::contains(eval.stats)
+      )
+    } else {
+      nulls.avgs <- nulls |>
+        dplyr::select(dplyr::ends_with("train"), paste0(eval.stats, ".avg")) |>
+        dplyr::summarize_all(mean, na.rm = TRUE)
+      nulls.sds <- nulls |>
+        dplyr::select(dplyr::ends_with("train"), paste0(eval.stats, ".sd")) |>
+        dplyr::summarise_all(sd, na.rm = TRUE)
       # get empirical model evaluation statistics for comparison
       emp.avgs <- emp.mod.res |> dplyr::select(dplyr::ends_with("train"), paste0(eval.stats, ".avg"))
     }
     if (sum(grepl("sd", names(emp.mod.res))) > 0) {
       emp.sds <- emp.mod.res |> dplyr::select(paste0(eval.stats, ".sd"))
-    } else{
+    } else {
       emp.sds <- NULL
     }
 
     empNull.stats <- as.data.frame(matrix(nrow = 6, ncol = ncol(emp.avgs) +
-                                            1))
+      1))
     names(empNull.stats)[1] <- "statistic"
-    empNull.stats$statistic <- c("emp.mean",
-                                 "emp.sd",
-                                 "null.mean",
-                                 "null.sd",
-                                 "zscore",
-                                 "pvalue")
+    empNull.stats$statistic <- c(
+      "emp.mean",
+      "emp.sd",
+      "null.mean",
+      "null.sd",
+      "zscore",
+      "pvalue"
+    )
     names(empNull.stats)[-1] <- gsub(".avg", replacement = "", names(emp.avgs))
 
     # populate empirical and null means and standard deviations
     empNull.stats[1, -1] <- emp.avgs
     emp.sds.nameStrip <- gsub(".sd", "", names(emp.sds))
-    if (length(emp.sds.nameStrip) > 0)
+    if (length(emp.sds.nameStrip) > 0) {
       empNull.stats[2, which(names(empNull.stats) %in% emp.sds.nameStrip)] <- emp.sds
+    }
     empNull.stats[3, -1] <- nulls.avgs
     empNull.stats[4, -1] <- nulls.sds
     # calculate z-scores
     empNull.stats[5, -1] <- (emp.avgs - nulls.avgs) / nulls.sds
     # find statistics that need a positive pnorm, and those that need a negative pnorm
-    p.pos <- names(signs[sapply(signs, function(x)
-      x == 1)])
-    p.neg <- names(signs[sapply(signs, function(x)
-      x == -1)])
+    p.pos <- names(signs[sapply(signs, function(x) {
+      x == 1
+    })])
+    p.neg <- names(signs[sapply(signs, function(x) {
+      x == -1
+    })])
     p.pos.inds <- which(grepl(paste(p.pos, collapse = "|"), names(empNull.stats)))
     p.neg.inds <- which(grepl(paste(p.neg, collapse = "|"), names(empNull.stats)))
     # calculate p-values
-    empNull.stats[6, p.pos.inds] <- sapply(empNull.stats[5, p.pos.inds], function(x)
-      pnorm(x, lower.tail = FALSE))
+    empNull.stats[6, p.pos.inds] <- sapply(empNull.stats[5, p.pos.inds], function(x) {
+      pnorm(x, lower.tail = FALSE)
+    })
     empNull.stats[6, p.neg.inds] <- sapply(empNull.stats[5, p.neg.inds], pnorm)
 
     mod.settings.tbl <- expand.grid(mod.settings)
-    mod.settings.tbl$tune.args <- apply(mod.settings.tbl, 1, function(x)
-      paste(names(x), x, collapse = "_", sep = "."))
+    mod.settings.tbl$tune.args <- apply(mod.settings.tbl, 1, function(x) {
+      paste(names(x), x, collapse = "_", sep = ".")
+    })
     mod.settings.tbl <- dplyr::mutate_all(mod.settings.tbl, as.factor)
 
     # make cbi.val column NA for jackknife partitions
@@ -553,14 +603,15 @@ maxent_parameter <- function(x,
 
     # optionally remove temp directory for maxent.jar
     if (e@algorithm == "maxent.jar" &
-        removeMxTemp == TRUE)
+      removeMxTemp == TRUE) {
       unlink(tmpdir, recursive = TRUE, force = TRUE)
+    }
 
 
     timed <- proc.time() - start.time
     t.min <- floor(timed[3] / 60)
     t.sec <- timed[3] - (t.min * 60)
-    if (quiet == FALSE)
+    if (quiet == FALSE) {
       message(paste(
         "\nENMnulls completed in",
         t.min,
@@ -568,16 +619,17 @@ maxent_parameter <- function(x,
         round(t.sec, 1),
         "seconds."
       ))
+    }
 
     return(e.n)
   }
 
-  #corse_method功能使用相关性选择变量
+  # corse_method功能使用相关性选择变量
   corse_method <- function(correlation, importance, vif, n) {
-    #n最初为1
+    # n最初为1
 
-    n = n
-    #这里可能会出现变量重要性不一致问题，之前选出来的变量直接保留占位，其他变量排序
+    n <- n
+    # 这里可能会出现变量重要性不一致问题，之前选出来的变量直接保留占位，其他变量排序
     if (n == 1) {
       importance1 <- dplyr::arrange(importance, desc(value))
     } else {
@@ -585,21 +637,21 @@ maxent_parameter <- function(x,
       importance_b <- dplyr::arrange(importance[-(1:(n - 1)), , drop = FALSE], desc(value))
       importance1 <- rbind(importance_a, importance_b)
     }
-    #importance1 <- dplyr::arrange(importance, desc(value))
+    # importance1 <- dplyr::arrange(importance, desc(value))
     if (nrow(importance) < n) {
       importance <- rownames(importance1)[1]
-    } else{
+    } else {
       importance <- rownames(importance1)[n]
     }
 
     ff <- correlation[, importance, drop = FALSE]
-    #ff <- dplyr::filter(ff, rowSums(ff < r) == ncol(ff))
-    ff <-  ff[which(ff < r), , drop = FALSE]
+    # ff <- dplyr::filter(ff, rowSums(ff < r) == ncol(ff))
+    ff <- ff[which(ff < r), , drop = FALSE]
 
-    bio_name <- c(importance, rownames(ff)) #要保留的变量名称
+    bio_name <- c(importance, rownames(ff)) # 要保留的变量名称
 
 
-    #当执行vif分时
+    # 当执行vif分时
     if (vif == T) {
       bio_name <- vifse_method(
         envdf = mybg,
@@ -608,35 +660,35 @@ maxent_parameter <- function(x,
         vifth = vifth,
         n = n
       )
-      #importance继承自importance1，importance1是排过序的，因此importance不用再排序
+      # importance继承自importance1，importance1是排过序的，因此importance不用再排序
     }
 
     return(bio_name)
   }
-  #vifse_method功能使用vif选择变量
+  # vifse_method功能使用vif选择变量
   vifse_method <- function(envdf, env_name, importance, vifth, n) {
-    #对保留的变量进行重要性排序
-    #im <- dplyr::arrange(importance[env_name,, drop =FALSE],desc(value))
-    #env_name <- rownames(im) #排过序的变量名
-    #importance中取出保留的变量
+    # 对保留的变量进行重要性排序
+    # im <- dplyr::arrange(importance[env_name,, drop =FALSE],desc(value))
+    # env_name <- rownames(im) #排过序的变量名
+    # importance中取出保留的变量
     im <- importance[rownames(importance) %in% env_name, , drop = FALSE]
-    env_name <- rownames(im) #这里的env_name是排过序的变量名
+    env_name <- rownames(im) # 这里的env_name是排过序的变量名
     env_name1 <- env_name
-    n = n - 1
+    n <- n - 1
 
     while (n < length(env_name1) - 1) {
-      n = n + 1
-      #从env_name中取出前n+1个变量，判断最重要的变量和次重要的变量之间的共线性，如果存在，次重要的变量删除
+      n <- n + 1
+      # 从env_name中取出前n+1个变量，判断最重要的变量和次重要的变量之间的共线性，如果存在，次重要的变量删除
       var <- env_name1[c(1:(n + 1))]
-      #只保留在env_name1中的变量
+      # 只保留在env_name1中的变量
       var1 <- var[var %in% env_name]
-      #对var1计算vif
+      # 对var1计算vif
       vifvalue <- usdm::vif(envdf[var1])
 
-      #当存在共线性则应该排除var1中的最后一个变量,当不存在共线性说明该变量要保留，进入下次循环
+      # 当存在共线性则应该排除var1中的最后一个变量,当不存在共线性说明该变量要保留，进入下次循环
       if (sum(vifvalue$VIF > vifth) > 0) {
         env_name <- env_name[!env_name %in% var1[length(var1)]]
-      } else{
+      } else {
         break
       }
     }
@@ -645,7 +697,7 @@ maxent_parameter <- function(x,
   }
 
   fun2 <- function(fc1, rm1) {
-    #根据组合设置 args参数
+    # 根据组合设置 args参数
     args1[2] <- paste0("betamultiplier=", rm1)
     ff1 <- stringr::str_split_1(fc1, "")
     for (j in ff1) {
@@ -666,21 +718,21 @@ maxent_parameter <- function(x,
       }
     }
 
-    n = 0 #用于fun1(),指示第几次循环来确定次重要变量
+    n <- 0 # 用于fun1(),指示第几次循环来确定次重要变量
     if (is.null(factors) == FALSE) {
-      #当存在分类变量，分开计算
-      #当factors只有1个变量
+      # 当存在分类变量，分开计算
+      # 当factors只有1个变量
       if (length(factors) == 1) {
         while (sum(correlation1 > r) > nrow(correlation1) | n == 0) {
           n <- n + 1
 
-          #进行模拟获得重要性列表
+          # 进行模拟获得重要性列表
           compare <- suppressMessages(
             maxent_single(
               x = x,
               evdir = evdir,
               evlist = evlist,
-              #evlist应该是相对于evdir也就是全部变量biolstall的下标
+              # evlist应该是相对于evdir也就是全部变量biolstall的下标
               factors = factors,
               nbg = nbg,
               bgwidth = NULL,
@@ -691,36 +743,38 @@ maxent_parameter <- function(x,
               parallel = FALSE
             )
           )
-          #下面根据上面模拟的结果删除相关性强的变量
-          #变量重要性
+          # 下面根据上面模拟的结果删除相关性强的变量
+          # 变量重要性
           ev_cb <- read.csv(
             paste0(outdir, "/TBlabENMtemp", random_num, "/", fc1, rm1, n, "/maxent/", sp_name, "/maxentResults.csv")
           ) |>
             dplyr::select(paste0(bio_name, ".contribution")) |>
-            utils::tail(n = 1) |> t() |> as.data.frame()
+            utils::tail(n = 1) |>
+            t() |>
+            as.data.frame()
           names(ev_cb) <- "value"
 
-          ##排除贡献小于0.5的变量
+          ## 排除贡献小于0.5的变量
           ev_cb <- ev_cb[ev_cb > 0.5, , drop = FALSE]
           if (nrow(ev_cb) == 0) {
             bio_name <- ""
             return(bio_name)
           }
-          #修改ev_cb的变量名
+          # 修改ev_cb的变量名
           nn <- c()
           for (i in 1:nrow(ev_cb)) {
             nn1 <- stringr::str_split_1(rownames(ev_cb)[i], ".contribution")[1]
             nn <- c(nn, nn1)
           }
           rownames(ev_cb) <- nn
-          #d当第一次全变量模拟只保留1个变量时直接退出循环
+          # d当第一次全变量模拟只保留1个变量时直接退出循环
           if (nrow(ev_cb) < 2) {
             bio_name <- rownames(ev_cb)
             return(bio_name)
           }
 
-          #将ev_cb按照变量类型拆开
-          factors <- rownames(ev_cb)[rownames(ev_cb) %in% factors] #更新factors
+          # 将ev_cb按照变量类型拆开
+          factors <- rownames(ev_cb)[rownames(ev_cb) %in% factors] # 更新factors
           if (length(factors) == 0) {
             factors <- NULL
           }
@@ -732,19 +786,19 @@ maxent_parameter <- function(x,
           }
 
 
-          #correlation1按照ev_cb提取
+          # correlation1按照ev_cb提取
           correlation1 <- correlation1[rownames(ev_cb1), rownames(ev_cb1)]
 
-          #连续变量的选择n=1
+          # 连续变量的选择n=1
           bio_name1 <- corse_method(
             correlation = correlation1,
             importance = ev_cb1,
             vif = vif,
             n = n
-          ) #下次模拟的变量
-          #组合两种变量
+          ) # 下次模拟的变量
+          # 组合两种变量
           bio_name <- c(factors, bio_name1)
-          #获取保留的变量存储路径的下标
+          # 获取保留的变量存储路径的下标
           evlist <- c()
           for (i in seq_along(bio_name)) {
             evlist1 <- which(stringr::str_detect(biolistall, paste0(bio_name, ".asc")[i]) == T)
@@ -753,20 +807,19 @@ maxent_parameter <- function(x,
             }
             evlist <- c(evlist, evlist1)
           }
-          #计算两种变量的相关性
+          # 计算两种变量的相关性
           correlation1 <- abs(as.data.frame(cor(mybg1[bio_name1], method = cormethod)))
         }
 
         return(bio_name)
-
       } else {
-        #分类变量大于1个的情况
+        # 分类变量大于1个的情况
 
         while (sum(correlation1 > r) > nrow(correlation1) |
-               sum(correlation2 > r) > nrow(correlation2) | n == 0) {
+          sum(correlation2 > r) > nrow(correlation2) | n == 0) {
           n <- n + 1
 
-          #进行模拟获得重要性列表
+          # 进行模拟获得重要性列表
           compare <- suppressMessages(
             maxent_single(
               x = x,
@@ -782,22 +835,24 @@ maxent_parameter <- function(x,
               parallel = FALSE
             )
           )
-          #下面根据上面模拟的结果删除相关性强的变量
-          #变量重要性
+          # 下面根据上面模拟的结果删除相关性强的变量
+          # 变量重要性
           ev_cb <- read.csv(
             paste0(outdir, "/TBlabENMtemp", random_num, "/", fc1, rm1, n, "/maxent/", sp_name, "/maxentResults.csv")
           ) |>
             dplyr::select(paste0(bio_name, ".contribution")) |>
-            utils::tail(n = 1) |> t() |> as.data.frame()
+            utils::tail(n = 1) |>
+            t() |>
+            as.data.frame()
           names(ev_cb) <- "value"
 
-          ##排除贡献小于0.5的变量
+          ## 排除贡献小于0.5的变量
           ev_cb <- ev_cb[ev_cb > 0.5, , drop = FALSE]
           if (nrow(ev_cb) == 0) {
             bio_name <- ""
             return(bio_name)
           }
-          #修改ev_cb的变量名
+          # 修改ev_cb的变量名
           nn <- c()
           for (i in 1:nrow(ev_cb)) {
             nn1 <- stringr::str_split_1(rownames(ev_cb)[i], ".contribution")[1]
@@ -805,18 +860,18 @@ maxent_parameter <- function(x,
           }
           rownames(ev_cb) <- nn
 
-          #d当第一次全变量模拟只保留1个变量时直接退出循环
+          # d当第一次全变量模拟只保留1个变量时直接退出循环
           if (nrow(ev_cb) < 2) {
             bio_name <- rownames(ev_cb)
             return(bio_name)
           }
 
-          factors <- rownames(ev_cb)[rownames(ev_cb) %in% factors] #更新factors
+          factors <- rownames(ev_cb)[rownames(ev_cb) %in% factors] # 更新factors
           if (length(factors) == 0) {
             factors <- NULL
           }
 
-          #将ev_cb按照变量类型拆开
+          # 将ev_cb按照变量类型拆开
           if (is.null(factors)) {
             ev_cb1 <- ev_cb
           } else {
@@ -824,7 +879,7 @@ maxent_parameter <- function(x,
             ev_cb2 <- ev_cb[factors, , drop = FALSE]
           }
 
-          #correlation1按照ev_cb提取
+          # correlation1按照ev_cb提取
           if (is.null(factors)) {
             correlation1 <- correlation1[rownames(ev_cb1), rownames(ev_cb1)]
           } else {
@@ -836,7 +891,7 @@ maxent_parameter <- function(x,
             }
           }
 
-          #连续变量的选择n=1
+          # 连续变量的选择n=1
           if (is.null(factors)) {
             if (nrow(ev_cb1) == 0) {
               bio_name1 <- NULL
@@ -849,7 +904,7 @@ maxent_parameter <- function(x,
               )
             }
             bio_name2 <- NULL
-          } else{
+          } else {
             if (length(factors) == 1) {
               if (nrow(ev_cb1) == 0) {
                 bio_name1 <- NULL
@@ -872,8 +927,8 @@ maxent_parameter <- function(x,
                   vif = vif,
                   n = n
                 )
-              }  #下次模拟的变量
-              #分类变量的选择
+              } # 下次模拟的变量
+              # 分类变量的选择
               bio_name2 <- corse_method(
                 correlation = correlation2,
                 importance = ev_cb2,
@@ -881,14 +936,14 @@ maxent_parameter <- function(x,
                 n = n
               )
             }
-          } #下次模拟的变量
+          } # 下次模拟的变量
 
-          #将factors参数更新为bio_name2
+          # 将factors参数更新为bio_name2
           factors <- bio_name2
-          #组合两种变量
+          # 组合两种变量
           bio_name <- c(bio_name2, bio_name1)
 
-          #获取保留的变量存储路径的下标
+          # 获取保留的变量存储路径的下标
           evlist <- c()
           for (i in seq_along(bio_name)) {
             evlist1 <- which(stringr::str_detect(biolistall, paste0(bio_name, ".asc")[i]) == TRUE)
@@ -898,7 +953,7 @@ maxent_parameter <- function(x,
             evlist <- c(evlist, evlist1)
           }
 
-          #计算两种变量的相关性
+          # 计算两种变量的相关性
           if (is.null(factors)) {
             correlation1 <- abs(as.data.frame(cor(mybg1[bio_name1], method = cormethod)))
             correlation2 <- as.data.frame(0)
@@ -918,11 +973,11 @@ maxent_parameter <- function(x,
       }
     } else {
       while (sum(correlation1 > r) > nrow(correlation1) |
-             n == 0) {
-        #bio_name初始值为最开始使用的全部变量
-        n = n + 1
+        n == 0) {
+        # bio_name初始值为最开始使用的全部变量
+        n <- n + 1
 
-        #进行模拟获得重要性列表
+        # 进行模拟获得重要性列表
         compare <- suppressMessages(
           maxent_single(
             x = x,
@@ -939,22 +994,24 @@ maxent_parameter <- function(x,
           )
         )
 
-        #下面根据上面模拟的结果删除相关性强的变量
-        #变量重要性
+        # 下面根据上面模拟的结果删除相关性强的变量
+        # 变量重要性
         ev_cb <- read.csv(
           paste0(outdir, "/TBlabENMtemp", random_num, "/", fc1, rm1, n, "/maxent/", sp_name, "/maxentResults.csv")
         ) |>
           dplyr::select(paste0(bio_name, ".contribution")) |>
-          utils::tail(n = 1) |> t() |> as.data.frame()
+          utils::tail(n = 1) |>
+          t() |>
+          as.data.frame()
         names(ev_cb) <- "value"
 
-        ##排除贡献小于0.5的变量
+        ## 排除贡献小于0.5的变量
         ev_cb <- ev_cb[ev_cb > 0.5, , drop = FALSE]
         if (nrow(ev_cb) == 0) {
           bio_name <- ""
           return(bio_name)
         }
-        #修改ev_cb的变量名
+        # 修改ev_cb的变量名
         nn <- c()
         for (i in 1:nrow(ev_cb)) {
           nn1 <- str_split_1(rownames(ev_cb)[i], ".contribution")[1]
@@ -962,20 +1019,20 @@ maxent_parameter <- function(x,
         }
         rownames(ev_cb) <- nn
 
-        #d当第一次全变量模拟只保留1个变量时直接退出循环
+        # d当第一次全变量模拟只保留1个变量时直接退出循环
         if (nrow(ev_cb) < 2) {
           bio_name <- rownames(ev_cb)
           return(bio_name)
         }
 
-        #correlation1按照ev_cb提取
+        # correlation1按照ev_cb提取
         correlation1 <- correlation1[rownames(ev_cb), rownames(ev_cb)]
         bio_name <- corse_method(
           correlation = correlation1,
           importance = ev_cb,
           vif = vif,
           n = n
-        )  #下次模拟的变量
+        ) # 下次模拟的变量
         evlist <- c()
         for (i in seq_along(bio_name)) {
           evlist1 <- which(stringr::str_detect(biolistall, paste0(bio_name, ".asc")[i]) == T)
@@ -985,15 +1042,14 @@ maxent_parameter <- function(x,
           evlist <- c(evlist, evlist1)
         }
         correlation1 <- abs(as.data.frame(cor(mybg[bio_name], method = cormethod)))
-
       }
       return(bio_name)
     }
   }
 
   fun4 <- function(i) {
-    #设置好fc和rm后进行模拟保留最重要变量i=1
-    var <- fun2(fc1 = combin[i, 1] , rm1 = combin[i, 2])
+    # 设置好fc和rm后进行模拟保留最重要变量i=1
+    var <- fun2(fc1 = combin[i, 1], rm1 = combin[i, 2])
     df[i, 3] <- paste0(var, collapse = ",")
   }
 
@@ -1007,24 +1063,27 @@ maxent_parameter <- function(x,
   if (is.null(outdir)) {
     outdir <- "."
   }
-  #dir.create(paste0(outdir, "/TBlabENM"),recursive = TRUE, showWarnings = FALSE)
+  # dir.create(paste0(outdir, "/TBlabENM"),recursive = TRUE, showWarnings = FALSE)
   mybgfile_rmd <- mybgfile
   factors123 <- factors
   biolistall <- list.files(evdir, pattern = ".asc$|.tif$", full.names = TRUE)
 
-  #获取物种名 对路径拆分并取倒数第一个字符串
+  # 获取物种名 对路径拆分并取倒数第一个字符串
   spname1 <- stringr::str_split_1(x, "/")[length(stringr::str_split_1(x, "/"))]
   sp_name <- stringr::str_split_1(spname1, ".csv$")[1]
   cat(paste("Select optimum parameters for", sp_name, "\n"))
   dir.create(paste0(outdir, "/maxent/", sp_name),
-             showWarnings = FALSE,
-             recursive = TRUE)
+    showWarnings = FALSE,
+    recursive = TRUE
+  )
   #################################################################################
-  #当指定环境变量时不再进行变量的选择
+  # 当指定环境变量时不再进行变量的选择
   if (is.null(myenv)) {
-    #变量名称
+    # 变量名称
     biolist <- list.files(evdir, pattern = ".asc$|.tif$", full.names = TRUE)
-    if (length(biolist) == 0) {stop("The environment variable does not exist. Check whether it is in `asc` format.\n")}
+    if (length(biolist) == 0) {
+      stop("The environment variable does not exist. Check whether it is in `asc` format.\n")
+    }
     if (is.null(evlist) == FALSE) {
       biolist <- biolist[evlist]
     }
@@ -1037,10 +1096,10 @@ maxent_parameter <- function(x,
     bio_name_all <- bio_name
     cat(paste("Initial variable:", paste(bio_name, collapse = ","), "\n"))
 
-    #判断分类变量factors是否包含在给定的环境数据集内
+    # 判断分类变量factors是否包含在给定的环境数据集内
     if (is.null(factors)) {
       cat("All variables are continuous variables \n")
-    } else{
+    } else {
       factors1 <- factors
       factors <- factors[factors %in% bio_name]
       if (length(factors) == 0) {
@@ -1064,30 +1123,30 @@ maxent_parameter <- function(x,
       ))
     }
     cat("***********Selecting parameters***********\n")
-    #提取发生数据的环境值
+    # 提取发生数据的环境值
     biostack <- terra::rast(biolist)
-    occ <- utils::read.csv(x) #读取物种坐标数据
+    occ <- utils::read.csv(x) # 读取物种坐标数据
     occ <- occ[c(2, 3)]
     names(occ) <- c("x", "y")
     if (is.null(bgwidth) == FALSE & is.null(mybgfile)) {
-      #将发生点转为sf对象
-      occs.sf <- sf::st_as_sf(occ, coords = c("x","y"), crs = terra::crs(biostack))
-      #转为等面积投影
+      # 将发生点转为sf对象
+      occs.sf <- sf::st_as_sf(occ, coords = c("x", "y"), crs = terra::crs(biostack))
+      # 转为等面积投影
       eckertIV <- "+proj=eck4 +lon_0=0 +x_0=0 +y_0=0 +datum=WGS84 +units=m +no_defs"
       occs.sf <- sf::st_transform(occs.sf, crs = eckertIV)
-      #创建缓冲区
+      # 创建缓冲区
       occs.buf <- sf::st_buffer(occs.sf, dist = bgwidth) |>
         sf::st_union() |>
         sf::st_sf() |>
-        sf::st_transform(crs = terra::crs(biostack)) #再转为经纬度投影
-      #将环境变量裁剪至缓冲区
+        sf::st_transform(crs = terra::crs(biostack)) # 再转为经纬度投影
+      # 将环境变量裁剪至缓冲区
       biostack <- terra::crop(biostack, occs.buf)
       biostack <- terra::mask(biostack, occs.buf)
-      cat(paste0("Crop the environment variable to a buffer with a radius of ", bgwidth/1000, " km centered on the point of occurrence.\n") )
-      }
+      cat(paste0("Crop the environment variable to a buffer with a radius of ", bgwidth / 1000, " km centered on the point of occurrence.\n"))
+    }
 
     occdata <- terra::extract(biostack, occ, ID = FALSE)
-    #判断有无缺失值，有的话就删掉
+    # 判断有无缺失值，有的话就删掉
     row_na <- which(rowSums(is.na(occdata)) != 0)
     if (length(row_na) > 0) {
       occ <- occ[-row_na, ]
@@ -1095,57 +1154,69 @@ maxent_parameter <- function(x,
       cat(paste0("The ", length(row_na), " points with missing values are deleted.\n"))
     }
     n_na <- nrow(occdata) - nrow(occ)
-    #提取背景值并计算变量相关性
-    ##随机生成10000个点
+    # 提取背景值并计算变量相关性
+    ## 随机生成10000个点
     if (is.null(mybgfile)) {
-
       mybg0 <- terra::spatSample(biostack, nbg, na.rm = T, xy = T)
       mybgfile <- mybg0[1:2]
       write.csv(mybgfile,
-                paste0(outdir, "/maxent/", sp_name, "/bg.csv"),
-                row.names = FALSE)
+        paste0(outdir, "/maxent/", sp_name, "/bg.csv"),
+        row.names = FALSE
+      )
       mybg <- mybg0[-(1:2)]
-      cat(paste0(nbg ," background points are randomly generated.\n"))
-    } else{
+      cat(paste0(nbg, " background points are randomly generated.\n"))
+    } else {
       cat("The background points has been specified!\n")
       mybg <- terra::extract(biostack, mybgfile, ID = FALSE)
     }
-    ##判断是否存在分类变量，若存在则分开计算
+    ## 判断是否存在分类变量，若存在则分开计算
     if (is.null(factors) == FALSE) {
-      #mybg分为两组，mybg1为连续变量，mybg2为分类变量
+      # mybg分为两组，mybg1为连续变量，mybg2为分类变量
       mybg1 <- mybg[, bio_name[!bio_name %in% factors], drop = FALSE]
       mybg2 <- mybg[, factors, drop = FALSE]
 
-      #绘制相关性热图
+      # 绘制相关性热图
       correlation1 <- cor(mybg1, method = cormethod)
       correlation2 <- cor(mybg2, method = cormethod)
       if (nrow(correlation1) > 1) {
-      grDevices::jpeg(filename = paste0(outdir, "/maxent/", sp_name, "/cor_continuous.jpg"),
-                      width = 15 + nrow(correlation1), height = 15 + nrow(correlation1), units = "cm", res = 300)
-      corrplot::corrplot.mixed(correlation1, tl.pos = c( "lt"), tl.col = "black",
-                               diag = c("u"), title = "continuous variable")
-      dev.off()}
+        grDevices::jpeg(
+          filename = paste0(outdir, "/maxent/", sp_name, "/cor_continuous.jpg"),
+          width = 15 + nrow(correlation1), height = 15 + nrow(correlation1), units = "cm", res = 300
+        )
+        corrplot::corrplot.mixed(correlation1,
+          tl.pos = c("lt"), tl.col = "black",
+          diag = c("u"), title = "continuous variable"
+        )
+        dev.off()
+      }
       #
       if (nrow(correlation1) > 1) {
-      grDevices::jpeg(filename = paste0(outdir, "/maxent/", sp_name, "/cor_categorical.jpg"),
-                      width = 15 + nrow(correlation2), height = 15 + nrow(correlation2), units = "cm", res = 300)
-      corrplot::corrplot.mixed(correlation2, tl.pos = c( "lt"), tl.col = "black",
-                               diag = c("u"), title = "categorical variable")
-      dev.off()}
-  #
+        grDevices::jpeg(
+          filename = paste0(outdir, "/maxent/", sp_name, "/cor_categorical.jpg"),
+          width = 15 + nrow(correlation2), height = 15 + nrow(correlation2), units = "cm", res = 300
+        )
+        corrplot::corrplot.mixed(correlation2,
+          tl.pos = c("lt"), tl.col = "black",
+          diag = c("u"), title = "categorical variable"
+        )
+        dev.off()
+      }
+      #
       correlation1 <- abs(as.data.frame(cor(mybg1, method = cormethod)))
       correlation2 <- abs(as.data.frame(cor(mybg2, method = cormethod)))
     } else {
-      ##绘制相关性热图
+      ## 绘制相关性热图
       correlation1 <- cor(mybg, method = cormethod)
-      grDevices::jpeg(filename = paste0(outdir, "/maxent/", sp_name, "/cor_continuous.jpg"),
-                      width = 15 + nrow(correlation1), height = 15 + nrow(correlation1), units = "cm", res = 300)
-      corrplot::corrplot.mixed(correlation1, tl.pos = c( "lt"), tl.col = "black", diag = c("u"))
+      grDevices::jpeg(
+        filename = paste0(outdir, "/maxent/", sp_name, "/cor_continuous.jpg"),
+        width = 15 + nrow(correlation1), height = 15 + nrow(correlation1), units = "cm", res = 300
+      )
+      corrplot::corrplot.mixed(correlation1, tl.pos = c("lt"), tl.col = "black", diag = c("u"))
       dev.off()
       correlation1 <- abs(as.data.frame(cor(mybg, method = cormethod)))
     }
 
-    #组合fc和 rm
+    # 组合fc和 rm
     fc <- toupper(fc)
     combin <- expand.grid(fc, rm, stringsAsFactors = FALSE) |>
       dplyr::mutate(fc = purrr::map_chr(
@@ -1159,7 +1230,7 @@ maxent_parameter <- function(x,
     df <- cbind(combin, df)
     names(df) <- c("fc", "rm", "env")
 
-    #根据组合设置 args参数
+    # 根据组合设置 args参数
 
     args1 <- TBlabENM::maxent_args(
       l = FALSE,
@@ -1172,7 +1243,7 @@ maxent_parameter <- function(x,
       pictures = FALSE
     )
     cat("Select environment variables for each fc and rm combination.\n")
-    ##并行计算
+    ## 并行计算
     if (parallel == T) {
       # 开启集成
       snowfall::sfInit(parallel = TRUE, cpus = ncpu)
@@ -1193,32 +1264,34 @@ maxent_parameter <- function(x,
       snowfall::sfExport("r")
       # snowfall::sfExport("correlation2")
       # snowfall::sfExport("maxent_single")
-fit <- try(  #报错调试
-      k <- snowfall::sfLapply(1:nrow(combin), fun4)
+      fit <- try( # 报错调试
+        k <- snowfall::sfLapply(1:nrow(combin), fun4)
       )
-if ('try-error' %in% class(fit)) {snowfall::sfStop()
-  unlink(paste0(outdir, "/TBlabENMtemp", random_num) , recursive = T)
-  }
-      snowfall::sfStop()  # 关闭集群
+      if ("try-error" %in% class(fit)) {
+        snowfall::sfStop()
+        unlink(paste0(outdir, "/TBlabENMtemp", random_num), recursive = T)
+      }
+      snowfall::sfStop() # 关闭集群
 
       df$env <- unlist(k)
-
-    } else{
-fit <- try(  #报错调试
-      for (i in 1:nrow(combin)) {
-        #设置好fc和rm后进行模拟保留最重要变量i=1
-        var <- fun2(fc1 = combin[i, 1] , rm1 = combin[i, 2])
-        df[i, 3] <- paste0(var, collapse = ",")
-      }
+    } else {
+      fit <- try( # 报错调试
+        for (i in 1:nrow(combin)) {
+          # 设置好fc和rm后进行模拟保留最重要变量i=1
+          var <- fun2(fc1 = combin[i, 1], rm1 = combin[i, 2])
+          df[i, 3] <- paste0(var, collapse = ",")
+        }
       )
-      if ('try-error' %in% class(fit)) {unlink(paste0(outdir, "/TBlabENMtemp", random_num) , recursive = T)}
+      if ("try-error" %in% class(fit)) {
+        unlink(paste0(outdir, "/TBlabENMtemp", random_num), recursive = T)
+      }
     }
-    #删除缓存文件
-    unlink(paste0(outdir, "/TBlabENMtemp", random_num) , recursive = T)
+    # 删除缓存文件
+    unlink(paste0(outdir, "/TBlabENMtemp", random_num), recursive = T)
   } else {
     biolist <- list.files(evdir, pattern = ".asc$|.tif$", full.names = TRUE)
-    #判断分类变量factors是否包含在给定的环境数据集内
-    ##全部变量名称
+    # 判断分类变量factors是否包含在给定的环境数据集内
+    ## 全部变量名称
     bio_name_all <- c()
     for (i in seq_along(biolistall)) {
       bioname1 <- stringr::str_split_1(biolistall[i], "/")[length(stringr::str_split_1(biolistall[i], "/"))]
@@ -1226,7 +1299,7 @@ fit <- try(  #报错调试
       bio_name_all <- c(bio_name_all, bio_name0)
     }
 
-    #指定的变量
+    # 指定的变量
     bio_name <- myenv
 
     if (sum(bio_name %in% bio_name_all) != length(bio_name)) {
@@ -1238,7 +1311,7 @@ fit <- try(  #报错调试
     }
     if (is.null(factors)) {
       cat("All variables are continuous variables \n")
-    } else{
+    } else {
       factors1 <- factors
       factors <- factors[factors %in% bio_name]
       if (length(factors) == 0) {
@@ -1248,7 +1321,8 @@ fit <- try(  #报错调试
       }
       if (length(factors) != length(factors1)) {
         stop(
-          paste0("Only variable '", factors,
+          paste0(
+            "Only variable '", factors,
             "' is identified as a categorical variable. Please check whether other categorical variables are in the given set of environment variables."
           )
         )
@@ -1260,29 +1334,30 @@ fit <- try(  #报错调试
       ))
     }
 
-    #提取发生数据的环境值
-    ##获取bio_name的下标
+    # 提取发生数据的环境值
+    ## 获取bio_name的下标
     xb <- c()
     for (i in bio_name) {
       xb1 <- which(stringr::str_detect(biolistall, paste0(i, ".asc")) == T)
       if (length(xb1) == 0) {
-        xb1 <- which(stringr::str_detect(biolistall, paste0(i, ".tif")) == T)}
+        xb1 <- which(stringr::str_detect(biolistall, paste0(i, ".tif")) == T)
+      }
       xb <- c(xb, xb1)
     }
     biostack <- terra::rast(biolistall[xb])
-    occ <- utils::read.csv(x) #读取物种坐标数据
+    occ <- utils::read.csv(x) # 读取物种坐标数据
     occ <- occ[c(2, 3)]
     occdata <- terra::extract(biostack, occ, ID = FALSE)
 
-    #提取背景值并计算变量相关性
-    ##随机生成10000个点
+    # 提取背景值并计算变量相关性
+    ## 随机生成10000个点
     if (is.null(mybgfile)) {
       mybg <- terra::spatSample(biostack, nbg, na.rm = T, xy = T)[-(1:2)]
-    } else{
+    } else {
       mybg <- terra::extract(biostack, mybgfile, ID = FALSE)
     }
 
-    #组合fc和 rm
+    # 组合fc和 rm
     fc <- toupper(fc)
     combin <- expand.grid(fc, rm, stringsAsFactors = FALSE) |>
       mutate(fc = purrr::map_chr(
@@ -1296,19 +1371,20 @@ fit <- try(  #报错调试
     df <- cbind(combin, df)
     df[, 3] <- rep(paste0(myenv, collapse = ","), nrow(df))
     names(df) <- c("fc", "rm", "env")
-
   }
 
   if (is.null(opt)) {
     parameter <- df
-  } else{
-    #剩余的组合进行evaluate通过AICC确定最佳组合
+  } else {
+    # 剩余的组合进行evaluate通过AICC确定最佳组合
     df <- df |>
       dplyr::mutate(occdata = purrr::map(
         .x = env,
         .f = function(x) {
-          if (x == "") {return(0)}
-          #获取变量下标
+          if (x == "") {
+            return(0)
+          }
+          # 获取变量下标
           xb <- c()
           xb2 <- stringr::str_split_1(x, ",")
           for (i in seq_along(xb2)) {
@@ -1319,66 +1395,74 @@ fit <- try(  #报错调试
             xb <- c(xb, xb1)
           }
 
-          occdata <- cbind(occ, occdata[xb2]) #选择变量后添加xy坐标
+          occdata <- cbind(occ, occdata[xb2]) # 选择变量后添加xy坐标
         }
       )) |>
       dplyr::mutate(bgdata = purrr::map(
         .x = env,
         .f = function(x) {
-          if (x == "") {return(0)}
-          #获取变量下标
+          if (x == "") {
+            return(0)
+          }
+          # 获取变量下标
           xb <- c()
           xb2 <- stringr::str_split_1(x, ",")
           for (i in seq_along(xb2)) {
             xb1 <- which(stringr::str_detect(biolist, paste0(xb2, ".asc")[i]) == T)
             if (length(xb1) == 0) {
-              xb1 <- which(stringr::str_detect(biolist, paste0(xb2, ".tif")[i]) == T)}
-            xb <- c(xb, xb1)}
-          bgdata <- cbind(mybgfile, mybg[xb2]) #选择变量后添加xy坐标
-        })) |> #计算变量个数
+              xb1 <- which(stringr::str_detect(biolist, paste0(xb2, ".tif")[i]) == T)
+            }
+            xb <- c(xb, xb1)
+          }
+          bgdata <- cbind(mybgfile, mybg[xb2]) # 选择变量后添加xy坐标
+        }
+      )) |> # 计算变量个数
       dplyr::mutate(num = purrr::map_dbl(
         .x = occdata,
         .f = function(x) {
-          if (sum(x) == 0) {return(0)}
+          if (sum(x) == 0) {
+            return(0)
+          }
           ncol(x)
-        }))
+        }
+      ))
 
-    #将分类变量转为因子型
+    # 将分类变量转为因子型
     for (i in 1:nrow(df)) {
-      dff4 <- df[[i,4]]
-      dff5 <- df[[i,5]]
+      dff4 <- df[[i, 4]]
+      dff5 <- df[[i, 5]]
       categoricals <- factors123[factors123 %in% names(dff4)]
       if (length(categoricals) > 0) {
-      num <- which(names(dff4) %in% factors123 == T)
-      for (j in num) {
-        dff4[,j] <- factor(dff4[,j] )
-        dff5[,j] <- factor(dff5[,j] )
+        num <- which(names(dff4) %in% factors123 == T)
+        for (j in num) {
+          dff4[, j] <- factor(dff4[, j])
+          dff5[, j] <- factor(dff5[, j])
+        }
+        df[[i, 4]] <- dff4
+        df[[i, 5]] <- dff5
       }
-      df[[i,4]] <- dff4
-      df[[i,5]] <- dff5
-                                     }
     }
 
-    #判断保留的变量有几个，只有一个则无法调优
-    df1 <- dplyr::filter(df, num > 3) #至少保留两个变量
+    # 判断保留的变量有几个，只有一个则无法调优
+    df1 <- dplyr::filter(df, num > 3) # 至少保留两个变量
     if (nrow(df1) == 0) {
-      #删除缓存文件
-      unlink(paste0(outdir, "/TBlabENMtemp", random_num) , recursive = T)
+      # 删除缓存文件
+      unlink(paste0(outdir, "/TBlabENMtemp", random_num), recursive = T)
       stop("All parameter combinations end up preserving only one variable.")
     }
 
-    #使用pmap函数并行评估（由于ENMevaluate函数的参数大于2个，所以使用pmap函数）
-    #设置参数
+    # 使用pmap函数并行评估（由于ENMevaluate函数的参数大于2个，所以使用pmap函数）
+    # 设置参数
     cat("Model evaluation metrics for each combination were evaluated using ENMeval.\n")
     block <- ENMeval::get.randomkfold(occ, mybgfile, kfolds = 5)
     if (nrow(occdata) >= 25) {
-      #partitions = "randomkfold"
-      #partition.settings = list(kfolds = 10)
-      partitions = "user"
-      user.grp = block
+      # partitions = "randomkfold"
+      # partition.settings = list(kfolds = 10)
+      partitions <- "user"
+      user.grp <- block
     } else {
-      partitions = "jackknife"
-      partition.settings = NULL
+      partitions <- "jackknife"
+      partition.settings <- NULL
     }
 
     gz <- purrr::pmap(
@@ -1388,62 +1472,64 @@ fit <- try(  #报错调试
           occs = occdata,
           bg = bgdata,
           tune.args = list(fc = fc, rm = rm),
-          #partitions = "jackknife", #数据分区方式，有2+6种
+          # partitions = "jackknife", #数据分区方式，有2+6种
           partitions = partitions,
           user.grp = block,
-          #数据分区方法|测试集、训练集划分方法
-         # partition.settings =  partition.settings,
-          #数据分区设置
-        #  other.settings =  list(
-        #    abs.auc.diff = TRUE,
-         #   pred.type = "logistic",
-        #    validation.bg = "full",
-            #与partitions参数分区类型对应
-        #    other.args = NULL
-       #   ),
-          #其他额外设置，有默认值
+          # 数据分区方法|测试集、训练集划分方法
+          # partition.settings =  partition.settings,
+          # 数据分区设置
+          #  other.settings =  list(
+          #    abs.auc.diff = TRUE,
+          #   pred.type = "logistic",
+          #    validation.bg = "full",
+          # 与partitions参数分区类型对应
+          #    other.args = NULL
+          #   ),
+          # 其他额外设置，有默认值
           taxon.name = sp_name,
           n.bg = nbg,
           algorithm = "maxent.jar",
-          #使用的模型，有三种
+          # 使用的模型，有三种
           overlap = FALSE,
           quiet = TRUE,
-          #生态位重叠
-         # categoricals = factors123[factors123 %in% names(occdata)],
-          #指定分类变量,"IAWC_CLASS", , "T_USDA_TEX_CLASS"
+          # 生态位重叠
+          # categoricals = factors123[factors123 %in% names(occdata)],
+          # 指定分类变量,"IAWC_CLASS", , "T_USDA_TEX_CLASS"
           doClamp = FALSE
         )
         res <- ENMeval::eval.results(e)
       }
     )
 
-    #评估的一系列参数
+    # 评估的一系列参数
     gz1 <- as.data.frame(data.table::rbindlist(gz))
     gz1$fc <- as.character(gz1$fc)
     gz1$rm <- as.numeric(as.character(gz1$rm))
     gz1$tune.args <- as.character(gz1$tune.args)
-    #合并df和gz1
+    # 合并df和gz1
     cs <- merge(df[1:3], gz1[c(1:16, 19)], all.x = TRUE, all.y = TRUE)
     cs2 <- cs
     cs <- dplyr::arrange(cs, AICc, auc.diff.avg, or.mtp.avg)
-    #保存结果
+    # 保存结果
     cat(paste0(outdir, "/maxent/", sp_name, "/tuneparameter.csv"))
     utils::write.csv(cs,
-                     paste0(outdir, "/maxent/", sp_name, "/tuneparameter.csv"),
-                     row.names = FALSE)
+      paste0(outdir, "/maxent/", sp_name, "/tuneparameter.csv"),
+      row.names = FALSE
+    )
     cs <- dplyr::filter(cs, !is.na(auc.train))
-    #选择最佳模型auc.train, cbi.train, auc.diff.avg, auc.val.avg, cbi.val.avg, or.10p.avg, or.mtp.avg, AICc
-    #单一指标法，顺序指标法，最大指标法。#opt1为最佳模型
-    for (i in opt) { #i = opt[1]
+    # 选择最佳模型auc.train, cbi.train, auc.diff.avg, auc.val.avg, cbi.val.avg, or.10p.avg, or.mtp.avg, AICc
+    # 单一指标法，顺序指标法，最大指标法。#opt1为最佳模型
+    for (i in opt) { # i = opt[1]
       if (is.na(min(cs[i]))) {
         warning("'", paste0(i), "'", " is NA in one or more parameter combinations, skip it.")
-        next}
+        next
+      }
 
       if (i %in% c("auc.diff.avg", "or.10p.avg", "or.mtp.avg", "AICc")) {
-        opt1 <- cs[which(min(cs[i]) == cs[[i]]),]
+        opt1 <- cs[which(min(cs[i]) == cs[[i]]), ]
         cs <- opt1
       } else {
-        opt1 <- cs[which(max(cs[i]) == cs[[i]]),]
+        opt1 <- cs[which(max(cs[i]) == cs[[i]]), ]
         cs <- opt1
       }
     }
@@ -1452,62 +1538,71 @@ fit <- try(  #报错调试
       opt <- append(opt, "auc.val.avg")
       warning("'", paste0(opt), "'", " is NA in one or more parameter combinations, use 'auc.val.avg' instead.")
     }
-    #绘制模型调优图
+    # 绘制模型调优图
     p_tun(cs2, opt)
 
-    #最佳模型的参数df_best
+    # 最佳模型的参数df_best
     df_best <- dplyr::filter(df, fc == opt1$fc, rm == opt1$rm)
     env_best <- stringr::str_split_1(df_best$env, ",")
-    env_best_f <- env_best[env_best %in% factors123] #最优模型保留的分类变量
-    env_best_c <- env_best[!env_best %in% env_best_f] #最优模型保留的连续变量
-    #绘制最佳模型的相关性热图
+    env_best_f <- env_best[env_best %in% factors123] # 最优模型保留的分类变量
+    env_best_c <- env_best[!env_best %in% env_best_f] # 最优模型保留的连续变量
+    # 绘制最佳模型的相关性热图
     mybg <- as.data.frame(tidyr::unnest(df_best[5], cols = c("bgdata")))
     mybg1 <- mybg[env_best_c]
     mybg2 <- mybg[env_best_f]
     correlation1 <- cor(mybg1, method = cormethod)
-    correlation2 <- cor(as.data.frame(lapply(mybg2,as.numeric)), method = cormethod)
+    correlation2 <- cor(as.data.frame(lapply(mybg2, as.numeric)), method = cormethod)
     if (nrow(correlation1) > 1) {
-    grDevices::jpeg(filename = paste0(outdir, "/maxent/", sp_name, "/cor_continuous_best.jpg"),
-                    width = 15 + nrow(correlation1), height = 15 + nrow(correlation1), units = "cm", res = 300)
-    corrplot::corrplot.mixed(correlation1, tl.pos = c( "lt"), tl.col = "black",
-                             diag = c("u"), title = "continuous variable")
-    dev.off()
+      grDevices::jpeg(
+        filename = paste0(outdir, "/maxent/", sp_name, "/cor_continuous_best.jpg"),
+        width = 15 + nrow(correlation1), height = 15 + nrow(correlation1), units = "cm", res = 300
+      )
+      corrplot::corrplot.mixed(correlation1,
+        tl.pos = c("lt"), tl.col = "black",
+        diag = c("u"), title = "continuous variable"
+      )
+      dev.off()
     }
     if (nrow(correlation2) > 1) {
-    grDevices::jpeg(filename = paste0(outdir, "/maxent/", sp_name, "/cor_categorical_best.jpg"),
-                    width = 15 + nrow(correlation2), height = 15 + nrow(correlation2), units = "cm", res = 300)
-    corrplot::corrplot.mixed(correlation2, tl.pos = c( "lt"), tl.col = "black",
-                             diag = c("u"), title = "categorical variable")
-    dev.off()}
-    #零模型检验
-    #使用最佳模型的参数重新构建模型测试获得参数e.mx
+      grDevices::jpeg(
+        filename = paste0(outdir, "/maxent/", sp_name, "/cor_categorical_best.jpg"),
+        width = 15 + nrow(correlation2), height = 15 + nrow(correlation2), units = "cm", res = 300
+      )
+      corrplot::corrplot.mixed(correlation2,
+        tl.pos = c("lt"), tl.col = "black",
+        diag = c("u"), title = "categorical variable"
+      )
+      dev.off()
+    }
+    # 零模型检验
+    # 使用最佳模型的参数重新构建模型测试获得参数e.mx
 
     if (null_model == TRUE) {
       e.mx <- ENMeval::ENMevaluate(
         occs = df_best$occdata,
         bg = df_best$bgdata,
         tune.args = list(fc = df_best$fc, rm = df_best$rm),
-        #partitions = "jackknife", #数据分区方式，有2+6种
+        # partitions = "jackknife", #数据分区方式，有2+6种
         partitions = "randomkfold",
-        #其他额外设置，有默认值
+        # 其他额外设置，有默认值
         taxon.name = sp_name,
         n.bg = nbg,
         algorithm = "maxent.jar",
-        #使用的模型，有三种
+        # 使用的模型，有三种
         overlap = FALSE,
         quiet = TRUE,
-        #生态位重叠
-       # categoricals = env_best_f,
+        # 生态位重叠
+        # categoricals = env_best_f,
         doClamp = FALSE
       )
       cat("\n**************null model test*****************\n")
       mod.null <- ENMnulls(
         e = e.mx,
         mod.settings = list(fc = df_best$fc, rm = df_best$rm),
-        #最佳模型的参数
+        # 最佳模型的参数
         no.iter = 100,
         eval.stats = c("auc.val", "or.10p"),
-       # user.eval.type = "knonspatial",
+        # user.eval.type = "knonspatial",
         parallel = parallel,
         numCores = ncpu,
         parallelType = "doSNOW",
@@ -1534,34 +1629,38 @@ fit <- try(  #报错调试
     parameter$species <- sp_name
     parameter$number <- nrow(occ)
     parameter <- parameter[, c(4, 5, 3, 1, 2)]
-
   }
 
-  ###rmarkdown file
+  ### rmarkdown file
   wendang <- function(x, n_na, occdata, sp_name, evdir, bio_name_all, factors, mybgfile_rmd, nbg,
-                      fc, rm, r, cormethod, vif, vifth, opt, bestpar, outdir,env_best_f,env_best_c, null_model){
+                      fc, rm, r, cormethod, vif, vifth, opt, bestpar, outdir, env_best_f, env_best_c, null_model) {
     Sys.setenv(RSTUDIO_PANDOC = Sys.getenv("RSTUDIO_PANDOC"))
     rmarkdown::render(
-     input = system.file("extdata", "Models_detail.Rmd", package = "TBlabENM"),
-     #input = "C:/Users/why/TBlabENM/inst/extdata/Models_detail.Rmd",
-                      output_file = paste0(outdir, "/maxent/", sp_name, "/Models_tuning.html"),
-                      quiet = TRUE,
-                      params = list("sp_name" = sp_name, "x" = x, "occdata" = occdata, "n_na" = n_na,
-                                    "evdir" = evdir, "bio_name_all" = bio_name_all,
-                                    "factors" = factors, "mybgfile_rmd" = mybgfile_rmd, "nbg" = nbg,
-                                    "fc" = fc, "rm" = rm, "r" = r, "cormethod" = cormethod, "vif" = vif,
-                                    "vifth" = vifth, "opt" = opt, "bestpar" = bestpar, "outdir" = outdir,
-                                    "env_best_f" = env_best_f, "env_best_c" = env_best_c,
-                                    "null_model" = null_model))
+      input = system.file("extdata", "Models_detail.Rmd", package = "TBlabENM"),
+      # input = "C:/Users/why/TBlabENM/inst/extdata/Models_detail.Rmd",
+      output_file = paste0(outdir, "/maxent/", sp_name, "/Models_tuning.html"),
+      quiet = TRUE,
+      params = list(
+        "sp_name" = sp_name, "x" = x, "occdata" = occdata, "n_na" = n_na,
+        "evdir" = evdir, "bio_name_all" = bio_name_all,
+        "factors" = factors, "mybgfile_rmd" = mybgfile_rmd, "nbg" = nbg,
+        "fc" = fc, "rm" = rm, "r" = r, "cormethod" = cormethod, "vif" = vif,
+        "vifth" = vifth, "opt" = opt, "bestpar" = bestpar, "outdir" = outdir,
+        "env_best_f" = env_best_f, "env_best_c" = env_best_c,
+        "null_model" = null_model
+      )
+    )
   }
 
-  wendang(sp_name = sp_name, x = x, occdata = occdata, n_na = n_na,
-          evdir = evdir, bio_name_all = bio_name_all,
-          factors = factors123,
-          mybgfile_rmd = mybgfile_rmd, nbg = nbg, fc = fc,
-          rm = rm, r = r, cormethod = cormethod, vif = vif, vifth = vifth,
-          opt = opt, bestpar = opt1, outdir = outdir,env_best_f = env_best_f, env_best_c = env_best_c,
-          null_model = null_model)
+  wendang(
+    sp_name = sp_name, x = x, occdata = occdata, n_na = n_na,
+    evdir = evdir, bio_name_all = bio_name_all,
+    factors = factors123,
+    mybgfile_rmd = mybgfile_rmd, nbg = nbg, fc = fc,
+    rm = rm, r = r, cormethod = cormethod, vif = vif, vifth = vifth,
+    opt = opt, bestpar = opt1, outdir = outdir, env_best_f = env_best_f, env_best_c = env_best_c,
+    null_model = null_model
+  )
 
   cat("\n")
   return(parameter)

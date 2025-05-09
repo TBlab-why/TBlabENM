@@ -16,15 +16,17 @@
 #' @export
 #'
 #' @examples
-#' #读取物种路径列表
+#' # 读取物种路径列表
 #' dir <- system.file("extdata", "species", package = "TBlabENM")
 #' splist <- list.files(dir, pattern = ".csv$", full.names = T)
-#' ENMspthin(spdir = splist,
-#'           spec.col = species,
-#'           long.col = longitude,
-#'           lat.col = latitude,
-#'           thin.par = 10,
-#'           outdir = NULL)
+#' ENMspthin(
+#'   spdir = splist,
+#'   spec.col = species,
+#'   long.col = longitude,
+#'   lat.col = latitude,
+#'   thin.par = 10,
+#'   outdir = NULL
+#' )
 ENMspthin <- function(spdir,
                       spec.col,
                       long.col,
@@ -32,7 +34,7 @@ ENMspthin <- function(spdir,
                       thin.par,
                       outdir = NULL) {
   if (is.null(outdir)) {
-    outdir = "."
+    outdir <- "."
   }
   dir.create(
     paste0(outdir, "/occthin", thin.par, "km"),
@@ -42,7 +44,7 @@ ENMspthin <- function(spdir,
 
   for (i in seq_along(spdir)) {
     occdata <- utils::read.csv(spdir[i], fileEncoding = "GB18030")
-  name <- stringr::str_split_1(spdir[i], pattern = "/")[length(stringr::str_split_1(spdir[i], pattern = "/"))] %>%
+    name <- stringr::str_split_1(spdir[i], pattern = "/")[length(stringr::str_split_1(spdir[i], pattern = "/"))] %>%
       stringr::str_split_1(pattern = ".csv$")
     if (file.exists(paste0(outdir, "/occthin", thin.par, "km/", name[1], "_thin1.csv"))) {
       file.remove(paste0(outdir, "/occthin", thin.par, "km/", name[1], "_thin1.csv"))
@@ -59,7 +61,7 @@ ENMspthin <- function(spdir,
       write.files = TRUE,
       max.files = 1,
       out.dir = paste0(outdir, "/occthin", thin.par, "km"),
-      out.base =  name[1],
+      out.base = name[1],
       write.log.file = TRUE,
       log.file = "spatial_thin_log.txt",
       verbose = FALSE
@@ -89,5 +91,4 @@ ENMspthin <- function(spdir,
       na = ""
     )
   }
-
 }
