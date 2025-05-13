@@ -1,7 +1,7 @@
 Package: TBlabENM
 Type: Package
 Title: Used for a Series of MaxEnt Analyses in TBlab
-Version: 0.0.2
+Version: 0.0.3
 Date: 2023-03-30
 Authors@R: 
     c(person("Haiyang", "Wu", role = c("aut", "cre"), email = "1248720256@qq.com"),
