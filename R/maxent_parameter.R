@@ -1347,6 +1347,7 @@ maxent_parameter <- function(x,
     biostack <- terra::rast(biolistall[xb])
     occ <- utils::read.csv(x) # 读取物种坐标数据
     occ <- occ[c(2, 3)]
+    names(occ) <- c("x", "y")
     occdata <- terra::extract(biostack, occ, ID = FALSE)
 
     # 提取背景值并计算变量相关性

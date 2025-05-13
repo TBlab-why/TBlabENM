@@ -22,6 +22,7 @@ You can install the development version of TBlabENM from
 
 ``` r
 # install.packages("devtools")
+options(timeout = 300)
 devtools::install_github("TBlab-why/TBlabENM")
 ```
 
