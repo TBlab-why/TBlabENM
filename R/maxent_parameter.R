@@ -1656,7 +1656,7 @@ maxent_parameter <- function(x,
   }
 
   wendang(
-    sp_name = sp_name, x = x, occdata = occdata, n_na = n_na,
+    sp_name = sp_name, x = x, occdata = occdata, n_na = 1,
     evdir = evdir, bio_name_all = bio_name_all,
     factors = factors123,
     mybgfile_rmd = mybgfile_rmd, nbg = nbg, fc = fc,
