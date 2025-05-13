@@ -10,7 +10,7 @@ Description: Used for a Series of MaxEnt Analyses in TBlab.
 License: GPL (>= 3)
 Depends: 
     ggplot2,
-    ENMeval (>= 2.0.4),
+    ENMeval (== 2.0.4),
     R (>= 3.6.0),
     foreach,
     predicts,
@@ -29,8 +29,11 @@ Imports:
     utils,
     usdm,
     ggsci,
-    tidyr
-Suggests: 
+    tidyr,
+    doSNOW,
+    ecospat,
+    flextable,
+    rmdformats,
     rJava
 URL: https://github.com/TBlab-why/TBlabENM
 BugReports: https://github.com/TBlab-why/TBlabENM/issues
