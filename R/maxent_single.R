@@ -96,7 +96,12 @@ maxent_single <- function(x,
   }
 
   occdata <- terra::extract(biostack, occ, ID = FALSE)
-  occdata <- stats::na.omit(occdata) #如果有缺失值则移除
+
+  if (any(is.na(occdata))) { #如果存在缺失值，找到缺失值所在行，删除
+    complete_rows <- stats::complete.cases(occdata)
+    occ <- occ[complete_rows, ]
+  }
+  occdata1 <- stats::na.omit(occdata) #如果有缺失值则移除
   # 读取、提取背景点的环境值并转化为数据框，生成环境背景数据
   if (is.null(mybgfile)) {
     mybg0 <- terra::spatSample(biostack, nbg, na.rm = T, xy = T)
@@ -110,15 +115,13 @@ maxent_single <- function(x,
 
   # 将背景点赋值为0
   mybg$"p/b" <- rep(0, times = nrow(mybg))
-
-
-
   # 将存在点赋值为1
   occ$"p/b" <- rep(1, times = nrow(occ))
 
   #### 全变量模拟####
   # 组合存在环境数据与环境背景数据构成环境变量数据框
   evdata <- dplyr::bind_rows(occdata, mybgdata)
+  evdata <- stats::na.omit(evdata) #如果有缺失值则移除
   # 指定分类变量
   # 获取变量名
   bio_name <- c()
@@ -138,13 +141,13 @@ maxent_single <- function(x,
   args2 <- args
   # 当坐标点少于25个时，将replicates=设置为坐标点数。
   if (nrow(occ) < 25) {
-    args2[1] <- paste0("replicates=", nrow(occdata))
-    n_na <- nrow(occ) - nrow(occdata)
+    args2[1] <- paste0("replicates=", nrow(occdata1))
+    n_na <- nrow(occ) - nrow(occdata1)
   }
 
   if (nrow(occ) >= 25) {
     #   args2[1] <- "replicates=10"
-    n_na <- nrow(occ) - nrow(occdata)
+    n_na <- nrow(occ) - nrow(occdata1)
   }
 
   if (n_na > 0) {
@@ -157,10 +160,9 @@ maxent_single <- function(x,
   } else {
     outdir <- paste0(outdir, "/maxent/")
   }
-
   if (is.null(prodir) == TRUE) {
     me1 <- predicts::MaxEnt(
-      evdata, xydata$`p/b`, # 环境变量、坐标数据和背景点
+      evdata, xydata$`p/b`, #环境变量、坐标数据和背景点
       args2, paste0(outdir, sp_name)
     )
   } # 输出路径
