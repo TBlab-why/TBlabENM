@@ -96,7 +96,7 @@ maxent_single <- function(x,
   }
 
   occdata <- terra::extract(biostack, occ, ID = FALSE)
-
+  occdata <- stats::na.omit(occdata) #如果有缺失值则移除
   # 读取、提取背景点的环境值并转化为数据框，生成环境背景数据
   if (is.null(mybgfile)) {
     mybg0 <- terra::spatSample(biostack, nbg, na.rm = T, xy = T)
