@@ -1353,10 +1353,16 @@ maxent_parameter <- function(x,
     # 提取背景值并计算变量相关性
     ## 随机生成10000个点
     if (is.null(mybgfile)) {
-      sjpoint <- terra::spatSample(biostack, nbg, na.rm = T, xy = T)
-      mybgfile <- sjpoint[1:2]
-      mybg <- sjpoint[-(1:2)]
+      mybg0 <- terra::spatSample(biostack, nbg, na.rm = T, xy = T)
+      mybgfile <- mybg0[1:2]
+      write.csv(mybgfile,
+                paste0(outdir, "/maxent/", sp_name, "/bg.csv"),
+                row.names = FALSE
+      )
+      mybg <- mybg0[-(1:2)]
+      cat(paste0(nbg, " background points are randomly generated.\n"))
     } else {
+      cat("The background points has been specified!\n")
       mybg <- terra::extract(biostack, mybgfile, ID = FALSE)
     }
 
