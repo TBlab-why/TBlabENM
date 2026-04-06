@@ -85,7 +85,7 @@ ENMunityenv <- function(radir, refdir, proname = NULL, factors = NULL, method = 
     }
   }
 
-
+  refdir <- refdir
   fun1 <- function(x) {
     ref <- terra::rast(refdir)
     ra <- terra::rast(x)
