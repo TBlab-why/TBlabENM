@@ -30,6 +30,7 @@
 #' args
 maxent_args <- function(replicates = 10,
                         betamultiplier = 1,
+                       # autofeature = FALSE, #
                         l = TRUE,
                         q = TRUE,
                         p = FALSE,
@@ -39,7 +40,19 @@ maxent_args <- function(replicates = 10,
                         responsecurves = TRUE,
                         jackknife = TRUE,
                         pictures = TRUE,
+                      #  randomseed = TRUE, #
+                      #  removeduplicates = TRUE, #
+                      #  maximumiterations = 1000, #
+                      #  doclamp = TRUE, #
+                      #  writemess = TRUE, #
+                      #  writeplotdata = TRUE, #
+                      #  writeclampgrid = TRUE, #
+                      #  addsamplestobackground = TRUE, #
+                      #  fadebyclamping = TRUE, #
+                      #  extrapolate = TRUE, #
                         outputgrids = FALSE,
+                      #  applythresholdrule = "", #
+                      #  outputfiletype = "tif", #
                         outputformat = "logistic") {
   c(
     paste0("replicates=", replicates),

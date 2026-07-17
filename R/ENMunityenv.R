@@ -91,6 +91,10 @@ ENMunityenv <- function(radir, refdir, proname = NULL, factors = NULL, method = 
     ra <- terra::rast(x)
     if (terra::crs(ref, proj = TRUE) == terra::crs(ra, proj = TRUE)) { # 投影相同的情况
       if (class(ref) == "SpatRaster") {
+         #重采样到相同分辨率
+        if (terra::res(ref)[1] != terra::res(ra)[1]) {
+          ra <- terra::resample(ra, ref, method = radf$method[which(x == radf[i])])
+        }
         ra_r <- terra::crop(ra, ref, mask = T) %>% terra::mask(ref)
       } else {
         ra_r <- terra::crop(ra, ref)
