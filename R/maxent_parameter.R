@@ -748,7 +748,7 @@ maxent_parameter <- function(x,
           ev_cb <- read.csv(
             paste0(outdir, "/TBlabENMtemp", random_num, "/", fc1, rm1, n, "/maxent/", sp_name, "/maxentResults.csv")
           ) |>
-            dplyr::select(paste0(bio_name, ".Permutation.importance")) |>
+            dplyr::select(paste0(bio_name, ".permutation.importance")) |>
 
             utils::tail(n = 1) |>
             t() |>
@@ -764,7 +764,7 @@ maxent_parameter <- function(x,
           # 修改ev_cb的变量名
           nn <- c()
           for (i in 1:nrow(ev_cb)) {
-            nn1 <- stringr::str_split_1(rownames(ev_cb)[i], ".Permutation.importance")[1]
+            nn1 <- stringr::str_split_1(rownames(ev_cb)[i], ".permutation.importance")[1]
             nn <- c(nn, nn1)
           }
           rownames(ev_cb) <- nn
@@ -841,7 +841,7 @@ maxent_parameter <- function(x,
           ev_cb <- read.csv(
             paste0(outdir, "/TBlabENMtemp", random_num, "/", fc1, rm1, n, "/maxent/", sp_name, "/maxentResults.csv")
           ) |>
-            dplyr::select(paste0(bio_name, ".Permutation.importance")) |>
+            dplyr::select(paste0(bio_name, ".permutation.importance")) |>
             utils::tail(n = 1) |>
             t() |>
             as.data.frame()
@@ -856,7 +856,7 @@ maxent_parameter <- function(x,
           # 修改ev_cb的变量名
           nn <- c()
           for (i in 1:nrow(ev_cb)) {
-            nn1 <- stringr::str_split_1(rownames(ev_cb)[i], ".Permutation.importance")[1]
+            nn1 <- stringr::str_split_1(rownames(ev_cb)[i], ".permutation.importance")[1]
             nn <- c(nn, nn1)
           }
           rownames(ev_cb) <- nn
@@ -1000,7 +1000,7 @@ maxent_parameter <- function(x,
         ev_cb <- read.csv(
           paste0(outdir, "/TBlabENMtemp", random_num, "/", fc1, rm1, n, "/maxent/", sp_name, "/maxentResults.csv")
         ) |>
-          dplyr::select(paste0(bio_name, ".Permutation.importance")) |>
+          dplyr::select(paste0(bio_name, ".permutation.importance")) |>
           utils::tail(n = 1) |>
           t() |>
           as.data.frame()
@@ -1015,7 +1015,7 @@ maxent_parameter <- function(x,
         # 修改ev_cb的变量名
         nn <- c()
         for (i in 1:nrow(ev_cb)) {
-          nn1 <- str_split_1(rownames(ev_cb)[i], ".Permutation.importance")[1]
+          nn1 <- str_split_1(rownames(ev_cb)[i], ".permutation.importance")[1]
           nn <- c(nn, nn1)
         }
         rownames(ev_cb) <- nn
